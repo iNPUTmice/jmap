@@ -29,16 +29,15 @@ import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.client.session.SessionClient;
-import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.method.MethodCall;
 
+import java.io.Closeable;
 import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-public class JmapClient {
+public class JmapClient implements Closeable {
 
     private final SessionClient sessionClient;
     private final HttpAuthentication authentication;
@@ -65,6 +64,7 @@ public class JmapClient {
     }
 
     public ListenableFuture<URL> getBaseUrl() {
+        Preconditions.checkState(!isShutdown(), "Unable to get baseUrl. JmapClient has been closed already");
         return Futures.transform(loadSession(), new Function<Session, URL>() {
             @NullableDecl
             @Override
@@ -88,6 +88,7 @@ public class JmapClient {
     }
 
     public ListenableFuture<MethodResponses> call(MethodCall methodCall) {
+        Preconditions.checkState(!isShutdown(), "Unable to call method. JmapClient has been closed already");
         final JmapRequest.Builder jmapRequestBuilder = new JmapRequest.Builder();
         final ListenableFuture<MethodResponses> methodResponsesFuture = jmapRequestBuilder.call(methodCall);
         this.execute(jmapRequestBuilder.build());
@@ -124,6 +125,15 @@ public class JmapClient {
         this.sessionClient.setSessionCache(sessionCache);
     }
 
+    private boolean isShutdown() {
+        return executorService.isShutdown();
+    }
+
+    @Override
+    public void close() {
+        executorService.shutdown();
+    }
+
     public class MultiCall {
 
         private boolean executed = false;
@@ -146,6 +156,7 @@ public class JmapClient {
 
         public synchronized void execute() {
             Preconditions.checkState(!executed,"You must not execute the same MultiCall twice");
+            Preconditions.checkState(!isShutdown(), "Unable to execute MultiCall. JmapClient has been closed already");
             executed = true;
             JmapClient.this.execute(jmapRequestBuilder.build());
         }
