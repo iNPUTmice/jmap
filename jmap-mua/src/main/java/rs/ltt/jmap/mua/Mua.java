@@ -89,7 +89,7 @@ public class Mua {
 
     public void shutdown() {
         ioExecutorService.shutdown();
-        jmapClient.getExecutorService().shutdown();
+        jmapClient.close();
     }
 
     public ListenableFuture<Status> refreshIdentities() {

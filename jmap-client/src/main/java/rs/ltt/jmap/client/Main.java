@@ -43,10 +43,8 @@ public class Main {
             return;
         }
 
-        final JmapClient client = new JmapClient(args[0], args[1]);
-        client.setSessionCache(new SessionFileCache());
-
-        try {
+        try (final JmapClient client = new JmapClient(args[0], args[1])) {
+            client.setSessionCache(new SessionFileCache());
 
             final Future<MethodResponses> methodResponsesFuture = client.call(new EchoMethodCall());
 
@@ -91,8 +89,6 @@ public class Main {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            client.getExecutorService().shutdown();
         }
     }
 }

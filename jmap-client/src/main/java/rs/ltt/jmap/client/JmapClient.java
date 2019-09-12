@@ -34,7 +34,6 @@ import rs.ltt.jmap.common.method.MethodCall;
 import java.io.Closeable;
 import java.net.URL;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class JmapClient implements Closeable {
@@ -111,10 +110,6 @@ public class JmapClient implements Closeable {
                 request.setException(throwable);
             }
         }, executorService);
-    }
-
-    public ExecutorService getExecutorService() {
-        return executorService;
     }
 
     public MultiCall newMultiCall() {
