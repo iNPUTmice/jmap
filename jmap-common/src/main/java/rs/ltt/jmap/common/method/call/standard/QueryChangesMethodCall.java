@@ -28,7 +28,7 @@ public abstract class QueryChangesMethodCall<T extends AbstractIdentifiableEntit
     private Filter filter;
     private Comparator[] sort;
     private String sinceQueryState;
-    private Integer maxChanges;
+    private Long maxChanges;
     private String upToId;
     private Boolean calculateTotal;
 

@@ -23,7 +23,7 @@ public abstract class ChangesMethodCall<T extends AbstractIdentifiableEntity> im
 
     private String accountId;
     private String sinceState;
-    private Integer maxChanges;
+    private Long maxChanges;
 
     public ChangesMethodCall(String sinceState) {
         this.sinceState = sinceState;

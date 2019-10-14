@@ -27,7 +27,7 @@ public class GetEmailMethodCall extends GetMethodCall<Email> {
     private Boolean fetchTextBodyValues;
     private Boolean fetchHTMLBodyValues;
     private Boolean fetchAllBodyValues;
-    private Integer maxBodyValueBytes;
+    private Long maxBodyValueBytes;
 
     public GetEmailMethodCall(Request.Invocation.ResultReference resultReference) {
         super(resultReference);

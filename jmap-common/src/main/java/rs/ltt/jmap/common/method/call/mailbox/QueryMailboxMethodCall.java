@@ -45,13 +45,13 @@ public class QueryMailboxMethodCall extends QueryMethodCall<Mailbox> {
         this.filterAsTree = query.filterAsTree;
     }
 
-    public QueryMailboxMethodCall(MailboxQuery query, Integer limit) {
+    public QueryMailboxMethodCall(MailboxQuery query, Long limit) {
         super(query, limit);
         this.sortAsTree = query.sortAsTree;
         this.filterAsTree = query.filterAsTree;
     }
 
-    public QueryMailboxMethodCall(MailboxQuery query, String afterId, Integer limit) {
+    public QueryMailboxMethodCall(MailboxQuery query, String afterId, Long limit) {
         super(query, afterId, limit);
         this.sortAsTree = query.sortAsTree;
         this.filterAsTree = query.filterAsTree;

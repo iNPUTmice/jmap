@@ -25,7 +25,7 @@ import java.util.Map;
 
 @JmapCapability( namespace = Namespace.SUBMISSION)
 public class SubmissionCapability implements Capability  {
-    private int maxDelayedSend;
+    private long maxDelayedSend;
     private Map<String,String[]> submissionExtensions;
 
     @Override
@@ -36,7 +36,7 @@ public class SubmissionCapability implements Capability  {
                 .toString();
     }
 
-    public int getMaxDelayedSend() {
+    public long getMaxDelayedSend() {
         return maxDelayedSend;
     }
 }

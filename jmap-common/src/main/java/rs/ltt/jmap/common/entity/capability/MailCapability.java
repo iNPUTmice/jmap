@@ -23,10 +23,10 @@ import rs.ltt.jmap.common.entity.Capability;
 
 @JmapCapability(namespace = Namespace.MAIL)
 public class MailCapability implements Capability {
-    private int maxMailboxesPerEmail;
-    private int maxMailboxDepth;
-    private int maxSizeMailboxName;
-    private int maxSizeAttachmentsPerEmail;
+    private long maxMailboxesPerEmail;
+    private long maxMailboxDepth;
+    private long maxSizeMailboxName;
+    private long maxSizeAttachmentsPerEmail;
     private String[] emailsListSortOptions;
 
     @Override
@@ -40,19 +40,19 @@ public class MailCapability implements Capability {
                 .toString();
     }
 
-    public int getMaxMailboxesPerEmail() {
+    public long getMaxMailboxesPerEmail() {
         return maxMailboxesPerEmail;
     }
 
-    public int getMaxMailboxDepth() {
+    public long getMaxMailboxDepth() {
         return maxMailboxDepth;
     }
 
-    public int getMaxSizeMailboxName() {
+    public long getMaxSizeMailboxName() {
         return maxSizeMailboxName;
     }
 
-    public int getMaxSizeAttachmentsPerEmail() {
+    public long getMaxSizeAttachmentsPerEmail() {
         return maxSizeAttachmentsPerEmail;
     }
 

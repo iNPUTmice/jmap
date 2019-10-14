@@ -71,7 +71,7 @@ public class Mua {
     private static final Logger LOGGER = LoggerFactory.getLogger(Mua.class);
     private final JmapClient jmapClient;
     private final Cache cache;
-    private Integer queryPageSize = null;
+    private Long queryPageSize = null;
     private ListeningExecutorService ioExecutorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
     private Mua(JmapClient jmapClient, Cache cache) {
@@ -1319,7 +1319,7 @@ public class Mua {
         private String password;
         private SessionCache sessionCache = new SessionFileCache();
         private Cache cache = new InMemoryCache();
-        private Integer queryPageSize = null;
+        private Long queryPageSize = null;
 
         private Builder() {
 
@@ -1335,7 +1335,7 @@ public class Mua {
             return this;
         }
 
-        public Builder queryPageSize(Integer queryPageSize) {
+        public Builder queryPageSize(Long queryPageSize) {
             this.queryPageSize = queryPageSize;
             return this;
         }

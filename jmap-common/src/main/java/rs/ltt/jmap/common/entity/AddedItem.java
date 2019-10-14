@@ -23,18 +23,18 @@ public class AddedItem<T> {
 
     @SerializedName("id")
     private T item;
-    private int index;
+    private long index;
 
     private AddedItem() {
 
     }
 
-    private AddedItem(T id, int index) {
+    private AddedItem(T id, long index) {
         this.item = id;
         this.index = index;
     }
 
-    public static <T> AddedItem<T> of(T item, int index) {
+    public static <T> AddedItem<T> of(T item, long index) {
         return new AddedItem<>(item, index);
     }
 
@@ -50,7 +50,7 @@ public class AddedItem<T> {
         return item;
     }
 
-    public int getIndex() {
+    public long getIndex() {
         return index;
     }
 }

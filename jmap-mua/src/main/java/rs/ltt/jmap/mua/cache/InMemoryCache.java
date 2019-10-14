@@ -336,7 +336,7 @@ public class InMemoryCache implements Cache {
             for (AddedItem<QueryResultItem> addedItem : update.getAdded()) {
                 //TODO it is probably save to just not add an item that exceeds the range (position > length) but this indicates a broken uper layer
                 LOGGER.info("now adding " + addedItem.getItem().getEmailId() + " on index " + addedItem.getIndex());
-                queryResult.items.add(addedItem.getIndex(), addedItem.getItem());
+                queryResult.items.add((int) addedItem.getIndex(), addedItem.getItem());
             }
             queryResult.queryState = update.getNewTypedState().getState();
         }

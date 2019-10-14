@@ -43,7 +43,7 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
     @Singular
     private Map<String, Boolean> keywords;
 
-    private Integer size;
+    private Long size;
 
     private Date receivedAt;
 

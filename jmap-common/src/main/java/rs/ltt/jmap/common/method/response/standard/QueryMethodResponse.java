@@ -27,10 +27,10 @@ public abstract class QueryMethodResponse<T extends AbstractIdentifiableEntity> 
     private String accountId;
     private String queryState;
     private boolean canCalculateChanges;
-    private Integer position;
+    private Long position;
     private String[] ids;
-    private Integer total;
-    private Integer limit;
+    private Long total;
+    private Long limit;
 
     public TypedState<T> getTypedQueryState() {
         return TypedState.of(queryState);

@@ -25,11 +25,11 @@ import rs.ltt.jmap.common.entity.Capability;
 @JmapCapability(namespace = Namespace.CORE)
 public class CoreCapability implements Capability {
 
-    private int maxSizeUpload;
-    private int maxConcurrentUpload;
-    private int maxCallsInRequest;
-    private int maxObjectsInGet;
-    private int maxObjectsInSet;
+    private long maxSizeUpload;
+    private long maxConcurrentUpload;
+    private long maxCallsInRequest;
+    private long maxObjectsInGet;
+    private long maxObjectsInSet;
     private String[] collationAlgorithms;
 
     @Override
@@ -44,23 +44,23 @@ public class CoreCapability implements Capability {
                 .toString();
     }
 
-    public int getMaxSizeUpload() {
+    public long getMaxSizeUpload() {
         return maxSizeUpload;
     }
 
-    public int getMaxConcurrentUpload() {
+    public long getMaxConcurrentUpload() {
         return maxConcurrentUpload;
     }
 
-    public int getMaxCallsInRequest() {
+    public long getMaxCallsInRequest() {
         return maxCallsInRequest;
     }
 
-    public int getMaxObjectsInGet() {
+    public long getMaxObjectsInGet() {
         return maxObjectsInGet;
     }
 
-    public int getMaxObjectsInSet() {
+    public long getMaxObjectsInSet() {
         return maxObjectsInSet;
     }
 

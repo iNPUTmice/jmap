@@ -33,11 +33,11 @@ import java.util.List;
 public class QueryResult {
 
     public final QueryResultItem[] items;
-    public final int position;
+    public final long position;
     public final TypedState<Email> queryState;
     public final TypedState<Email> objectState;
 
-    private QueryResult(@NonNullDecl QueryResultItem[] items, int position, TypedState<Email> queryState, TypedState<Email> objectState) {
+    private QueryResult(@NonNullDecl QueryResultItem[] items, long position, TypedState<Email> queryState, TypedState<Email> objectState) {
         this.items = items;
         this.position = position;
         this.queryState = queryState;

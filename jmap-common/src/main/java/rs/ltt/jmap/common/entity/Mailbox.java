@@ -30,15 +30,15 @@ public class Mailbox extends AbstractIdentifiableEntity implements IdentifiableM
 
     private Role role;
 
-    private Integer sortOrder;
+    private Long sortOrder;
 
-    private Integer totalEmails;
+    private Long totalEmails;
 
-    private Integer unreadEmails;
+    private Long unreadEmails;
 
-    private Integer totalThreads;
+    private Long totalThreads;
 
-    private Integer unreadThreads;
+    private Long unreadThreads;
 
     private MailboxRights myRights;
 

@@ -28,10 +28,10 @@ public abstract class QueryMethodCall<T extends AbstractIdentifiableEntity> impl
     private String accountId;
     private Filter filter;
     private Comparator[] sort;
-    private Integer position;
+    private Long position;
     private String anchor;
-    private Integer anchorOffset;
-    private Integer limit;
+    private Long anchorOffset;
+    private Long limit;
 
     public QueryMethodCall() {
         
@@ -46,7 +46,7 @@ public abstract class QueryMethodCall<T extends AbstractIdentifiableEntity> impl
         this.sort = query.comparators;
     }
 
-    public QueryMethodCall(Query<T> query, Integer limit) {
+    public QueryMethodCall(Query<T> query, Long limit) {
         this.filter = query.filter;
         this.sort = query.comparators;
         this.limit = limit;
@@ -56,14 +56,14 @@ public abstract class QueryMethodCall<T extends AbstractIdentifiableEntity> impl
         this.filter = query.filter;
         this.sort = query.comparators;
         this.anchor = afterId;
-        this.anchorOffset = 1;
+        this.anchorOffset = 1L;
     }
 
-    public QueryMethodCall(Query<T> query, String afterId, Integer limit) {
+    public QueryMethodCall(Query<T> query, String afterId, Long limit) {
         this.filter = query.filter;
         this.sort = query.comparators;
         this.anchor = afterId;
-        this.anchorOffset = 1;
+        this.anchorOffset = 1L;
         this.limit = limit;
     }
 

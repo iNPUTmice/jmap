@@ -40,7 +40,7 @@ public class QueryEmailMethodCall extends QueryMethodCall<Email> {
         this.collapseThreads = query.collapseThreads;
     }
 
-    public QueryEmailMethodCall(EmailQuery query, Integer limit) {
+    public QueryEmailMethodCall(EmailQuery query, Long limit) {
         super(query, limit);
         this.collapseThreads = query.collapseThreads;
     }
@@ -50,7 +50,7 @@ public class QueryEmailMethodCall extends QueryMethodCall<Email> {
         this.collapseThreads = query.collapseThreads;
     }
 
-    public QueryEmailMethodCall(EmailQuery query, String afterEmailId, Integer limit) {
+    public QueryEmailMethodCall(EmailQuery query, String afterEmailId, Long limit) {
         super(query, afterEmailId, limit);
         this.collapseThreads = query.collapseThreads;
     }

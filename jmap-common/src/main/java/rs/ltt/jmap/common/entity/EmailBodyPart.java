@@ -28,7 +28,7 @@ public class EmailBodyPart {
 
     private String partId;
     private String blobId;
-    private Integer size;
+    private Long size;
     @Singular
     private List<EmailHeader> headers;
     private String name;

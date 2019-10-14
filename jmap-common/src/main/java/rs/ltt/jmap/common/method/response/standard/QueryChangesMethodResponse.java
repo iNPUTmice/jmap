@@ -31,7 +31,7 @@ public abstract class QueryChangesMethodResponse<T extends AbstractIdentifiableE
     private String accountId;
     private String oldQueryState;
     private String newQueryState;
-    private int total;
+    private long total;
     private String[] removed;
     private List<AddedItem<String>> added;
 

@@ -36,9 +36,9 @@ public class EmailFilterCondition implements FilterCondition<Email> {
 
     private String[] inMailboxOtherThan;
 
-    private Integer minSize;
+    private Long minSize;
 
-    private Integer maxSize;
+    private Long maxSize;
 
     private String text;
 
