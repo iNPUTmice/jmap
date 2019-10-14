@@ -105,7 +105,7 @@ public class SessionClient {
             final SessionResource sessionResource = gson.fromJson(new InputStreamReader(inputStream), SessionResource.class);
             final HttpUrl currentBaseUrl = response.request().url();
             if (!base.equals(currentBaseUrl.url())) {
-                LOGGER.info(String.format("Processed new base URL %s", currentBaseUrl.url()));
+                LOGGER.info("Processed new base URL {}", currentBaseUrl.url());
             }
             return new Session(currentBaseUrl.url(), sessionResource);
         } else if (code == 401) {

@@ -941,7 +941,7 @@ public class Mua {
                 SetEmailMethodResponse setEmailMethodResponse = setFuture.get().getMain(SetEmailMethodResponse.class);
                 SetEmailException.throwIfFailed(setEmailMethodResponse);
                 final String[] destroyed = setEmailMethodResponse.getDestroyed();
-                LOGGER.info(String.format("Deleted %d emails", destroyed == null ? 0 : destroyed.length));
+                LOGGER.info("Deleted {} emails", destroyed == null ? 0 : destroyed.length);
                 return Futures.immediateFuture(true);
             }
         }, MoreExecutors.directExecutor());

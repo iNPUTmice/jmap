@@ -49,7 +49,7 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
 
     @Override
     void onSessionStateRetrieved(final String sessionState) {
-        LOGGER.debug(String.format("Notified of session state='%s'", sessionState));
+        LOGGER.debug("Notified of session state='{}'", sessionState);
     }
 
     @Override
