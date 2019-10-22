@@ -1,0 +1,40 @@
+﻿{
+  "methodResponses": [
+    [
+      "Mailbox/get",
+      {
+        "state": "4011",
+        "list": [
+          {
+            "id": "46b9c2ce-7a7c-4736-9711-02a22491a02b",
+            "name": "Inbox",
+            "parentId": null,
+            "myRights": {
+              "mayReadItems": true,
+              "mayAddItems": true,
+              "mayRemoveItems": true,
+              "mayCreateChild": true,
+              "mayDelete": false,
+              "maySubmit": true,
+              "maySetSeen": true,
+              "maySetKeywords": true,
+              "mayAdmin": true,
+              "mayRename": false
+            },
+            "role": "inbox",
+            "totalEmails": 238,
+            "unreadEmails": 6,
+            "totalThreads": 80,
+            "unreadThreads": 4,
+            "sortOrder": 1,
+            "isSubscribed": false
+          }
+        ],
+        "notFound": [],
+        "accountId": "test@example.com"
+      },
+      "0"
+    ]
+  ],
+  "sessionState": "1"
+}

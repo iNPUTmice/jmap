@@ -18,6 +18,7 @@ package rs.ltt.jmap.client.api;
 
 
 import okhttp3.*;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.http.BasicAuthHttpAuthentication;
@@ -37,19 +38,28 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
 
     private final URL apiUrl;
     private final HttpAuthentication httpAuthentication;
+    private final SessionStateListener sessionStateListener;
 
     public HttpJmapApiClient(final URL apiUrl, String username, String password) {
-        this(apiUrl, new BasicAuthHttpAuthentication(username, password));
+        this(apiUrl, new BasicAuthHttpAuthentication(username, password), null);
     }
 
     public HttpJmapApiClient(final URL apiUrl, final HttpAuthentication httpAuthentication) {
+        this(apiUrl,httpAuthentication, null);
+    }
+
+    public HttpJmapApiClient(final URL apiUrl, final HttpAuthentication httpAuthentication, @NullableDecl final SessionStateListener sessionStateListener) {
         this.apiUrl = apiUrl;
         this.httpAuthentication = httpAuthentication;
+        this.sessionStateListener = sessionStateListener;
     }
 
     @Override
     void onSessionStateRetrieved(final String sessionState) {
         LOGGER.debug("Notified of session state='{}'", sessionState);
+        if (sessionStateListener != null) {
+            sessionStateListener.onSessionStateRetrieved(sessionState);
+        }
     }
 
     @Override

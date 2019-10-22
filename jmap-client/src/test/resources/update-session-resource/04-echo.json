@@ -1,0 +1,8 @@
+﻿{
+  "methodResponses": [
+    [
+      "Core/echo", {"libraryName":  "ltt.rs"}, "0"
+    ]
+  ],
+  "sessionState": "1"
+}

@@ -24,6 +24,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import rs.ltt.jmap.client.api.HttpJmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClient;
+import rs.ltt.jmap.client.api.SessionStateListener;
 import rs.ltt.jmap.client.http.BasicAuthHttpAuthentication;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
@@ -42,6 +43,13 @@ public class JmapClient implements Closeable {
     private final HttpAuthentication authentication;
 
     private ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+
+    private final SessionStateListener sessionStateListener = new SessionStateListener() {
+        @Override
+        public void onSessionStateRetrieved(String sessionState) {
+            sessionClient.setLatestSessionState(sessionState);
+        }
+    };
 
     public JmapClient(HttpAuthentication httpAuthentication) {
         this.authentication = httpAuthentication;
@@ -101,7 +109,7 @@ public class JmapClient implements Closeable {
                 if (session == null) {
                     return;
                 }
-                JmapApiClient apiClient = new HttpJmapApiClient(session.getApiUrl(), authentication);
+                JmapApiClient apiClient = new HttpJmapApiClient(session.getApiUrl(), authentication, sessionStateListener);
                 apiClient.execute(request);
             }
 

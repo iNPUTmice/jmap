@@ -26,6 +26,7 @@ import org.junit.Test;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
 import rs.ltt.jmap.client.api.MethodResponseNotFoundException;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
+import rs.ltt.jmap.common.method.call.core.EchoMethodCall;
 import rs.ltt.jmap.common.method.call.mailbox.GetMailboxMethodCall;
 import rs.ltt.jmap.common.method.error.UnknownMethodMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.mailbox.GetMailboxMethodResponse;
@@ -120,4 +121,43 @@ public class HttpJmapClientTest {
         }
     }
 
+    @Test
+    public void updateSessionResourceIfNecessary() throws IOException, InterruptedException, ExecutionException {
+        final MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody(readResourceAsString("update-session-resource/01-session.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("update-session-resource/02-mailboxes.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("update-session-resource/03-session.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("update-session-resource/04-echo.json")));
+        server.start();
+
+        final JmapClient jmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(".well-know/jmap").url()
+        );
+
+        final ListenableFuture<MethodResponses> mailboxFuture = jmapClient.call(new GetMailboxMethodCall());
+
+        // Wait for result
+        mailboxFuture.get();
+
+        // Skip session request
+        server.takeRequest();
+
+        Assert.assertEquals(server.url("/jmap/"), server.takeRequest().getRequestUrl());
+
+
+        final ListenableFuture<MethodResponses> echoFuture = jmapClient.call(new EchoMethodCall());
+
+        // Wait for result
+        echoFuture.get();
+
+        // Skip session request
+        server.takeRequest();
+
+        Assert.assertEquals(server.url("/api/jmap/"), server.takeRequest().getRequestUrl());
+
+
+        server.shutdown();
+    }
 }

@@ -38,4 +38,8 @@ public class Session {
     public URL getBase() {
         return base;
     }
+
+    public String getState() {
+        return sessionResource.getState();
+    }
 }

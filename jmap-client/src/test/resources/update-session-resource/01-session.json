@@ -1,0 +1,34 @@
+﻿{
+  "username": "test@example.com",
+  "apiUrl": "/jmap/",
+  "downloadUrl": "/jmap/download/{accountId}/{blobId}/{name}?accept={type}",
+  "uploadUrl": "/jmap/upload/{accountId}/",
+  "accounts": {
+    "test@example.com": {
+      "name": "test@example.com",
+      "isPersonal": true,
+      "isReadOnly": false
+    }
+  },
+  "capabilities": {
+    "urn:ietf:params:jmap:core": {
+      "maxSizeUpload": 1073741824,
+      "maxConcurrentUpload": 5,
+      "maxCallsInRequest": 50,
+      "maxObjectsInGet": 4096,
+      "maxObjectsInSet": 4096,
+      "collationAlgorithms": []
+    },
+    "urn:ietf:params:jmap:mail": {
+      "maxMailboxesPerEmail": 0,
+      "maxMailboxDepth": 0,
+      "maxSizeMailboxName": 0,
+      "maxSizeAttachmentsPerEmail": 0
+    },
+    "urn:ietf:params:jmap:submission": {
+      "maxDelayedSend": 0
+    },
+    "urn:ietf:params:jmap:vacationresponse": {}
+  },
+  "state": "0"
+}

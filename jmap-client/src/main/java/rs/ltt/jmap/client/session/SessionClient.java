@@ -42,6 +42,7 @@ public class SessionClient {
     private HttpAuthentication httpAuthentication;
     private SessionCache sessionCache;
     private Session currentSession = null;
+    private boolean sessionResourceChanged = false;
 
     public SessionClient(HttpAuthentication authentication) {
         this.sessionResource = null;
@@ -54,14 +55,11 @@ public class SessionClient {
     }
 
     public Session get() throws Exception {
-        final Session existingSession = this.currentSession;
-        if (existingSession != null) {
-            return existingSession;
-        }
         synchronized (this) {
-            if (currentSession != null) {
+            if (!sessionResourceChanged && currentSession != null) {
                 return currentSession;
             }
+
             final String username = httpAuthentication.getUsername();
             final URL resource;
             if (sessionResource != null) {
@@ -71,10 +69,11 @@ public class SessionClient {
             }
 
             final SessionCache cache = sessionCache;
-            Session session = cache != null ? cache.load(username, resource) : null;
+            Session session = !sessionResourceChanged && cache != null ? cache.load(username, resource) : null;
 
             if (session == null) {
                 session = fetchSession(resource);
+                sessionResourceChanged = false;
                 if (cache != null) {
                     cache.store(username, resource, session);
                 }
@@ -84,6 +83,25 @@ public class SessionClient {
 
         }
         return currentSession;
+    }
+
+    public void setLatestSessionState(String sessionState) {
+        synchronized (this) {
+            if (sessionResourceChanged) {
+                return;
+            }
+
+            final Session existingSession = this.currentSession;
+            if (existingSession == null) {
+                sessionResourceChanged = true;
+                return;
+            }
+
+            final String oldState = existingSession.getState();
+            if (oldState == null || !oldState.equals(sessionState)) {
+                sessionResourceChanged = true;
+            }
+        }
     }
 
     private Session fetchSession(final URL base) throws Exception {
