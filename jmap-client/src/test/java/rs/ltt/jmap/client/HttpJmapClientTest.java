@@ -45,6 +45,7 @@ public class HttpJmapClientTest {
     public void fetchMailboxes() throws Exception {
         final MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/02-mailboxes.json")));
         server.start();
 
         final JmapClient jmapClient = new JmapClient(
@@ -54,21 +55,8 @@ public class HttpJmapClientTest {
         );
 
 
-        //we need to use a the multi call builder here to get our hands on the
-        //invocation id to use in in the mock response. Otherwise we could have
-        //just called jmapClient.call(new GetMailboxMethodCall());
+        final ListenableFuture<MethodResponses> future = jmapClient.call(new GetMailboxMethodCall());
 
-        final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
-
-        final JmapRequest.Call callInfo = multiCall.call(new GetMailboxMethodCall());
-
-
-        final String body = readResourceAsString("fetch-mailboxes/02-mailboxes.json", callInfo.getMethodCallId());
-        server.enqueue(new MockResponse().setBody(body));
-
-        final ListenableFuture<MethodResponses> future = callInfo.getFuture();
-
-        multiCall.execute();
 
         final GetMailboxMethodResponse mailboxResponse = future.get().getMain(GetMailboxMethodResponse.class);
 
@@ -81,14 +69,11 @@ public class HttpJmapClientTest {
         return Resources.asCharSource(Resources.getResource(filename), Charset.defaultCharset()).read().trim();
     }
 
-    private static String readResourceAsString(String filename, Object... args) throws IOException {
-        return String.format(readResourceAsString(filename), args);
-    }
-
     @Test
     public void fetchMailboxesWithMethodError() throws IOException, InterruptedException {
         final MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/unknown-method.json")));
         server.start();
 
         final JmapClient jmapClient = new JmapClient(
@@ -98,21 +83,8 @@ public class HttpJmapClientTest {
         );
 
 
-        //we need to use a the multi call builder here to get our hands on the
-        //invocation id to use in in the mock response. Otherwise we could have
-        //just called jmapClient.call(new GetMailboxMethodCall());
+        ListenableFuture<MethodResponses> future = jmapClient.call(new GetMailboxMethodCall());
 
-        final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
-
-        final JmapRequest.Call callInfo = multiCall.call(new GetMailboxMethodCall());
-
-
-        final String body = readResourceAsString("fetch-mailboxes/unknown-method.json", callInfo.getMethodCallId());
-        server.enqueue(new MockResponse().setBody(body));
-
-        final ListenableFuture<MethodResponses> future = callInfo.getFuture();
-
-        multiCall.execute();
 
         try {
             future.get();
@@ -130,7 +102,7 @@ public class HttpJmapClientTest {
     public void fetchMailboxesGarbage() throws IOException, InterruptedException {
         final MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
-        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/unknown-method.json", "GARBAGE")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/unknown-method-call-id.json")));
         server.start();
 
         final JmapClient jmapClient = new JmapClient(

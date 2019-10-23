@@ -57,11 +57,16 @@ public class JmapRequest {
     public static class Builder {
 
         private final Map<Request.Invocation, SettableFuture<MethodResponses>> map = new LinkedHashMap<>();
+        private int nextMethodCallId = 0;
 
         public Call call(final MethodCall methodCall) {
-            final Request.Invocation invocation = Request.Invocation.create(methodCall);
+            final Request.Invocation invocation = Request.Invocation.create(methodCall, nextMethodCallId());
             final ListenableFuture<MethodResponses> future = add(invocation);
             return new Call(future, invocation);
+        }
+
+        private String nextMethodCallId() {
+            return Integer.toString(nextMethodCallId++);
         }
 
         //TODO throw illegal state when adding after build
@@ -87,10 +92,6 @@ public class JmapRequest {
 
         public ListenableFuture<MethodResponses> getMethodResponses() {
             return future;
-        }
-
-        public String getMethodCallId() {
-            return invocation.getId();
         }
 
         public Request.Invocation.ResultReference createResultReference(String path) {

@@ -19,7 +19,6 @@ package rs.ltt.jmap.common;
 import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.util.Namespace;
 
-import java.security.SecureRandom;
 import java.util.*;
 
 public class Request {
@@ -47,9 +46,6 @@ public class Request {
 
     public static class Invocation {
 
-        private static final int ID_LENGTH = 10;
-        private static final char[] AVAILABLE_CHARS_FOR_ID_GENERATION = "abcdefghijklmnopqrstovwxyz".toCharArray();
-        private static final SecureRandom SECURE_RANDOM = new SecureRandom();
         private MethodCall methodCall;
         private String id;
         private Invocation() {
@@ -61,16 +57,8 @@ public class Request {
             this.id = id;
         }
 
-        public static Invocation create(MethodCall methodCall) {
-            return new Invocation(methodCall, nextId());
-        }
-
-        private static String nextId() {
-            char[] id = new char[ID_LENGTH];
-            for (int i = 0; i < ID_LENGTH; ++i) {
-                id[i] = AVAILABLE_CHARS_FOR_ID_GENERATION[SECURE_RANDOM.nextInt(AVAILABLE_CHARS_FOR_ID_GENERATION.length - 1)];
-            }
-            return String.valueOf(id);
+        public static Invocation create(MethodCall methodCall, String id) {
+            return new Invocation(methodCall, id);
         }
 
         public MethodCall getMethodCall() {

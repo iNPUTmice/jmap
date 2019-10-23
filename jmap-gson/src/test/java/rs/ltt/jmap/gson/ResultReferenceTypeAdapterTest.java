@@ -9,9 +9,11 @@ import rs.ltt.jmap.common.method.call.email.QueryEmailMethodCall;
 
 public class ResultReferenceTypeAdapterTest {
 
+    private static final String METHOD_CALL_ID = "#1";
+
     @Test
     public void writeAndReadBack() {
-        Request.Invocation emailQuery = Request.Invocation.create(new QueryEmailMethodCall());
+        Request.Invocation emailQuery = Request.Invocation.create(new QueryEmailMethodCall(), METHOD_CALL_ID);
         Request.Invocation.ResultReference resultReferenceOut = emailQuery.createReference("/ids");
         GsonBuilder gsonBuilder = new GsonBuilder();
         ResultReferenceTypeAdapter.register(gsonBuilder);

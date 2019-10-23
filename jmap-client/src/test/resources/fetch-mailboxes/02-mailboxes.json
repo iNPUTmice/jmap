@@ -177,7 +177,7 @@
         "notFound": [],
         "accountId": "test@example.com"
       },
-      "%s"
+      "0"
     ]
   ],
   "sessionState": "0"
