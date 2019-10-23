@@ -58,13 +58,14 @@ public class JmapRequest {
 
         private final Map<Request.Invocation, SettableFuture<MethodResponses>> map = new LinkedHashMap<>();
 
-        public ListenableFuture<MethodResponses> call(final MethodCall methodCall) {
-            return add(Request.Invocation.create(methodCall));
-
+        public Call call(final MethodCall methodCall) {
+            final Request.Invocation invocation = Request.Invocation.create(methodCall);
+            final ListenableFuture<MethodResponses> future = add(invocation);
+            return new Call(future, invocation);
         }
 
         //TODO throw illegal state when adding after build
-        public ListenableFuture<MethodResponses> add(final Request.Invocation invocation) {
+        private ListenableFuture<MethodResponses> add(final Request.Invocation invocation) {
             final SettableFuture<MethodResponses> future = SettableFuture.create();
             this.map.put(invocation, future);
             return future;
@@ -75,4 +76,25 @@ public class JmapRequest {
         }
     }
 
+    public static class Call {
+        private final ListenableFuture<MethodResponses> future;
+        private final Request.Invocation invocation;
+
+        private Call(ListenableFuture<MethodResponses> future, Request.Invocation invocation) {
+            this.future = future;
+            this.invocation = invocation;
+        }
+
+        public ListenableFuture<MethodResponses> getMethodResponses() {
+            return future;
+        }
+
+        public String getMethodCallId() {
+            return invocation.getId();
+        }
+
+        public Request.Invocation.ResultReference createResultReference(String path) {
+            return invocation.createReference(path);
+        }
+    }
 }

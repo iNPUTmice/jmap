@@ -36,7 +36,7 @@ public class CreateUtil {
         }
         final Optional<ListenableFuture<MethodResponses>> mailboxCreateFutureOptional;
         if (mailbox == null) {
-            return Optional.of(multiCall.call(new SetMailboxMethodCall(ImmutableMap.of(createId(role), MailboxUtil.create(role)))));
+            return Optional.of(multiCall.call(new SetMailboxMethodCall(ImmutableMap.of(createId(role), MailboxUtil.create(role)))).getMethodResponses());
         } else {
             return Optional.absent();
         }

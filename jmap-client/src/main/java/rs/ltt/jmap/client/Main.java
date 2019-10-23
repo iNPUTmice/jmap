@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.client;
 
+import rs.ltt.jmap.client.JmapRequest.Call;
 import rs.ltt.jmap.client.session.SessionFileCache;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.Email;
@@ -58,11 +59,11 @@ public class Main {
                     EmailFilterCondition.builder().text("test").build()
             );
 
-            Request.Invocation emailQuery = Request.Invocation.create(new QueryEmailMethodCall(emailFilter));
-            Request.Invocation emailGet = Request.Invocation.create(new GetEmailMethodCall(emailQuery.createReference(Request.Invocation.ResultReference.Path.IDS)));
+            Call emailQueryCall = multiCall.call(new QueryEmailMethodCall(emailFilter));
+            Future<MethodResponses> emailQueryResponseFuture = emailQueryCall.getMethodResponses();
 
-            Future<MethodResponses> emailQueryResponseFuture = multiCall.add(emailQuery);
-            Future<MethodResponses> emailGetResponseFuture = multiCall.add(emailGet);
+            Future<MethodResponses> emailGetResponseFuture = multiCall.call(new GetEmailMethodCall(emailQueryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS))).getMethodResponses();
+
             multiCall.execute();
             final QueryEmailMethodResponse emailQueryResponse = emailQueryResponseFuture.get().getMain(QueryEmailMethodResponse.class);
             final GetEmailMethodResponse getEmailMethodResponse = emailGetResponseFuture.get().getMain(GetEmailMethodResponse.class);
@@ -74,12 +75,14 @@ public class Main {
             while (true) {
                 Thread.sleep(5000);
                 final JmapClient.MultiCall updateMultiCall = client.newMultiCall();
-                Request.Invocation emailQueryChanges = Request.Invocation.create(new QueryChangesEmailMethodCall(currentState, emailFilter));
-                Request.Invocation addedEmailGet = Request.Invocation.create(new GetEmailMethodCall(emailQueryChanges.createReference(Request.Invocation.ResultReference.Path.ADDED_IDS)));
-                Future<MethodResponses> emailQueryChangeResponseFuture = updateMultiCall.add(emailQueryChanges);
-                Future<MethodResponses> emailGetAddedResponseFuture = updateMultiCall.add(addedEmailGet);
+
+                Call emailQueryChangesCall = multiCall.call(new QueryChangesEmailMethodCall(currentState, emailFilter));
+                Future<MethodResponses> emailQueryChangesResponseFuture = emailQueryChangesCall.getMethodResponses();
+
+                Future<MethodResponses> emailGetAddedResponseFuture = multiCall.call(new GetEmailMethodCall(emailQueryChangesCall.createResultReference(Request.Invocation.ResultReference.Path.ADDED_IDS))).getMethodResponses();
+
                 updateMultiCall.execute();
-                QueryChangesEmailMethodResponse emailQueryChangesResponse = emailQueryChangeResponseFuture.get().getMain(QueryChangesEmailMethodResponse.class);
+                QueryChangesEmailMethodResponse emailQueryChangesResponse = emailQueryChangesResponseFuture.get().getMain(QueryChangesEmailMethodResponse.class);
                 GetEmailMethodResponse emailAddedGetResponse = emailGetAddedResponseFuture.get().getMain(GetEmailMethodResponse.class);
                 for (Email email : emailAddedGetResponse.getList()) {
                     System.out.println(email.getSentAt() + " " + email.getFrom() + " " + email.getSubject());

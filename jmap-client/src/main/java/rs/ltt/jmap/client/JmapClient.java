@@ -89,7 +89,7 @@ public class JmapClient implements Closeable {
     public ListenableFuture<MethodResponses> call(MethodCall methodCall) {
         Preconditions.checkState(!isShutdown(), "Unable to call method. JmapClient has been closed already");
         final JmapRequest.Builder jmapRequestBuilder = new JmapRequest.Builder();
-        final ListenableFuture<MethodResponses> methodResponsesFuture = jmapRequestBuilder.call(methodCall);
+        final ListenableFuture<MethodResponses> methodResponsesFuture = jmapRequestBuilder.call(methodCall).getMethodResponses();
         this.execute(jmapRequestBuilder.build());
         return methodResponsesFuture;
     }
@@ -139,13 +139,8 @@ public class JmapClient implements Closeable {
 
         }
 
-        public synchronized ListenableFuture<MethodResponses> add(rs.ltt.jmap.common.Request.Invocation invocation) {
-            Preconditions.checkState(!executed,"Unable to add invocation. MultiCall has already been executed");
-            return jmapRequestBuilder.add(invocation);
-        }
-
-        public synchronized ListenableFuture<MethodResponses> call(MethodCall methodCall) {
-            Preconditions.checkState(!executed,"Unable to add MethodCall. MultiCall has already been executed");
+        public synchronized JmapRequest.Call call(MethodCall methodCall) {
+            Preconditions.checkState(!executed, "Unable to add MethodCall. MultiCall has already been executed");
             return jmapRequestBuilder.call(methodCall);
         }
 

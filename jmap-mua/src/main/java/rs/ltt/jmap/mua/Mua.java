@@ -27,6 +27,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapClient;
+import rs.ltt.jmap.client.JmapRequest.Call;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.client.session.SessionFileCache;
@@ -120,7 +121,7 @@ public class Mua {
 
     private ListenableFuture<Status> loadIdentities(JmapClient.MultiCall multiCall) {
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final ListenableFuture<MethodResponses> responseFuture = multiCall.call(new GetIdentityMethodCall());
+        final ListenableFuture<MethodResponses> responseFuture = multiCall.call(new GetIdentityMethodCall()).getMethodResponses();
         responseFuture.addListener(new Runnable() {
             @Override
             public void run() {
@@ -207,7 +208,7 @@ public class Mua {
 
     private ListenableFuture<Status> loadMailboxes(JmapClient.MultiCall multiCall) {
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final ListenableFuture<MethodResponses> getMailboxMethodResponsesFuture = multiCall.call(new GetMailboxMethodCall());
+        final ListenableFuture<MethodResponses> getMailboxMethodResponsesFuture = multiCall.call(new GetMailboxMethodCall()).getMethodResponses();
         getMailboxMethodResponsesFuture.addListener(new Runnable() {
             @Override
             public void run() {
@@ -316,7 +317,7 @@ public class Mua {
         if (!email.getKeywords().containsKey(Keyword.SEEN)) {
             emailBuilder.keyword(Keyword.SEEN, true);
         }
-        final ListenableFuture<MethodResponses> future = multiCall.call(new SetEmailMethodCall(ImmutableMap.of("e0", emailBuilder.build())));
+        final ListenableFuture<MethodResponses> future = multiCall.call(new SetEmailMethodCall(ImmutableMap.of("e0", emailBuilder.build()))).getMethodResponses();
         return Futures.transformAsync(future, new AsyncFunction<MethodResponses, Boolean>() {
             @Override
             public ListenableFuture<Boolean> apply(@NullableDecl MethodResponses methodResponses) throws Exception {
@@ -394,7 +395,7 @@ public class Mua {
                         "#es0",
                         patchesBuilder.build()
                 )
-        ));
+        )).getMethodResponses();
         return Futures.transformAsync(setEmailSubmissionFuture, new AsyncFunction<MethodResponses, Boolean>() {
             @Override
             public ListenableFuture<Boolean> apply(@NullableDecl MethodResponses methodResponses) throws Exception {
@@ -499,7 +500,7 @@ public class Mua {
     }
 
     private ListenableFuture<Boolean> applyEmailPatches(final Map<String, Map<String, Object>> patches, final ObjectsState objectsState, JmapClient.MultiCall multiCall) {
-        ListenableFuture<MethodResponses> future = multiCall.call(new SetEmailMethodCall(objectsState.emailState, patches));
+        ListenableFuture<MethodResponses> future = multiCall.call(new SetEmailMethodCall(objectsState.emailState, patches)).getMethodResponses();
         if (objectsState.emailState != null) {
             updateEmails(objectsState.emailState, multiCall);
         }
@@ -930,10 +931,8 @@ public class Mua {
     public ListenableFuture<Boolean> emptyTrash(@NonNullDecl IdentifiableMailboxWithRole trash) {
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final EmailFilterCondition filter = EmailFilterCondition.builder().inMailbox(trash.getId()).build();
-        final Request.Invocation queryInvocation = Request.Invocation.create(new QueryEmailMethodCall(filter));
-        ListenableFuture<MethodResponses> queryFuture = multiCall.add(queryInvocation);
-        final Request.Invocation setInvocation = Request.Invocation.create(new SetEmailMethodCall(null, queryInvocation.createReference(Request.Invocation.ResultReference.Path.IDS)));
-        final ListenableFuture<MethodResponses> setFuture = multiCall.add(setInvocation);
+        final Call queryCall = multiCall.call(new QueryEmailMethodCall(filter));
+        final ListenableFuture<MethodResponses> setFuture = multiCall.call(new SetEmailMethodCall(null, queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS))).getMethodResponses();
         multiCall.execute();
         return Futures.transformAsync(setFuture, new AsyncFunction<MethodResponses, Boolean>() {
             @Override
@@ -1085,10 +1084,9 @@ public class Mua {
         JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final ListenableFuture<Status> queryRefreshFuture = refreshQuery(query, queryStateWrapper, multiCall);
 
-        final Request.Invocation queryInvocation = Request.Invocation.create(new QueryEmailMethodCall(query, afterEmailId, this.queryPageSize));
-        Request.Invocation getThreadIdsInvocation = Request.Invocation.create(new GetEmailMethodCall(queryInvocation.createReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"}));
-        final ListenableFuture<MethodResponses> queryResponsesFuture = multiCall.add(queryInvocation);
-        final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = multiCall.add(getThreadIdsInvocation);
+        final Call queryCall = multiCall.call(new QueryEmailMethodCall(query, afterEmailId, this.queryPageSize));
+        final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
+        final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = multiCall.call(new GetEmailMethodCall(queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"})).getMethodResponses();
 
         queryResponsesFuture.addListener(new Runnable() {
             @Override
@@ -1137,9 +1135,9 @@ public class Mua {
 
         final List<ListenableFuture<Status>> piggyBackedFuturesList = piggyBack(queryStateWrapper.objectsState, multiCall);
 
-        final Request.Invocation queryChangesInvocation = Request.Invocation.create(new QueryChangesEmailMethodCall(queryStateWrapper.queryState, query));
-        final ListenableFuture<MethodResponses> queryChangesResponsesFuture = multiCall.add(queryChangesInvocation);
-        final ListenableFuture<MethodResponses> getThreadIdResponsesFuture = multiCall.call(new GetEmailMethodCall(queryChangesInvocation.createReference(Request.Invocation.ResultReference.Path.ADDED_IDS), new String[]{"threadId"}));
+        final Call queryChangesCall = multiCall.call(new QueryChangesEmailMethodCall(queryStateWrapper.queryState, query));
+        final ListenableFuture<MethodResponses> queryChangesResponsesFuture = queryChangesCall.getMethodResponses();
+        final ListenableFuture<MethodResponses> getThreadIdResponsesFuture = multiCall.call(new GetEmailMethodCall(queryChangesCall.createResultReference(Request.Invocation.ResultReference.Path.ADDED_IDS), new String[]{"threadId"})).getMethodResponses();
 
         queryChangesResponsesFuture.addListener(new Runnable() {
             @Override
@@ -1193,19 +1191,18 @@ public class Mua {
         //these need to be processed *before* the Query call or else the fetchMissing will not honor newly fetched ids
         final List<ListenableFuture<Status>> piggyBackedFuturesList = piggyBack(queryStateWrapper.objectsState, multiCall);
 
-        final Request.Invocation queryInvocation = Request.Invocation.create(new QueryEmailMethodCall(query, this.queryPageSize));
-        Request.Invocation getThreadIdsInvocation = Request.Invocation.create(new GetEmailMethodCall(queryInvocation.createReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"}));
-        final ListenableFuture<MethodResponses> queryResponsesFuture = multiCall.add(queryInvocation);
-        final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = multiCall.add(getThreadIdsInvocation);
+        final Call queryCall = multiCall.call(new QueryEmailMethodCall(query, this.queryPageSize));
+        final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
+        final Call threadIdsCall = multiCall.call(new GetEmailMethodCall(queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"}));
+        final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = threadIdsCall.getMethodResponses();
 
 
         final ListenableFuture<MethodResponses> getThreadsResponsesFuture;
         final ListenableFuture<MethodResponses> getEmailResponsesFuture;
         if (queryStateWrapper.objectsState.threadState == null && queryStateWrapper.objectsState.emailState == null) {
-            Request.Invocation getThreadsInvocation = Request.Invocation.create(new GetThreadMethodCall(getThreadIdsInvocation.createReference(Request.Invocation.ResultReference.Path.LIST_THREAD_IDS)));
-            Request.Invocation getEmailInvocation = Request.Invocation.create(new GetEmailMethodCall(getThreadsInvocation.createReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true));
-            getThreadsResponsesFuture = multiCall.add(getThreadsInvocation);
-            getEmailResponsesFuture = multiCall.add(getEmailInvocation);
+            final Call threadCall = multiCall.call(new GetThreadMethodCall(threadIdsCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_THREAD_IDS)));
+            getThreadsResponsesFuture = threadCall.getMethodResponses();
+            getEmailResponsesFuture = multiCall.call(new GetEmailMethodCall(threadCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true)).getMethodResponses();
         } else {
             getThreadsResponsesFuture = null;
             getEmailResponsesFuture = null;
@@ -1282,9 +1279,9 @@ public class Mua {
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final ListenableFuture<Status> updateThreadsFuture = updateThreads(missing.threadState, multiCall);
         final ListenableFuture<Status> updateEmailsFuture = updateEmails(missing.emailState, multiCall);
-        Request.Invocation getThreadsInvocation = Request.Invocation.create(new GetThreadMethodCall(missing.threadIds.toArray(new String[0])));
-        final ListenableFuture<MethodResponses> getThreadsResponsesFuture = multiCall.add(getThreadsInvocation);
-        final ListenableFuture<MethodResponses> getEmailsResponsesFuture = multiCall.call(new GetEmailMethodCall(getThreadsInvocation.createReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true));
+        final Call threadsCall = multiCall.call(new GetThreadMethodCall(missing.threadIds.toArray(new String[0])));
+        final ListenableFuture<MethodResponses> getThreadsResponsesFuture = threadsCall.getMethodResponses();
+        final ListenableFuture<MethodResponses> getEmailsResponsesFuture = multiCall.call(new GetEmailMethodCall(threadsCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true)).getMethodResponses();
         multiCall.execute();
         getThreadsResponsesFuture.addListener(new Runnable() {
             @Override

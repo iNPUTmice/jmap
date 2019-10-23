@@ -18,9 +18,9 @@ package rs.ltt.jmap.mua.util;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import rs.ltt.jmap.client.JmapClient;
+import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.common.Request;
-import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.method.call.email.ChangesEmailMethodCall;
 import rs.ltt.jmap.common.method.call.email.GetEmailMethodCall;
 import rs.ltt.jmap.common.method.call.identity.ChangesIdentityMethodCall;
@@ -32,87 +32,59 @@ import rs.ltt.jmap.common.method.call.thread.GetThreadMethodCall;
 
 public class UpdateUtil {
 
-    private static MethodResponsesFuture add(JmapClient.MultiCall multiCall, Invocation invocation) {
-        final ListenableFuture<MethodResponses> changes = multiCall.add(invocation.changes);
-        final ListenableFuture<MethodResponses> created = multiCall.add(invocation.created);
-        final ListenableFuture<MethodResponses> updated = multiCall.add(invocation.updated);
+    public static MethodResponsesFuture emails(JmapClient.MultiCall multiCall, String state) {
+        final JmapRequest.Call changesCallInfo = multiCall.call(new ChangesEmailMethodCall(state));
+        final ListenableFuture<MethodResponses> changes = changesCallInfo.getMethodResponses();
+        final ListenableFuture<MethodResponses> created = multiCall.call(new GetEmailMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.CREATED),
+                true
+        )).getMethodResponses();
+        final ListenableFuture<MethodResponses> updated = multiCall.call(new GetEmailMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.UPDATED),
+                true
+        )).getMethodResponses();
+
         return new MethodResponsesFuture(changes, created, updated);
     }
 
-    public static MethodResponsesFuture emails(JmapClient.MultiCall multiCall, String state) {
-        return add(multiCall, emails(state));
-    }
-
-    private static Invocation emails(String state) {
-        final Request.Invocation changes = Request.Invocation.create(new ChangesEmailMethodCall(state));
-        final Request.Invocation created = Request.Invocation.create(new GetEmailMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.CREATED),
-                true
-        ));
-        final Request.Invocation updated = Request.Invocation.create(new GetEmailMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.UPDATED),
-                Email.MUTABLE_PROPERTIES
-        ));
-        return new Invocation(changes, created, updated);
-    }
-
     public static MethodResponsesFuture identities(JmapClient.MultiCall multiCall, String state) {
-        return add(multiCall, identities(state));
-    }
+        final JmapRequest.Call changesCallInfo = multiCall.call(new ChangesIdentityMethodCall(state));
+        final ListenableFuture<MethodResponses> changes = changesCallInfo.getMethodResponses();
+        final ListenableFuture<MethodResponses> created = multiCall.call(new GetIdentityMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.CREATED)
+        )).getMethodResponses();
+        final ListenableFuture<MethodResponses> updated = multiCall.call(new GetIdentityMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.UPDATED)
+        )).getMethodResponses();
 
-    private static Invocation identities(String state) {
-        final Request.Invocation changes = Request.Invocation.create(new ChangesIdentityMethodCall(state));
-        final Request.Invocation created = Request.Invocation.create(new GetIdentityMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.CREATED)
-        ));
-        final Request.Invocation updated = Request.Invocation.create(new GetIdentityMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.UPDATED)
-        ));
-        return new Invocation(changes, created, updated);
+        return new MethodResponsesFuture(changes, created, updated);
     }
 
     public static MethodResponsesFuture mailboxes(JmapClient.MultiCall multiCall, String state) {
-        return add(multiCall, mailboxes(state));
-    }
+        final JmapRequest.Call changesCallInfo = multiCall.call(new ChangesMailboxMethodCall(state));
+        final ListenableFuture<MethodResponses> changes = changesCallInfo.getMethodResponses();
+        final ListenableFuture<MethodResponses> created = multiCall.call(new GetMailboxMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.CREATED)
+        )).getMethodResponses();
+        final ListenableFuture<MethodResponses> updated = multiCall.call(new GetMailboxMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.UPDATED),
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.UPDATED_PROPERTIES)
+        )).getMethodResponses();
 
-    private static Invocation mailboxes(String state) {
-        final Request.Invocation changes = Request.Invocation.create(new ChangesMailboxMethodCall(state));
-        final Request.Invocation created = Request.Invocation.create(new GetMailboxMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.CREATED)
-        ));
-        final Request.Invocation updated = Request.Invocation.create(new GetMailboxMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.UPDATED),
-                changes.createReference(Request.Invocation.ResultReference.Path.UPDATED_PROPERTIES)
-        ));
-        return new Invocation(changes, created, updated);
+        return new MethodResponsesFuture(changes, created, updated);
     }
 
     public static MethodResponsesFuture threads(JmapClient.MultiCall multiCall, String state) {
-        return add(multiCall, threads(state));
-    }
+        final JmapRequest.Call changesCallInfo = multiCall.call(new ChangesThreadMethodCall(state));
+        final ListenableFuture<MethodResponses> changes = changesCallInfo.getMethodResponses();
+        final ListenableFuture<MethodResponses> created = multiCall.call(new GetThreadMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.CREATED)
+        )).getMethodResponses();
+        final ListenableFuture<MethodResponses> updated = multiCall.call(new GetThreadMethodCall(
+                changesCallInfo.createResultReference(Request.Invocation.ResultReference.Path.UPDATED)
+        )).getMethodResponses();
 
-    private static Invocation threads(String state) {
-        final Request.Invocation changes = Request.Invocation.create(new ChangesThreadMethodCall(state));
-        final Request.Invocation created = Request.Invocation.create(new GetThreadMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.CREATED)
-        ));
-        final Request.Invocation updated = Request.Invocation.create(new GetThreadMethodCall(
-                changes.createReference(Request.Invocation.ResultReference.Path.UPDATED)
-        ));
-        return new Invocation(changes, created, updated);
-    }
-
-    public static class Invocation {
-
-        public final Request.Invocation changes;
-        public final Request.Invocation created;
-        public final Request.Invocation updated;
-
-        private Invocation(Request.Invocation changes, Request.Invocation created, Request.Invocation updated) {
-            this.changes = changes;
-            this.created = created;
-            this.updated = updated;
-        }
+        return new MethodResponsesFuture(changes, created, updated);
     }
 
     public static class MethodResponsesFuture {

@@ -25,7 +25,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
 import rs.ltt.jmap.client.api.MethodResponseNotFoundException;
-import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.call.mailbox.GetMailboxMethodCall;
 import rs.ltt.jmap.common.method.error.UnknownMethodMethodErrorResponse;
@@ -61,13 +60,13 @@ public class HttpJmapClientTest {
 
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
 
-        final Request.Invocation invocation = Request.Invocation.create(new GetMailboxMethodCall());
+        final JmapRequest.Call callInfo = multiCall.call(new GetMailboxMethodCall());
 
 
-        final String body = readResourceAsString("fetch-mailboxes/02-mailboxes.json", invocation.getId());
+        final String body = readResourceAsString("fetch-mailboxes/02-mailboxes.json", callInfo.getMethodCallId());
         server.enqueue(new MockResponse().setBody(body));
 
-        final ListenableFuture<MethodResponses> future = multiCall.add(invocation);
+        final ListenableFuture<MethodResponses> future = callInfo.getFuture();
 
         multiCall.execute();
 
@@ -105,13 +104,13 @@ public class HttpJmapClientTest {
 
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
 
-        final Request.Invocation invocation = Request.Invocation.create(new GetMailboxMethodCall());
+        final JmapRequest.Call callInfo = multiCall.call(new GetMailboxMethodCall());
 
 
-        final String body = readResourceAsString("fetch-mailboxes/unknown-method.json", invocation.getId());
+        final String body = readResourceAsString("fetch-mailboxes/unknown-method.json", callInfo.getMethodCallId());
         server.enqueue(new MockResponse().setBody(body));
 
-        final ListenableFuture<MethodResponses> future = multiCall.add(invocation);
+        final ListenableFuture<MethodResponses> future = callInfo.getFuture();
 
         multiCall.execute();
 
