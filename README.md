@@ -54,23 +54,20 @@ JmapClient client = new JmapClient("user@example.com", "password");
 JmapClient.MultiCall multiCall = client.newMultiCall();
 
 //create a query request
-Request.Invocation emailQuery = Request.Invocation.create(
-    new QueryEmailMethodCall(EmailQuery.unfiltered())
-);
-//create a get email request with a back reference to the IDs found in the previous request
-Request.Invocation emailGet = Request.Invocation.create(
-    new GetEmailMethodCall(emailQuery.createReference(Request.Invocation.ResultReference.Path.IDS))
+Call queryEmailCall = multiCall.call(
+        new QueryEmailMethodCall(EmailQuery.unfiltered())
 );
 
-//add both method calls to multi call
-Future<MethodResponses> queryFuture = multiCall.add(emailQuery);
-Future<MethodResponses> getFuture = multiCall.add(emailGet);
+//create a get email request with a back reference to the IDs found in the previous request
+Call getEmailCall = multiCall.call(
+        new GetEmailMethodCall(queryEmailCall.createResultReference(Request.Invocation.ResultReference.Path.IDS))
+);
 
 multiCall.execute();
 
 //process responses
-QueryEmailMethodResponse emailQueryResponse = queryFuture.get().getMain(QueryEmailMethodResponse.class);
-GetEmailMethodResponse getEmailMethodResponse = getFuture.get().getMain(GetEmailMethodResponse.class);
+QueryEmailMethodResponse emailQueryResponse = queryEmailCall.getMethodResponses().get().getMain(QueryEmailMethodResponse.class);
+GetEmailMethodResponse getEmailMethodResponse = getEmailCall.getMethodResponses().get().getMain(GetEmailMethodResponse.class);
 for (Email email : getEmailMethodResponse.getList()) {
     System.out.println(email.getSentAt() + " " + email.getFrom() + " " + email.getSubject());
 }
