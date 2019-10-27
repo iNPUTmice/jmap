@@ -60,6 +60,12 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
                 final Response response = (Response) genericResponse;
                 final ResponseAnalyzer responseAnalyzer = ResponseAnalyzer.analyse(response);
                 final Map<Request.Invocation, SettableFuture<MethodResponses>> map = jmapRequest.getInvocationFutureImmutableMap();
+
+                // Notify about potentially updated session state *before* setting the response futures. This way we'll
+                // make sure that additional requests guarded by a wait on one of the response futures will trigger
+                // re-fetching the session resource.
+                this.onSessionStateRetrieved(response.getSessionState());
+
                 for(Map.Entry<Request.Invocation, SettableFuture<MethodResponses>> entry : map.entrySet()) {
                     final Request.Invocation invocation = entry.getKey();
                     final SettableFuture<MethodResponses> future = entry.getValue();
@@ -75,7 +81,6 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
                         future.set(methodResponses);
                     }
                 }
-                this.onSessionStateRetrieved(response.getSessionState());
             }
         } catch (Exception e) {
             jmapRequest.setException(e);
