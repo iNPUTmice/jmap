@@ -14,16 +14,14 @@
  *
  */
 
-package rs.ltt.jmap.common.entity;
+package rs.ltt.jmap.annotation;
 
-import lombok.Getter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 
-import java.util.Map;
+@Target(ElementType.TYPE)
+public @interface JmapAccountCapability {
 
-@Getter
-public class Account {
-    private String name;
-    private boolean isPersonal;
-    private boolean isReadOnly;
-    private Map<Class<?extends AccountCapability>, AccountCapability> accountCapabilities;
+    String namespace();
+
 }

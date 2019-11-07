@@ -16,14 +16,5 @@
 
 package rs.ltt.jmap.common.entity;
 
-import lombok.Getter;
-
-import java.util.Map;
-
-@Getter
-public class Account {
-    private String name;
-    private boolean isPersonal;
-    private boolean isReadOnly;
-    private Map<Class<?extends AccountCapability>, AccountCapability> accountCapabilities;
+public interface AccountCapability {
 }
