@@ -16,47 +16,10 @@
 
 package rs.ltt.jmap.common.entity.capability;
 
-import com.google.common.base.MoreObjects;
 import rs.ltt.jmap.Namespace;
 import rs.ltt.jmap.annotation.JmapCapability;
 import rs.ltt.jmap.common.entity.Capability;
 
 @JmapCapability(namespace = Namespace.MAIL)
 public class MailCapability implements Capability {
-    private long maxMailboxesPerEmail;
-    private long maxMailboxDepth;
-    private long maxSizeMailboxName;
-    private long maxSizeAttachmentsPerEmail;
-    private String[] emailsListSortOptions;
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("maxMailboxesPerEmail", maxMailboxesPerEmail)
-                .add("maxMailboxDepth", maxMailboxDepth)
-                .add("maxSizeMailboxName", maxSizeMailboxName)
-                .add("maxSizeAttachmentsPerEmail", maxSizeAttachmentsPerEmail)
-                .add("emailsListSortOptions", emailsListSortOptions)
-                .toString();
-    }
-
-    public long getMaxMailboxesPerEmail() {
-        return maxMailboxesPerEmail;
-    }
-
-    public long getMaxMailboxDepth() {
-        return maxMailboxDepth;
-    }
-
-    public long getMaxSizeMailboxName() {
-        return maxSizeMailboxName;
-    }
-
-    public long getMaxSizeAttachmentsPerEmail() {
-        return maxSizeAttachmentsPerEmail;
-    }
-
-    public String[] getEmailsListSortOptions() {
-        return emailsListSortOptions;
-    }
 }
