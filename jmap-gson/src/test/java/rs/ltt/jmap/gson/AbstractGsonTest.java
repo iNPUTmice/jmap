@@ -10,10 +10,14 @@ import java.nio.charset.Charset;
 
 abstract class AbstractGsonTest {
 
-    static <T> T parseFromResource(String filename, Type type) throws IOException {
+    static Gson getGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         JmapAdapters.register(gsonBuilder);
-        final Gson gson = gsonBuilder.create();
+        return gsonBuilder.create();
+    }
+
+    static <T> T parseFromResource(String filename, Type type) throws IOException {
+        final Gson gson = getGson();
         return gson.fromJson(Resources.asCharSource(Resources.getResource(filename), Charset.defaultCharset()).read(),type);
     }
 

@@ -1,0 +1,1 @@
+{"urn:ietf:params:jmap:mail":{"maxMailboxesPerEmail":1,"maxMailboxDepth":5,"maxSizeMailboxName":500,"maxSizeAttachmentsPerEmail":10000000,"emailQuerySortOptions":["receivedAt","To"],"mayCreateTopLevelMailbox":false},"urn:ietf:params:jmap:submission":{"maxDelayedSend":300,"submissionExtensions":{"DELIVERBY":["240"]}},"urn:ietf:params:jmap:vacationresponse":{}}

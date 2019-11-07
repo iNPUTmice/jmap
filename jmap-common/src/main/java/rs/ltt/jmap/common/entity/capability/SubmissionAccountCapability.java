@@ -30,6 +30,11 @@ public class SubmissionAccountCapability implements AccountCapability  {
     private long maxDelayedSend;
     private Map<String,String[]> submissionExtensions;
 
+    public SubmissionAccountCapability(long maxDelayedSend, Map<String, String[]> submissionExtensions) {
+        this.maxDelayedSend = maxDelayedSend;
+        this.submissionExtensions = submissionExtensions;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
