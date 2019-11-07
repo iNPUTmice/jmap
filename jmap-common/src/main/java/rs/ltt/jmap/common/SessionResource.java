@@ -33,6 +33,7 @@ public class SessionResource {
     private String uploadUrl;
     private String eventSourceUrl;
     private Map<String, Account> accounts;
+    private Map<String, String> primaryAccounts;
     private Map<Class<?extends Capability>, Capability> capabilities;
     private String state;
 
