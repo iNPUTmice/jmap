@@ -28,20 +28,20 @@ public class GetMailboxMethodCall extends GetMethodCall<Mailbox> {
     @SerializedName("#properties")
     private Request.Invocation.ResultReference propertiesReference;
 
-    public GetMailboxMethodCall() {
-        super();
+    public GetMailboxMethodCall(String accountId) {
+        super(accountId);
     }
 
-    public GetMailboxMethodCall(Request.Invocation.ResultReference resultReference) {
-        super(resultReference);
+    public GetMailboxMethodCall(String accountId, Request.Invocation.ResultReference resultReference) {
+        super(accountId, resultReference);
     }
 
-    public GetMailboxMethodCall(Request.Invocation.ResultReference idsReference, Request.Invocation.ResultReference propertiesReference) {
-        super(idsReference);
+    public GetMailboxMethodCall(String accountId, Request.Invocation.ResultReference idsReference, Request.Invocation.ResultReference propertiesReference) {
+        super(accountId, idsReference);
         this.propertiesReference = propertiesReference;
     }
 
-    public GetMailboxMethodCall(String[] ids) {
-        super(ids);
+    public GetMailboxMethodCall(String accountId, String[] ids) {
+        super(accountId, ids);
     }
 }

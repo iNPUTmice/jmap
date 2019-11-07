@@ -71,12 +71,14 @@ public class Mua {
     private static final Logger LOGGER = LoggerFactory.getLogger(Mua.class);
     private final JmapClient jmapClient;
     private final Cache cache;
+    private final String accountId;
     private Long queryPageSize = null;
     private ListeningExecutorService ioExecutorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
-    private Mua(JmapClient jmapClient, Cache cache) {
+    private Mua(JmapClient jmapClient, Cache cache, String accountId) {
         this.jmapClient = jmapClient;
         this.cache = cache;
+        this.accountId = accountId;
     }
 
     public static Builder builder() {
@@ -120,7 +122,7 @@ public class Mua {
 
     private ListenableFuture<Status> loadIdentities(JmapClient.MultiCall multiCall) {
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final ListenableFuture<MethodResponses> responseFuture = multiCall.call(new GetIdentityMethodCall()).getMethodResponses();
+        final ListenableFuture<MethodResponses> responseFuture = multiCall.call(new GetIdentityMethodCall(accountId)).getMethodResponses();
         responseFuture.addListener(new Runnable() {
             @Override
             public void run() {
@@ -157,7 +159,7 @@ public class Mua {
     private ListenableFuture<Status> updateIdentities(final String state, JmapClient.MultiCall multiCall) {
         Preconditions.checkNotNull(state, "State can not be null when updating identities");
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.identities(multiCall, state);
+        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.identities(multiCall, accountId, state);
         methodResponsesFuture.changes.addListener(new Runnable() {
             @Override
             public void run() {
@@ -207,7 +209,7 @@ public class Mua {
 
     private ListenableFuture<Status> loadMailboxes(JmapClient.MultiCall multiCall) {
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final ListenableFuture<MethodResponses> getMailboxMethodResponsesFuture = multiCall.call(new GetMailboxMethodCall()).getMethodResponses();
+        final ListenableFuture<MethodResponses> getMailboxMethodResponsesFuture = multiCall.call(new GetMailboxMethodCall(accountId)).getMethodResponses();
         getMailboxMethodResponsesFuture.addListener(new Runnable() {
             @Override
             public void run() {
@@ -235,7 +237,7 @@ public class Mua {
     private ListenableFuture<Status> updateMailboxes(final String state, final JmapClient.MultiCall multiCall) {
         Preconditions.checkNotNull(state, "State can not be null when updating mailboxes");
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.mailboxes(multiCall, state);
+        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.mailboxes(multiCall, accountId, state);
         methodResponsesFuture.changes.addListener(new Runnable() {
             @Override
             public void run() {
@@ -577,7 +579,7 @@ public class Mua {
     private ListenableFuture<Status> updateEmails(final String state, final JmapClient.MultiCall multiCall) {
         Preconditions.checkNotNull(state, "state can not be null when updating emails");
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.emails(multiCall, state);
+        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.emails(multiCall, accountId, state);
         methodResponsesFuture.changes.addListener(new Runnable() {
             @Override
             public void run() {
@@ -1159,7 +1161,7 @@ public class Mua {
     private ListenableFuture<Status> updateThreads(final String state, final JmapClient.MultiCall multiCall) {
         Preconditions.checkNotNull(state, "state can not be null when updating threads");
         final SettableFuture<Status> settableFuture = SettableFuture.create();
-        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.threads(multiCall, state);
+        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.threads(multiCall, accountId, state);
         methodResponsesFuture.changes.addListener(new Runnable() {
             @Override
             public void run() {
@@ -1263,7 +1265,7 @@ public class Mua {
 
         final Call queryCall = multiCall.call(new QueryEmailMethodCall(query, afterEmailId, this.queryPageSize));
         final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
-        final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = multiCall.call(new GetEmailMethodCall(queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"})).getMethodResponses();
+        final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = multiCall.call(new GetEmailMethodCall(accountId, queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"})).getMethodResponses();
 
         queryResponsesFuture.addListener(new Runnable() {
             @Override
@@ -1338,7 +1340,7 @@ public class Mua {
 
         final Call queryChangesCall = multiCall.call(new QueryChangesEmailMethodCall(queryStateWrapper.queryState, query)); //TODO do we want to include upTo?
         final ListenableFuture<MethodResponses> queryChangesResponsesFuture = queryChangesCall.getMethodResponses();
-        final ListenableFuture<MethodResponses> getThreadIdResponsesFuture = multiCall.call(new GetEmailMethodCall(queryChangesCall.createResultReference(Request.Invocation.ResultReference.Path.ADDED_IDS), new String[]{"threadId"})).getMethodResponses();
+        final ListenableFuture<MethodResponses> getThreadIdResponsesFuture = multiCall.call(new GetEmailMethodCall(accountId, queryChangesCall.createResultReference(Request.Invocation.ResultReference.Path.ADDED_IDS), new String[]{"threadId"})).getMethodResponses();
 
         queryChangesResponsesFuture.addListener(new Runnable() {
             @Override
@@ -1393,16 +1395,16 @@ public class Mua {
 
         final Call queryCall = multiCall.call(new QueryEmailMethodCall(query, this.queryPageSize));
         final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
-        final Call threadIdsCall = multiCall.call(new GetEmailMethodCall(queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"}));
+        final Call threadIdsCall = multiCall.call(new GetEmailMethodCall(accountId, queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"}));
         final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = threadIdsCall.getMethodResponses();
 
 
         final ListenableFuture<MethodResponses> getThreadsResponsesFuture;
         final ListenableFuture<MethodResponses> getEmailResponsesFuture;
         if (queryStateWrapper.objectsState.threadState == null && queryStateWrapper.objectsState.emailState == null) {
-            final Call threadCall = multiCall.call(new GetThreadMethodCall(threadIdsCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_THREAD_IDS)));
+            final Call threadCall = multiCall.call(new GetThreadMethodCall(accountId, threadIdsCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_THREAD_IDS)));
             getThreadsResponsesFuture = threadCall.getMethodResponses();
-            getEmailResponsesFuture = multiCall.call(new GetEmailMethodCall(threadCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true)).getMethodResponses();
+            getEmailResponsesFuture = multiCall.call(new GetEmailMethodCall(accountId, threadCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true)).getMethodResponses();
         } else {
             getThreadsResponsesFuture = null;
             getEmailResponsesFuture = null;
@@ -1472,9 +1474,9 @@ public class Mua {
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final ListenableFuture<Status> updateThreadsFuture = updateThreads(missing.threadState, multiCall);
         final ListenableFuture<Status> updateEmailsFuture = updateEmails(missing.emailState, multiCall);
-        final Call threadsCall = multiCall.call(new GetThreadMethodCall(missing.threadIds.toArray(new String[0])));
+        final Call threadsCall = multiCall.call(new GetThreadMethodCall(accountId, missing.threadIds.toArray(new String[0])));
         final ListenableFuture<MethodResponses> getThreadsResponsesFuture = threadsCall.getMethodResponses();
-        final ListenableFuture<MethodResponses> getEmailsResponsesFuture = multiCall.call(new GetEmailMethodCall(threadsCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true)).getMethodResponses();
+        final ListenableFuture<MethodResponses> getEmailsResponsesFuture = multiCall.call(new GetEmailMethodCall(accountId, threadsCall.createResultReference(Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS), true)).getMethodResponses();
         multiCall.execute();
         getThreadsResponsesFuture.addListener(new Runnable() {
             @Override
@@ -1508,6 +1510,7 @@ public class Mua {
     public static class Builder {
         private String username;
         private String password;
+        private String accountId;
         private SessionCache sessionCache = new SessionFileCache();
         private Cache cache = new InMemoryCache();
         private Long queryPageSize = null;
@@ -1523,6 +1526,11 @@ public class Mua {
 
         public Builder password(String password) {
             this.password = password;
+            return this;
+        }
+
+        public Builder accountId(String accountId) {
+            this.accountId = accountId;
             return this;
         }
 
@@ -1546,9 +1554,11 @@ public class Mua {
         }
 
         public Mua build() {
+            Preconditions.checkNotNull(accountId, "accountId is required");
+
             JmapClient jmapClient = new JmapClient(this.username, this.password);
             jmapClient.setSessionCache(this.sessionCache);
-            Mua mua = new Mua(jmapClient, cache);
+            Mua mua = new Mua(jmapClient, cache, accountId);
             mua.queryPageSize = this.queryPageSize;
             return mua;
         }

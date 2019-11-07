@@ -33,9 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.cli.cache.MyInMemoryCache;
 import rs.ltt.cli.model.QueryViewItem;
+import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
 import rs.ltt.jmap.client.api.UnauthorizedException;
 import rs.ltt.jmap.common.entity.*;
+import rs.ltt.jmap.common.entity.capability.MailAccountCapability;
+import rs.ltt.jmap.common.entity.capability.MailCapability;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
@@ -77,7 +80,25 @@ public class Main {
 
         final String username = args[0];
         final String password = args[1];
-        final Mua mua = Mua.builder().username(username).password(password).cache(myInMemoryCache).queryPageSize(10).build();
+
+        final String accountId;
+        try {
+            JmapClient jmapClient = new JmapClient(username, password);
+            accountId = jmapClient.getSession().get().getPrimaryAccount(MailAccountCapability.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Could not find primary email account");
+            System.exit(1);
+            return;
+        }
+
+        final Mua mua = Mua.builder()
+                .username(username)
+                .password(password)
+                .accountId(accountId)
+                .cache(myInMemoryCache)
+                .queryPageSize(10)
+                .build();
 
         DefaultTerminalFactory defaultTerminalFactory = new DefaultTerminalFactory();
         try {

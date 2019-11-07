@@ -29,31 +29,31 @@ public class GetEmailMethodCall extends GetMethodCall<Email> {
     private Boolean fetchAllBodyValues;
     private Long maxBodyValueBytes;
 
-    public GetEmailMethodCall(Request.Invocation.ResultReference resultReference) {
-        super(resultReference);
+    public GetEmailMethodCall(String accountId, Request.Invocation.ResultReference resultReference) {
+        super(accountId, resultReference);
     }
 
-    public GetEmailMethodCall(Request.Invocation.ResultReference resultReference, boolean fetchTextBodyValues) {
-        super(resultReference);
+    public GetEmailMethodCall(String accountId, Request.Invocation.ResultReference resultReference, boolean fetchTextBodyValues) {
+        super(accountId, resultReference);
         this.fetchTextBodyValues = fetchTextBodyValues;
     }
 
-    public GetEmailMethodCall(String[] ids) {
-        super(ids);
+    public GetEmailMethodCall(String accountId, String[] ids) {
+        super(accountId, ids);
     }
 
-    public GetEmailMethodCall(String[] ids, boolean fetchTextBodyValues) {
-        super(ids);
+    public GetEmailMethodCall(String accountId, String[] ids, boolean fetchTextBodyValues) {
+        super(accountId, ids);
         this.fetchTextBodyValues = fetchTextBodyValues;
     }
 
-    public GetEmailMethodCall(Request.Invocation.ResultReference resultReference, String[] properties) {
-        super(resultReference);
+    public GetEmailMethodCall(String accountId, Request.Invocation.ResultReference resultReference, String[] properties) {
+        super(accountId, resultReference);
         this.properties = properties;
     }
 
-    public GetEmailMethodCall(String[] ids, String[] properties) {
-        super(ids);
+    public GetEmailMethodCall(String accountId, String[] ids, String[] properties) {
+        super(accountId, ids);
         this.properties = properties;
     }
 }

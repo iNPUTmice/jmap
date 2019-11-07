@@ -24,11 +24,11 @@ import rs.ltt.jmap.common.method.call.standard.GetMethodCall;
 @JmapMethod("Thread/get")
 public class GetThreadMethodCall extends GetMethodCall<Thread> {
     
-    public GetThreadMethodCall(Request.Invocation.ResultReference resultReference) {
-        super(resultReference);
+    public GetThreadMethodCall(String accountId, Request.Invocation.ResultReference resultReference) {
+        super(accountId, resultReference);
     }
 
-    public GetThreadMethodCall(String[] ids) {
-        super(ids);
+    public GetThreadMethodCall(String accountId, String[] ids) {
+        super(accountId, ids);
     }
 }

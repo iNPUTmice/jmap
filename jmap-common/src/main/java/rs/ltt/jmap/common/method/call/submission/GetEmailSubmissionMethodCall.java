@@ -22,4 +22,7 @@ import rs.ltt.jmap.common.method.call.standard.GetMethodCall;
 
 @JmapMethod("EmailSubmission/get")
 public class GetEmailSubmissionMethodCall extends GetMethodCall<EmailSubmission> {
+    public GetEmailSubmissionMethodCall(String accountId) {
+        super(accountId);
+    }
 }

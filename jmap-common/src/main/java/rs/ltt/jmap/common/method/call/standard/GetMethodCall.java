@@ -30,17 +30,19 @@ public abstract class GetMethodCall<T extends AbstractIdentifiableEntity> implem
     @SerializedName("#ids")
     private Request.Invocation.ResultReference idsReference;
 
-    public GetMethodCall(Request.Invocation.ResultReference idsReference) {
+    public GetMethodCall(String accountId, Request.Invocation.ResultReference idsReference) {
+        this.accountId = accountId;
         this.idsReference = idsReference;
     }
 
 
-    public GetMethodCall(String[] ids) {
+    public GetMethodCall(String accountId, String[] ids) {
+        this.accountId = accountId;
         this.ids = ids;
     }
 
-    public GetMethodCall() {
-
+    public GetMethodCall(String accountId) {
+        this.accountId = accountId;
     }
 
 }

@@ -22,4 +22,7 @@ import rs.ltt.jmap.common.method.call.standard.GetMethodCall;
 
 @JmapMethod("VacationResponse/get")
 public class GetVacationResponseMethodCall extends GetMethodCall<VacationResponse> {
+    public GetVacationResponseMethodCall(String accountId) {
+        super(accountId);
+    }
 }

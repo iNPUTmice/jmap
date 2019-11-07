@@ -24,16 +24,16 @@ import rs.ltt.jmap.common.method.call.standard.GetMethodCall;
 @JmapMethod("Identity/get")
 public class GetIdentityMethodCall extends GetMethodCall<Identity> {
 
-    public GetIdentityMethodCall(Request.Invocation.ResultReference resultReference) {
-        super(resultReference);
+    public GetIdentityMethodCall(String accountId, Request.Invocation.ResultReference resultReference) {
+        super(accountId, resultReference);
     }
 
-    public GetIdentityMethodCall(String[] ids) {
-        super(ids);
+    public GetIdentityMethodCall(String accountId, String[] ids) {
+        super(accountId, ids);
     }
 
-    public GetIdentityMethodCall() {
-        super();
+    public GetIdentityMethodCall(String accountId) {
+        super(accountId);
     }
 
 }
