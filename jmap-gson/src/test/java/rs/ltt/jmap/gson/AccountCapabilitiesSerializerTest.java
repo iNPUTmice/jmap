@@ -69,25 +69,27 @@ public class AccountCapabilitiesSerializerTest extends AbstractGsonTest {
     }
 
     private MailAccountCapability createMailAccountCapability() {
-        Long maxMailboxesPerEmail = 1L;
-        Long maxMailboxDepth = 5L;
-        long maxSizeMailboxName = 500;
-        long maxSizeAttachmentsPerEmail = 10_000_000;
-        String[] emailQuerySortOptions = new String[] { "receivedAt", "To" };
-        boolean mayCreateTopLevelMailbox = false;
-        return new MailAccountCapability(maxMailboxesPerEmail, maxMailboxDepth,
-                maxSizeMailboxName, maxSizeAttachmentsPerEmail, emailQuerySortOptions, mayCreateTopLevelMailbox);
+        return MailAccountCapability.builder()
+                .maxMailboxesPerEmail(1L)
+                .maxMailboxDepth(5L)
+                .maxSizeMailboxName(500)
+                .maxSizeAttachmentsPerEmail(10_000_000)
+                .emailQuerySortOptions(new String[] { "receivedAt", "To" })
+                .mayCreateTopLevelMailbox(false)
+                .build();
     }
 
     private SubmissionAccountCapability createSubmissionAccountCapability() {
-        long maxDelayedSend = 300;
         Map<String, String[]> submissionExtensions = new LinkedHashMap<>();
         submissionExtensions.put("DELIVERBY", new String[] { "240" });
-        return new SubmissionAccountCapability(maxDelayedSend, submissionExtensions);
+        return SubmissionAccountCapability.builder()
+                .maxDelayedSend(300)
+                .submissionExtensions(submissionExtensions)
+                .build();
     }
 
     private VacationResponseAccountCapability createVacationResponseAccountCapability() {
-        return new VacationResponseAccountCapability();
+        return VacationResponseAccountCapability.builder().build();
     }
 
     private Map<Class<? extends AccountCapability>, AccountCapability> createAccountCapabilitiesMap(AccountCapability... accountCapabilities) {

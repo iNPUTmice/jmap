@@ -16,12 +16,17 @@
 
 package rs.ltt.jmap.common.entity.capability;
 
-import com.google.common.base.MoreObjects;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 import rs.ltt.jmap.Namespace;
 import rs.ltt.jmap.annotation.JmapAccountCapability;
 import rs.ltt.jmap.common.entity.AccountCapability;
 
 @JmapAccountCapability(namespace = Namespace.MAIL)
+@Getter
+@Builder
+@ToString
 public class MailAccountCapability implements AccountCapability {
     private Long maxMailboxesPerEmail;
     private Long maxMailboxDepth;
@@ -29,50 +34,4 @@ public class MailAccountCapability implements AccountCapability {
     private long maxSizeAttachmentsPerEmail;
     private String[] emailQuerySortOptions;
     private boolean mayCreateTopLevelMailbox;
-
-    public MailAccountCapability(Long maxMailboxesPerEmail, Long maxMailboxDepth, long maxSizeMailboxName, long maxSizeAttachmentsPerEmail,
-                                 String[] emailQuerySortOptions, boolean mayCreateTopLevelMailbox) {
-        this.maxMailboxesPerEmail = maxMailboxesPerEmail;
-        this.maxMailboxDepth = maxMailboxDepth;
-        this.maxSizeMailboxName = maxSizeMailboxName;
-        this.maxSizeAttachmentsPerEmail = maxSizeAttachmentsPerEmail;
-        this.emailQuerySortOptions = emailQuerySortOptions;
-        this.mayCreateTopLevelMailbox = mayCreateTopLevelMailbox;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("maxMailboxesPerEmail", maxMailboxesPerEmail)
-                .add("maxMailboxDepth", maxMailboxDepth)
-                .add("maxSizeMailboxName", maxSizeMailboxName)
-                .add("maxSizeAttachmentsPerEmail", maxSizeAttachmentsPerEmail)
-                .add("emailQuerySortOptions", emailQuerySortOptions)
-                .add("mayCreateTopLevelMailbox", mayCreateTopLevelMailbox)
-                .toString();
-    }
-
-    public Long getMaxMailboxesPerEmail() {
-        return maxMailboxesPerEmail;
-    }
-
-    public Long getMaxMailboxDepth() {
-        return maxMailboxDepth;
-    }
-
-    public long getMaxSizeMailboxName() {
-        return maxSizeMailboxName;
-    }
-
-    public long getMaxSizeAttachmentsPerEmail() {
-        return maxSizeAttachmentsPerEmail;
-    }
-
-    public String[] getEmailQuerySortOptions() {
-        return emailQuerySortOptions;
-    }
-
-    public boolean isMayCreateTopLevelMailbox() {
-        return mayCreateTopLevelMailbox;
-    }
 }

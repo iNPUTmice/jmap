@@ -16,38 +16,20 @@
 
 package rs.ltt.jmap.common.entity.capability;
 
-import com.google.common.base.MoreObjects;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 import rs.ltt.jmap.Namespace;
 import rs.ltt.jmap.annotation.JmapAccountCapability;
-import rs.ltt.jmap.annotation.JmapCapability;
 import rs.ltt.jmap.common.entity.AccountCapability;
-import rs.ltt.jmap.common.entity.Capability;
 
 import java.util.Map;
 
-@JmapAccountCapability( namespace = Namespace.SUBMISSION)
+@JmapAccountCapability(namespace = Namespace.SUBMISSION)
+@Getter
+@Builder
+@ToString
 public class SubmissionAccountCapability implements AccountCapability  {
     private long maxDelayedSend;
     private Map<String,String[]> submissionExtensions;
-
-    public SubmissionAccountCapability(long maxDelayedSend, Map<String, String[]> submissionExtensions) {
-        this.maxDelayedSend = maxDelayedSend;
-        this.submissionExtensions = submissionExtensions;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("maxDelayedSend", maxDelayedSend)
-                .add("submissionExtensions", submissionExtensions)
-                .toString();
-    }
-
-    public long getMaxDelayedSend() {
-        return maxDelayedSend;
-    }
-
-    public Map<String, String[]> getSubmissionExtensions() {
-        return submissionExtensions;
-    }
 }
