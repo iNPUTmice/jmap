@@ -27,7 +27,7 @@ public class MailAccountCapability implements AccountCapability {
     private Long maxMailboxDepth;
     private long maxSizeMailboxName;
     private long maxSizeAttachmentsPerEmail;
-    private String[] emailsListSortOptions;
+    private String[] emailQuerySortOptions;
     private boolean mayCreateTopLevelMailbox;
 
     @Override
@@ -37,7 +37,7 @@ public class MailAccountCapability implements AccountCapability {
                 .add("maxMailboxDepth", maxMailboxDepth)
                 .add("maxSizeMailboxName", maxSizeMailboxName)
                 .add("maxSizeAttachmentsPerEmail", maxSizeAttachmentsPerEmail)
-                .add("emailsListSortOptions", emailsListSortOptions)
+                .add("emailQuerySortOptions", emailQuerySortOptions)
                 .add("mayCreateTopLevelMailbox", mayCreateTopLevelMailbox)
                 .toString();
     }
@@ -58,8 +58,8 @@ public class MailAccountCapability implements AccountCapability {
         return maxSizeAttachmentsPerEmail;
     }
 
-    public String[] getEmailsListSortOptions() {
-        return emailsListSortOptions;
+    public String[] getEmailQuerySortOptions() {
+        return emailQuerySortOptions;
     }
 
     public boolean isMayCreateTopLevelMailbox() {
