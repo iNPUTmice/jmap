@@ -16,10 +16,29 @@
 
 package rs.ltt.jmap.common.entity.capability;
 
+import com.google.common.base.MoreObjects;
 import rs.ltt.jmap.Namespace;
+import rs.ltt.jmap.annotation.JmapAccountCapability;
 import rs.ltt.jmap.annotation.JmapCapability;
+import rs.ltt.jmap.common.entity.AccountCapability;
 import rs.ltt.jmap.common.entity.Capability;
 
-@JmapCapability( namespace = Namespace.SUBMISSION)
-public class SubmissionCapability implements Capability  {
+import java.util.Map;
+
+@JmapAccountCapability( namespace = Namespace.SUBMISSION)
+public class SubmissionAccountCapability implements AccountCapability  {
+    private long maxDelayedSend;
+    private Map<String,String[]> submissionExtensions;
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("maxDelayedSend", maxDelayedSend)
+                .add("submissionExtensions", submissionExtensions)
+                .toString();
+    }
+
+    public long getMaxDelayedSend() {
+        return maxDelayedSend;
+    }
 }
