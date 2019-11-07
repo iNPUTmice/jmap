@@ -1,0 +1,21 @@
+{
+  "urn:ietf:params:jmap:mail":  {
+    "maxMailboxesPerEmail": 20,
+    "maxMailboxDepth": 10,
+    "maxSizeMailboxName": 200,
+    "maxSizeAttachmentsPerEmail": 50000000,
+    "emailQuerySortOptions": ["receivedAt"],
+    "mayCreateTopLevelMailbox": true
+  },
+  "urn:ietf:params:jmap:submission":  {
+    "maxDelayedSend": 0,
+    "submissionExtensions": {
+      "SIZE": [50000000]
+    }
+  },
+  "urn:ietf:params:jmap:vacationresponse":  {
+  },
+  "unknown": {
+    "some": "property"
+  }
+}

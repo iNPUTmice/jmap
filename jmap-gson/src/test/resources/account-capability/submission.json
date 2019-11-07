@@ -1,0 +1,8 @@
+{
+  "urn:ietf:params:jmap:submission":  {
+    "maxDelayedSend": 0,
+    "submissionExtensions": {
+      "SIZE": ["50000000"]
+    }
+  }
+}

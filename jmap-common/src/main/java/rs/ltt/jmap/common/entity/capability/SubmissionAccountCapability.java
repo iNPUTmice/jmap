@@ -41,4 +41,8 @@ public class SubmissionAccountCapability implements AccountCapability  {
     public long getMaxDelayedSend() {
         return maxDelayedSend;
     }
+
+    public Map<String, String[]> getSubmissionExtensions() {
+        return submissionExtensions;
+    }
 }
