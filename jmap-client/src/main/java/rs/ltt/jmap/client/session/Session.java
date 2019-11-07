@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import rs.ltt.jmap.client.event.CloseAfter;
 import rs.ltt.jmap.common.SessionResource;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
+import rs.ltt.jmap.common.entity.AccountCapability;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -102,5 +103,9 @@ public class Session {
 
     public String getState() {
         return sessionResource.getState();
+    }
+
+    public String getPrimaryAccount(Class<? extends AccountCapability> clazz) {
+        return sessionResource.getPrimaryAccount(clazz);
     }
 }
