@@ -30,20 +30,20 @@ public class SetEmailMethodCall extends SetMethodCall<Email> {
         super(accountId, ifInState, create, update, destroy);
     }
 
-    public SetEmailMethodCall(String ifInState, String[] destroy) {
-        super(ifInState, destroy);
+    public SetEmailMethodCall(String accountId, String ifInState, String[] destroy) {
+        super(accountId, ifInState, destroy);
     }
 
-    public SetEmailMethodCall(String ifInState, Request.Invocation.ResultReference destroy) {
-        super(ifInState, destroy);
+    public SetEmailMethodCall(String accountId, String ifInState, Request.Invocation.ResultReference destroy) {
+        super(accountId, ifInState, destroy);
     }
 
 
-    public SetEmailMethodCall(String ifInState, Map<String, Map<String, Object>> update) {
-        super(ifInState, update);
+    public SetEmailMethodCall(String accountId, String ifInState, Map<String, Map<String, Object>> update) {
+        super(accountId, ifInState, update);
     }
 
-    public SetEmailMethodCall(Map<String, Email> create) {
-        super(create);
+    public SetEmailMethodCall(String accountId, Map<String, Email> create) {
+        super(accountId, create);
     }
 }

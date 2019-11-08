@@ -28,15 +28,15 @@ public class SetIdentityMethodCall extends SetMethodCall<Identity> {
         super(accountId, ifInState, create, update, destroy);
     }
 
-    public SetIdentityMethodCall(String ifInState, String[] destroy) {
-        super(ifInState, destroy);
+    public SetIdentityMethodCall(String accountId, String ifInState, String[] destroy) {
+        super(accountId, ifInState, destroy);
     }
 
-    public SetIdentityMethodCall(String ifInState, Map<String, Map<String, Object>> update) {
-        super(ifInState, update);
+    public SetIdentityMethodCall(String accountId, String ifInState, Map<String, Map<String, Object>> update) {
+        super(accountId, ifInState, update);
     }
 
-    public SetIdentityMethodCall(Map<String, Identity> create) {
-        super(create);
+    public SetIdentityMethodCall(String accountId, Map<String, Identity> create) {
+        super(accountId, create);
     }
 }

@@ -41,6 +41,7 @@ public class SetEmailSubmissionMethodCallTest extends AbstractGsonTest {
         patchesBuilder.remove("keywords/" + Keyword.DRAFT);
         patchesBuilder.set("mailboxIds/MB3", true);
         SetEmailSubmissionMethodCall submissionCall = new SetEmailSubmissionMethodCall(
+                "accountId",
                 ImmutableMap.of(
                         "es0",
                         EmailSubmission.builder()

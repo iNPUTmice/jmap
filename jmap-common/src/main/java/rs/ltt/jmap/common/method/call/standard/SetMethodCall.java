@@ -46,22 +46,26 @@ public abstract class SetMethodCall<T extends AbstractIdentifiableEntity> implem
         this.destroy = destroy;
     }
 
-    public SetMethodCall(String ifInState, String[] destroy) {
+    public SetMethodCall(String accountId, String ifInState, String[] destroy) {
+        this.accountId = accountId;
         this.ifInState = ifInState;
         this.destroy = destroy;
     }
 
-    public SetMethodCall(String ifInState, Request.Invocation.ResultReference destroy) {
+    public SetMethodCall(String accountId, String ifInState, Request.Invocation.ResultReference destroy) {
+        this.accountId = accountId;
         this.ifInState = ifInState;
         this.destroyReference = destroy;
     }
 
-    public SetMethodCall(String ifInState, Map<String, Map<String, Object>> update) {
+    public SetMethodCall(String accountId, String ifInState, Map<String, Map<String, Object>> update) {
+        this.accountId = accountId;
         this.ifInState = ifInState;
         this.update = update;
     }
 
-    public SetMethodCall(Map<String, T> create) {
+    public SetMethodCall(String accountId, Map<String, T> create) {
+        this.accountId = accountId;
         this.create = create;
     }
 }

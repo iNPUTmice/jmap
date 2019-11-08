@@ -36,20 +36,20 @@ public class SetMailboxMethodCall extends SetMethodCall<Mailbox> {
         this.onDestroyRemoveEmails = onDestroyRemoveEmails;
     }
 
-    public SetMailboxMethodCall(String ifInState, String[] destroy) {
-        super(ifInState, destroy);
+    public SetMailboxMethodCall(String accountId, String ifInState, String[] destroy) {
+        super(accountId, ifInState, destroy);
     }
 
-    public SetMailboxMethodCall(String ifInState, String[] destroy, Boolean onDestroyRemoveEmails) {
-        super(ifInState, destroy);
+    public SetMailboxMethodCall(String accountId, String ifInState, String[] destroy, Boolean onDestroyRemoveEmails) {
+        super(accountId, ifInState, destroy);
         this.onDestroyRemoveEmails = onDestroyRemoveEmails;
     }
 
-    public SetMailboxMethodCall(String ifInState, Map<String, Map<String, Object>> update) {
-        super(ifInState, update);
+    public SetMailboxMethodCall(String accountId, String ifInState, Map<String, Map<String, Object>> update) {
+        super(accountId, ifInState, update);
     }
 
-    public SetMailboxMethodCall(Map<String, Mailbox> create) {
-        super(create);
+    public SetMailboxMethodCall(String accountId, Map<String, Mailbox> create) {
+        super(accountId, create);
     }
 }

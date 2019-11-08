@@ -1,1 +1,1 @@
-{"using":["urn:ietf:params:jmap:mail"],"methodCalls":[["EmailSubmission/set",{"onSuccessUpdateEmail":{"#es0":{"keywords/$draft":null,"mailboxIds/MB3":true}},"create":{"es0":{"identityId":"I0","emailId":"M1234"}}},"0"]]}
+{"using":["urn:ietf:params:jmap:mail"],"methodCalls":[["EmailSubmission/set",{"onSuccessUpdateEmail":{"#es0":{"keywords/$draft":null,"mailboxIds/MB3":true}},"accountId":"accountId","create":{"es0":{"identityId":"I0","emailId":"M1234"}}},"0"]]}

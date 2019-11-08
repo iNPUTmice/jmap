@@ -1,1 +1,1 @@
-{"using":["urn:ietf:params:jmap:mail"],"methodCalls":[["Email/set",{"ifInState":"state","update":{"M123":{"keywords/$seen":null}}},"0"]]}
+{"using":["urn:ietf:params:jmap:mail"],"methodCalls":[["Email/set",{"accountId":"accountId","ifInState":"state","update":{"M123":{"keywords/$seen":null}}},"0"]]}

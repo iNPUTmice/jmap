@@ -35,30 +35,30 @@ public class SetEmailSubmissionMethodCall extends SetMethodCall<EmailSubmission>
         this.onSuccessDestroyEmail = onSuccessDestroyEmail;
     }
 
-    public SetEmailSubmissionMethodCall(String ifInState, String[] destroy) {
-        super(ifInState, destroy);
+    public SetEmailSubmissionMethodCall(String accountId, String ifInState, String[] destroy) {
+        super(accountId, ifInState, destroy);
     }
 
-    public SetEmailSubmissionMethodCall(String ifInState, String[] destroy, List<String> onSuccessDestroyEmail) {
-        super(ifInState, destroy);
+    public SetEmailSubmissionMethodCall(String accountId, String ifInState, String[] destroy, List<String> onSuccessDestroyEmail) {
+        super(accountId, ifInState, destroy);
         this.onSuccessDestroyEmail = onSuccessDestroyEmail;
     }
 
-    public SetEmailSubmissionMethodCall(String ifInState, Map<String, Map<String, Object>> update) {
-        super(ifInState, update);
+    public SetEmailSubmissionMethodCall(String accountId, String ifInState, Map<String, Map<String, Object>> update) {
+        super(accountId, ifInState, update);
     }
 
-    public SetEmailSubmissionMethodCall(String ifInState, Map<String, Map<String, Object>> update, Map<String, Map<String, Object>> onSuccessUpdateEmail) {
-        super(ifInState, update);
+    public SetEmailSubmissionMethodCall(String accountId, String ifInState, Map<String, Map<String, Object>> update, Map<String, Map<String, Object>> onSuccessUpdateEmail) {
+        super(accountId, ifInState, update);
         this.onSuccessUpdateEmail = onSuccessUpdateEmail;
     }
 
-    public SetEmailSubmissionMethodCall(Map<String, EmailSubmission> create) {
-        super(create);
+    public SetEmailSubmissionMethodCall(String accountId, Map<String, EmailSubmission> create) {
+        super(accountId, create);
     }
 
-    public SetEmailSubmissionMethodCall(Map<String, EmailSubmission> create, Map<String, Map<String, Object>> onSuccessUpdateEmail) {
-        super(create);
+    public SetEmailSubmissionMethodCall(String accountId, Map<String, EmailSubmission> create, Map<String, Map<String, Object>> onSuccessUpdateEmail) {
+        super(accountId, create);
         this.onSuccessUpdateEmail = onSuccessUpdateEmail;
     }
 }

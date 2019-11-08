@@ -28,15 +28,15 @@ public class SetVacationResponseMethodCall extends SetMethodCall<VacationRespons
         super(accountId, ifInState, create, update, destroy);
     }
 
-    public SetVacationResponseMethodCall(String ifInState, String[] destroy) {
-        super(ifInState, destroy);
+    public SetVacationResponseMethodCall(String accountId, String ifInState, String[] destroy) {
+        super(accountId, ifInState, destroy);
     }
 
-    public SetVacationResponseMethodCall(String ifInState, Map<String, Map<String, Object>> update) {
-        super(ifInState, update);
+    public SetVacationResponseMethodCall(String accountId, String ifInState, Map<String, Map<String, Object>> update) {
+        super(accountId, ifInState, update);
     }
 
-    public SetVacationResponseMethodCall(Map<String, VacationResponse> create) {
-        super(create);
+    public SetVacationResponseMethodCall(String accountId, Map<String, VacationResponse> create) {
+        super(accountId, create);
     }
 }
