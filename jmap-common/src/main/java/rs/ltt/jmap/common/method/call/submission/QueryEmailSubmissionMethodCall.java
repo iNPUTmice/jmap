@@ -22,4 +22,7 @@ import rs.ltt.jmap.common.method.call.standard.QueryMethodCall;
 
 @JmapMethod("EmailSubmission/query")
 public class QueryEmailSubmissionMethodCall extends QueryMethodCall<EmailSubmission> {
+    public QueryEmailSubmissionMethodCall(String accountId) {
+        super(accountId);
+    }
 }

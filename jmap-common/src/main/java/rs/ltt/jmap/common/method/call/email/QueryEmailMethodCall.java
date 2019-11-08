@@ -27,31 +27,31 @@ public class QueryEmailMethodCall extends QueryMethodCall<Email> {
 
     private Boolean collapseThreads;
 
-    public QueryEmailMethodCall() {
-        super();
+    public QueryEmailMethodCall(String accountId) {
+        super(accountId);
     }
 
-    public QueryEmailMethodCall(Filter<Email> filter) {
-        super(filter);
+    public QueryEmailMethodCall(String accountId, Filter<Email> filter) {
+        super(accountId, filter);
     }
 
-    public QueryEmailMethodCall(EmailQuery query) {
-        super(query);
+    public QueryEmailMethodCall(String accountId, EmailQuery query) {
+        super(accountId, query);
         this.collapseThreads = query.collapseThreads;
     }
 
-    public QueryEmailMethodCall(EmailQuery query, Long limit) {
-        super(query, limit);
+    public QueryEmailMethodCall(String accountId, EmailQuery query, Long limit) {
+        super(accountId, query, limit);
         this.collapseThreads = query.collapseThreads;
     }
 
-    public QueryEmailMethodCall(EmailQuery query, String afterEmailId) {
-        super(query, afterEmailId);
+    public QueryEmailMethodCall(String accountId, EmailQuery query, String afterEmailId) {
+        super(accountId, query, afterEmailId);
         this.collapseThreads = query.collapseThreads;
     }
 
-    public QueryEmailMethodCall(EmailQuery query, String afterEmailId, Long limit) {
-        super(query, afterEmailId, limit);
+    public QueryEmailMethodCall(String accountId, EmailQuery query, String afterEmailId, Long limit) {
+        super(accountId, query, afterEmailId, limit);
         this.collapseThreads = query.collapseThreads;
     }
 }

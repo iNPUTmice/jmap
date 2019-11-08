@@ -64,7 +64,7 @@ public class Main {
                     EmailFilterCondition.builder().text("test").build()
             );
 
-            Call emailQueryCall = multiCall.call(new QueryEmailMethodCall(emailFilter));
+            Call emailQueryCall = multiCall.call(new QueryEmailMethodCall(accountId, emailFilter));
             Future<MethodResponses> emailQueryResponseFuture = emailQueryCall.getMethodResponses();
 
             Future<MethodResponses> emailGetResponseFuture = multiCall.call(new GetEmailMethodCall(accountId, emailQueryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS))).getMethodResponses();

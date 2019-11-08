@@ -29,30 +29,30 @@ public class QueryMailboxMethodCall extends QueryMethodCall<Mailbox> {
 
     private Boolean filterAsTree;
 
-    public QueryMailboxMethodCall(Filter<Mailbox> filter) {
-        super(filter);
+    public QueryMailboxMethodCall(String accountId, Filter<Mailbox> filter) {
+        super(accountId, filter);
     }
 
-    public QueryMailboxMethodCall(MailboxQuery query) {
-        super(query);
+    public QueryMailboxMethodCall(String accountId, MailboxQuery query) {
+        super(accountId, query);
         this.sortAsTree = query.sortAsTree;
         this.filterAsTree = query.filterAsTree;
     }
 
-    public QueryMailboxMethodCall(MailboxQuery query, String afterId) {
-        super(query, afterId);
+    public QueryMailboxMethodCall(String accountId, MailboxQuery query, String afterId) {
+        super(accountId, query, afterId);
         this.sortAsTree = query.sortAsTree;
         this.filterAsTree = query.filterAsTree;
     }
 
-    public QueryMailboxMethodCall(MailboxQuery query, Long limit) {
-        super(query, limit);
+    public QueryMailboxMethodCall(String accountId, MailboxQuery query, Long limit) {
+        super(accountId, query, limit);
         this.sortAsTree = query.sortAsTree;
         this.filterAsTree = query.filterAsTree;
     }
 
-    public QueryMailboxMethodCall(MailboxQuery query, String afterId, Long limit) {
-        super(query, afterId, limit);
+    public QueryMailboxMethodCall(String accountId, MailboxQuery query, String afterId, Long limit) {
+        super(accountId, query, afterId, limit);
         this.sortAsTree = query.sortAsTree;
         this.filterAsTree = query.filterAsTree;
     }

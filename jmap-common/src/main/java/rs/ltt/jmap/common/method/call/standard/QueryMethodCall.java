@@ -33,33 +33,38 @@ public abstract class QueryMethodCall<T extends AbstractIdentifiableEntity> impl
     private Long anchorOffset;
     private Long limit;
 
-    public QueryMethodCall() {
-        
+    public QueryMethodCall(String accountId) {
+        this.accountId = accountId;
     }
 
-    public QueryMethodCall(Filter<T> filter) {
+    public QueryMethodCall(String accountId, Filter<T> filter) {
+        this.accountId = accountId;
         this.filter = filter;
     }
 
-    public QueryMethodCall(Query<T> query) {
+    public QueryMethodCall(String accountId, Query<T> query) {
+        this.accountId = accountId;
         this.filter = query.filter;
         this.sort = query.comparators;
     }
 
-    public QueryMethodCall(Query<T> query, Long limit) {
+    public QueryMethodCall(String accountId, Query<T> query, Long limit) {
+        this.accountId = accountId;
         this.filter = query.filter;
         this.sort = query.comparators;
         this.limit = limit;
     }
 
-    public QueryMethodCall(Query<T> query, String afterId) {
+    public QueryMethodCall(String accountId, Query<T> query, String afterId) {
+        this.accountId = accountId;
         this.filter = query.filter;
         this.sort = query.comparators;
         this.anchor = afterId;
         this.anchorOffset = 1L;
     }
 
-    public QueryMethodCall(Query<T> query, String afterId, Long limit) {
+    public QueryMethodCall(String accountId, Query<T> query, String afterId, Long limit) {
+        this.accountId = accountId;
         this.filter = query.filter;
         this.sort = query.comparators;
         this.anchor = afterId;

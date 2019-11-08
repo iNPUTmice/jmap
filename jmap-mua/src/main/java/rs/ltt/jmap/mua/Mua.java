@@ -1108,7 +1108,7 @@ public class Mua {
     public ListenableFuture<Boolean> emptyTrash(@NonNullDecl IdentifiableMailboxWithRole trash) {
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final EmailFilterCondition filter = EmailFilterCondition.builder().inMailbox(trash.getId()).build();
-        final Call queryCall = multiCall.call(new QueryEmailMethodCall(filter));
+        final Call queryCall = multiCall.call(new QueryEmailMethodCall(accountId, filter));
         final ListenableFuture<MethodResponses> setFuture = multiCall.call(new SetEmailMethodCall(accountId, null, queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS))).getMethodResponses();
         multiCall.execute();
         return Futures.transformAsync(setFuture, new AsyncFunction<MethodResponses, Boolean>() {
@@ -1264,7 +1264,7 @@ public class Mua {
         JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final ListenableFuture<Status> queryRefreshFuture = refreshQuery(query, queryStateWrapper, multiCall);
 
-        final Call queryCall = multiCall.call(new QueryEmailMethodCall(query, afterEmailId, this.queryPageSize));
+        final Call queryCall = multiCall.call(new QueryEmailMethodCall(accountId, query, afterEmailId, this.queryPageSize));
         final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
         final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = multiCall.call(new GetEmailMethodCall(accountId, queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"})).getMethodResponses();
 
@@ -1394,7 +1394,7 @@ public class Mua {
         //these need to be processed *before* the Query call or else the fetchMissing will not honor newly fetched ids
         final List<ListenableFuture<Status>> piggyBackedFuturesList = piggyBack(queryStateWrapper.objectsState, multiCall);
 
-        final Call queryCall = multiCall.call(new QueryEmailMethodCall(query, this.queryPageSize));
+        final Call queryCall = multiCall.call(new QueryEmailMethodCall(accountId, query, this.queryPageSize));
         final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
         final Call threadIdsCall = multiCall.call(new GetEmailMethodCall(accountId, queryCall.createResultReference(Request.Invocation.ResultReference.Path.IDS), new String[]{"threadId"}));
         final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = threadIdsCall.getMethodResponses();

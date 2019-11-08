@@ -13,7 +13,7 @@ public class ResultReferenceTypeAdapterTest {
 
     @Test
     public void writeAndReadBack() {
-        Request.Invocation emailQuery = new Request.Invocation(new QueryEmailMethodCall(), METHOD_CALL_ID);
+        Request.Invocation emailQuery = new Request.Invocation(new QueryEmailMethodCall("accountId"), METHOD_CALL_ID);
         Request.Invocation.ResultReference resultReferenceOut = emailQuery.createReference("/ids");
         GsonBuilder gsonBuilder = new GsonBuilder();
         ResultReferenceTypeAdapter.register(gsonBuilder);
