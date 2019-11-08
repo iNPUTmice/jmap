@@ -34,12 +34,14 @@ public class GetSearchSnippetsMethodCall implements MethodCall {
     @SerializedName("#ids")
     private Request.Invocation.ResultReference idsReference;
 
-    public GetSearchSnippetsMethodCall(Request.Invocation.ResultReference idsReference, Filter<Email> filter) {
+    public GetSearchSnippetsMethodCall(String accountId, Request.Invocation.ResultReference idsReference, Filter<Email> filter) {
+        this.accountId = accountId;
         this.idsReference = idsReference;
         this.filter = filter;
     }
 
-    public GetSearchSnippetsMethodCall(String[] ids, Filter<Email> filter) {
+    public GetSearchSnippetsMethodCall(String accountId, String[] ids, Filter<Email> filter) {
+        this.accountId = accountId;
         this.ids = ids;
         this.filter = filter;
     }
