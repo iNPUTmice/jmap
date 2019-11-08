@@ -22,7 +22,7 @@ import rs.ltt.jmap.common.method.call.standard.ChangesMethodCall;
 
 @JmapMethod("Identity/changes")
 public class ChangesIdentityMethodCall extends ChangesMethodCall<Identity> {
-    public ChangesIdentityMethodCall(String sinceState) {
-        super(sinceState);
+    public ChangesIdentityMethodCall(String accountId, String sinceState) {
+        super(accountId, sinceState);
     }
 }

@@ -22,7 +22,7 @@ import rs.ltt.jmap.common.method.call.standard.ChangesMethodCall;
 
 @JmapMethod("Email/changes")
 public class ChangesEmailMethodCall extends ChangesMethodCall<Email> {
-    public ChangesEmailMethodCall(String sinceState) {
-        super(sinceState);
+    public ChangesEmailMethodCall(String accountId, String sinceState) {
+        super(accountId, sinceState);
     }
 }

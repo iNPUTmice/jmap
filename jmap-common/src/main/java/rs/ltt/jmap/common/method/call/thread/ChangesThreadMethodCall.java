@@ -22,7 +22,7 @@ import rs.ltt.jmap.common.method.call.standard.ChangesMethodCall;
 
 @JmapMethod("Thread/changes")
 public class ChangesThreadMethodCall extends ChangesMethodCall<Thread> {
-    public ChangesThreadMethodCall(String sinceState) {
-        super(sinceState);
+    public ChangesThreadMethodCall(String accountId, String sinceState) {
+        super(accountId, sinceState);
     }
 }
