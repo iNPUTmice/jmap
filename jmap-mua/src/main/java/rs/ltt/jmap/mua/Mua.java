@@ -1339,7 +1339,7 @@ public class Mua {
 
         final List<ListenableFuture<Status>> piggyBackedFuturesList = piggyBack(queryStateWrapper.objectsState, multiCall);
 
-        final Call queryChangesCall = multiCall.call(new QueryChangesEmailMethodCall(queryStateWrapper.queryState, query)); //TODO do we want to include upTo?
+        final Call queryChangesCall = multiCall.call(new QueryChangesEmailMethodCall(accountId, queryStateWrapper.queryState, query)); //TODO do we want to include upTo?
         final ListenableFuture<MethodResponses> queryChangesResponsesFuture = queryChangesCall.getMethodResponses();
         final ListenableFuture<MethodResponses> getThreadIdResponsesFuture = multiCall.call(new GetEmailMethodCall(accountId, queryChangesCall.createResultReference(Request.Invocation.ResultReference.Path.ADDED_IDS), new String[]{"threadId"})).getMethodResponses();
 

@@ -25,15 +25,15 @@ import rs.ltt.jmap.common.method.call.standard.QueryChangesMethodCall;
 @JmapMethod("Mailbox/queryChanges")
 public class QueryChangesMailboxMethodCall extends QueryChangesMethodCall<Mailbox> {
 
-    public QueryChangesMailboxMethodCall(String sinceQueryState, Filter<Mailbox> filter) {
-        super(sinceQueryState, filter);
+    public QueryChangesMailboxMethodCall(String accountId, String sinceQueryState, Filter<Mailbox> filter) {
+        super(accountId, sinceQueryState, filter);
     }
 
-    public QueryChangesMailboxMethodCall(String sinceQueryState, Query<Mailbox> query) {
-        super(sinceQueryState, query);
+    public QueryChangesMailboxMethodCall(String accountId, String sinceQueryState, Query<Mailbox> query) {
+        super(accountId, sinceQueryState, query);
     }
 
-    public QueryChangesMailboxMethodCall(String sinceQueryState) {
-        super(sinceQueryState);
+    public QueryChangesMailboxMethodCall(String accountId, String sinceQueryState) {
+        super(accountId, sinceQueryState);
     }
 }

@@ -32,18 +32,21 @@ public abstract class QueryChangesMethodCall<T extends AbstractIdentifiableEntit
     private String upToId;
     private Boolean calculateTotal;
 
-    public QueryChangesMethodCall(String sinceQueryState, final Filter<T> filter) {
+    public QueryChangesMethodCall(String accountId, String sinceQueryState, final Filter<T> filter) {
+        this.accountId = accountId;
         this.sinceQueryState = sinceQueryState;
         this.filter = filter;
     }
 
-    public QueryChangesMethodCall(String sinceQueryState, final Query<T> query) {
+    public QueryChangesMethodCall(String accountId, String sinceQueryState, final Query<T> query) {
+        this.accountId = accountId;
         this.sinceQueryState = sinceQueryState;
         this.filter = query.filter;
         this.sort = query.comparators;
     }
 
-    public QueryChangesMethodCall(String sinceQueryState) {
+    public QueryChangesMethodCall(String accountId, String sinceQueryState) {
+        this.accountId = accountId;
         this.sinceQueryState = sinceQueryState;
     }
 

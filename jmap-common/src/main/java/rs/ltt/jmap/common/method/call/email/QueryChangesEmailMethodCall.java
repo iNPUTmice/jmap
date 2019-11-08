@@ -27,16 +27,16 @@ public class QueryChangesEmailMethodCall extends QueryChangesMethodCall<Email> {
 
     private Boolean collapseThreads;
 
-    public QueryChangesEmailMethodCall(String sinceQueryState, Filter<Email> filter) {
-        super(sinceQueryState, filter);
+    public QueryChangesEmailMethodCall(String accountId, String sinceQueryState, Filter<Email> filter) {
+        super(accountId, sinceQueryState, filter);
     }
 
-    public QueryChangesEmailMethodCall(String sinceQueryState, EmailQuery query) {
-        super(sinceQueryState, query);
+    public QueryChangesEmailMethodCall(String accountId, String sinceQueryState, EmailQuery query) {
+        super(accountId, sinceQueryState, query);
         this.collapseThreads = query.collapseThreads;
     }
 
-    public QueryChangesEmailMethodCall(String sinceQueryState) {
-        super(sinceQueryState);
+    public QueryChangesEmailMethodCall(String accountId, String sinceQueryState) {
+        super(accountId, sinceQueryState);
     }
 }

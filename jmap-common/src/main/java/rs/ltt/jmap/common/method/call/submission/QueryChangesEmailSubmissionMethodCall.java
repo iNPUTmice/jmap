@@ -24,15 +24,15 @@ import rs.ltt.jmap.common.method.call.standard.QueryChangesMethodCall;
 
 @JmapMethod("EmailSubmission/queryChanges")
 public class QueryChangesEmailSubmissionMethodCall extends QueryChangesMethodCall<EmailSubmission> {
-    public QueryChangesEmailSubmissionMethodCall(String sinceQueryState, Filter<EmailSubmission> filter) {
-        super(sinceQueryState, filter);
+    public QueryChangesEmailSubmissionMethodCall(String accountId, String sinceQueryState, Filter<EmailSubmission> filter) {
+        super(accountId, sinceQueryState, filter);
     }
 
-    public QueryChangesEmailSubmissionMethodCall(String sinceQueryState, Query<EmailSubmission> query) {
-        super(sinceQueryState, query);
+    public QueryChangesEmailSubmissionMethodCall(String accountId, String sinceQueryState, Query<EmailSubmission> query) {
+        super(accountId, sinceQueryState, query);
     }
 
-    public QueryChangesEmailSubmissionMethodCall(String sinceQueryState) {
-        super(sinceQueryState);
+    public QueryChangesEmailSubmissionMethodCall(String accountId, String sinceQueryState) {
+        super(accountId, sinceQueryState);
     }
 }

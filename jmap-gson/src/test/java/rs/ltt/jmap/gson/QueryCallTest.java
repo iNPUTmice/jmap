@@ -20,7 +20,7 @@ public class QueryCallTest extends AbstractGsonTest {
         Gson gson = builder.create();
         final EmailQuery query = EmailQuery.of(EmailFilterCondition.builder().inMailbox("inbox-id").build(), true);
         Assert.assertEquals(readResourceAsString("request/query-email.json"), gson.toJson(new QueryEmailMethodCall(query)));
-        Assert.assertEquals(readResourceAsString("request/query-changes-email.json"), gson.toJson(new QueryChangesEmailMethodCall("first", query)));
+        Assert.assertEquals(readResourceAsString("request/query-changes-email.json"), gson.toJson(new QueryChangesEmailMethodCall("accountId", "first", query)));
     }
 
 }
