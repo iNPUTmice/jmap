@@ -14,7 +14,7 @@
  *
  */
 
-@JmapNamespace(Namespace.MAIL)
+@JmapNamespace(Namespace.SUBMISSION)
 package rs.ltt.jmap.common.method.call.identity;
 
 import rs.ltt.jmap.Namespace;
