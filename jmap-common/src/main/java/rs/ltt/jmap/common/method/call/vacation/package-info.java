@@ -14,7 +14,7 @@
  *
  */
 
-@JmapNamespace(Namespace.MAIL)
+@JmapNamespace(Namespace.VACATION_RESPONSE)
 package rs.ltt.jmap.common.method.call.vacation;
 
 import rs.ltt.jmap.Namespace;
