@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.client;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.ListenableFuture;
 import okhttp3.HttpUrl;
@@ -40,7 +41,6 @@ import rs.ltt.jmap.common.method.error.UnknownMethodMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.mailbox.GetMailboxMethodResponse;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
@@ -81,7 +81,7 @@ public class HttpJmapClientTest {
     }
 
     private static String readResourceAsString(String filename) throws IOException {
-        return Resources.asCharSource(Resources.getResource(filename), Charset.defaultCharset()).read().trim();
+        return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8).read().trim();
     }
 
     @Test
