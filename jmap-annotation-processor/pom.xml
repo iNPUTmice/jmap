@@ -27,7 +27,7 @@
         <version>0.1.3</version>
     </parent>
 
-    <artifactId>jmap-annotation</artifactId>
+    <artifactId>jmap-annotation-processor</artifactId>
 
     <build>
         <plugins>
@@ -45,11 +45,23 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jmap-annotation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jmap-common-interface</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc4</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

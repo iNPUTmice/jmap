@@ -27,6 +27,7 @@
 
     <modules>
         <module>jmap-annotation</module>
+        <module>jmap-annotation-processor</module>
         <module>jmap-client</module>
         <module>jmap-common</module>
         <module>jmap-common-interface</module>
