@@ -117,21 +117,22 @@ public class SessionClient {
             if (body == null) {
                 throw new InvalidSessionResourceException("Unable to fetch session object. Response body was empty.");
             }
-            final InputStream inputStream = body.byteStream();
-            final GsonBuilder builder = new GsonBuilder();
-            JmapAdapters.register(builder);
-            final Gson gson = builder.create();
-            final SessionResource sessionResource;
-            try {
-                sessionResource = gson.fromJson(new InputStreamReader(inputStream), SessionResource.class);
-            } catch (JsonIOException | JsonSyntaxException e) {
-                throw new InvalidSessionResourceException(e);
+            try (final InputStream inputStream = body.byteStream()) {
+                final GsonBuilder builder = new GsonBuilder();
+                JmapAdapters.register(builder);
+                final Gson gson = builder.create();
+                final SessionResource sessionResource;
+                try {
+                    sessionResource = gson.fromJson(new InputStreamReader(inputStream), SessionResource.class);
+                } catch (JsonIOException | JsonSyntaxException e) {
+                    throw new InvalidSessionResourceException(e);
+                }
+                final HttpUrl currentBaseUrl = response.request().url();
+                if (!base.equals(currentBaseUrl)) {
+                    LOGGER.info("Processed new base URL {}", currentBaseUrl.url());
+                }
+                return new Session(currentBaseUrl, sessionResource);
             }
-            final HttpUrl currentBaseUrl = response.request().url();
-            if (!base.equals(currentBaseUrl)) {
-                LOGGER.info("Processed new base URL {}", currentBaseUrl.url());
-            }
-            return new Session(currentBaseUrl, sessionResource);
         } else if (code == 401) {
             throw new UnauthorizedException(String.format("Session object(%s) was unauthorized", base.toString()));
         } else {

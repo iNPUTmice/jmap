@@ -52,33 +52,34 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
     public void execute(final JmapRequest jmapRequest) {
         try {
             final Gson gson = gsonBuilder.create();
-            final InputStream inputStream = send(gson.toJson(jmapRequest.getRequest()));
-            final GenericResponse genericResponse = gson.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
-            if (genericResponse instanceof ErrorResponse) {
-                jmapRequest.setException(new ErrorResponseException((ErrorResponse) genericResponse));
-            } else if (genericResponse instanceof Response) {
-                final Response response = (Response) genericResponse;
-                final ResponseAnalyzer responseAnalyzer = ResponseAnalyzer.analyse(response);
-                final Map<Request.Invocation, SettableFuture<MethodResponses>> map = jmapRequest.getInvocationFutureImmutableMap();
+            try (final InputStream inputStream = send(gson.toJson(jmapRequest.getRequest()))) {
+                final GenericResponse genericResponse = gson.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
+                if (genericResponse instanceof ErrorResponse) {
+                    jmapRequest.setException(new ErrorResponseException((ErrorResponse) genericResponse));
+                } else if (genericResponse instanceof Response) {
+                    final Response response = (Response) genericResponse;
+                    final ResponseAnalyzer responseAnalyzer = ResponseAnalyzer.analyse(response);
+                    final Map<Request.Invocation, SettableFuture<MethodResponses>> map = jmapRequest.getInvocationFutureImmutableMap();
 
-                // Notify about potentially updated session state *before* setting the response futures. This way we'll
-                // make sure that additional requests guarded by a wait on one of the response futures will trigger
-                // re-fetching the session resource.
-                this.onSessionStateRetrieved(response.getSessionState());
+                    // Notify about potentially updated session state *before* setting the response futures. This way we'll
+                    // make sure that additional requests guarded by a wait on one of the response futures will trigger
+                    // re-fetching the session resource.
+                    this.onSessionStateRetrieved(response.getSessionState());
 
-                for(Map.Entry<Request.Invocation, SettableFuture<MethodResponses>> entry : map.entrySet()) {
-                    final Request.Invocation invocation = entry.getKey();
-                    final SettableFuture<MethodResponses> future = entry.getValue();
-                    final MethodResponses methodResponses = responseAnalyzer.find(invocation);
-                    if (methodResponses == null) {
-                        future.setException(new MethodResponseNotFoundException(invocation));
-                        continue;
-                    }
-                    final MethodResponse main = methodResponses.getMain();
-                    if (main instanceof MethodErrorResponse) {
-                        future.setException(new MethodErrorResponseException((MethodErrorResponse) main, methodResponses.getAdditional()));
-                    } else {
-                        future.set(methodResponses);
+                    for (Map.Entry<Request.Invocation, SettableFuture<MethodResponses>> entry : map.entrySet()) {
+                        final Request.Invocation invocation = entry.getKey();
+                        final SettableFuture<MethodResponses> future = entry.getValue();
+                        final MethodResponses methodResponses = responseAnalyzer.find(invocation);
+                        if (methodResponses == null) {
+                            future.setException(new MethodResponseNotFoundException(invocation));
+                            continue;
+                        }
+                        final MethodResponse main = methodResponses.getMain();
+                        if (main instanceof MethodErrorResponse) {
+                            future.setException(new MethodErrorResponseException((MethodErrorResponse) main, methodResponses.getAdditional()));
+                        } else {
+                            future.set(methodResponses);
+                        }
                     }
                 }
             }
