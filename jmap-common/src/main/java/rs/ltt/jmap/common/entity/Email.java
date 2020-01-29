@@ -98,8 +98,7 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
 
     //body data
 
-    @Singular("bodyStructure")
-    private List<EmailBodyPart> bodyStructure;
+    private EmailBodyPart bodyStructure;
 
     @Singular
     private Map<String, EmailBodyValue> bodyValues;
