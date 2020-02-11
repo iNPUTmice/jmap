@@ -27,6 +27,16 @@ public class Comparator implements QueryString {
 
     private String collation;
 
+    public Comparator(String property, Boolean isAscending) {
+        this(property, isAscending, null);
+    }
+
+    public Comparator(String property, Boolean isAscending, String collation) {
+        this.property = property;
+        this.isAscending = isAscending;
+        this.collation = collation;
+    }
+
     @Override
     public String toQueryString() {
         return IndexableStringUtils.toIndexableString(L2_DIVIDER, L3_DIVIDER, property, isAscending, collation);
