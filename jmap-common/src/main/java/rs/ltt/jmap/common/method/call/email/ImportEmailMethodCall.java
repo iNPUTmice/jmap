@@ -18,6 +18,7 @@ package rs.ltt.jmap.common.method.call.email;
 
 import lombok.Builder;
 import lombok.NonNull;
+import lombok.Singular;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.entity.EmailImport;
 import rs.ltt.jmap.common.method.MethodCall;
@@ -34,6 +35,7 @@ public class ImportEmailMethodCall implements MethodCall {
     private String ifInState;
 
     @NonNull
+    @Singular
     private Map<String, EmailImport> emails;
 
 }
