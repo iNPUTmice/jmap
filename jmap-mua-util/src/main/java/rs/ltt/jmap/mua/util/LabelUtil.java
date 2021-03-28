@@ -44,8 +44,8 @@ public class LabelUtil {
         return labels;
     }
 
-    private static boolean anyIsRole(Collection<? extends Label> labels, Role role) {
-        for (Label label : labels) {
+    private static boolean anyIsRole(final Collection<? extends Label> labels, final Role role) {
+        for (final Label label : labels) {
             if (label.getRole() == role) {
                 return true;
             }
