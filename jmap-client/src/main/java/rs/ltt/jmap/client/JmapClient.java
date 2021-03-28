@@ -89,7 +89,7 @@ public class JmapClient implements Closeable {
             @Override
             public void onSuccess(@Nullable Session session) {
                 Preconditions.checkState(session != null, "Session was null");
-                JmapApiClient apiClient = new HttpJmapApiClient(session.getApiUrl(), authentication, sessionStateListener);
+                final JmapApiClient apiClient = new HttpJmapApiClient(session.getApiUrl(), authentication, sessionStateListener);
                 apiClient.execute(request);
             }
 

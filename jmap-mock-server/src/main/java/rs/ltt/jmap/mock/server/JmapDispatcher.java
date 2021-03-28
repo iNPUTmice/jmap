@@ -91,6 +91,7 @@ public abstract class JmapDispatcher extends Dispatcher {
                                 MailAccountCapability.class,
                                 MailAccountCapability.builder().build()
                         ))
+                        .name(ACCOUNT_ID)
                         .build())
                 .capabilities(ImmutableMap.of(CoreCapability.class, CoreCapability.builder().maxObjectsInGet(4096L).build()))
                 .primaryAccounts(ImmutableMap.of(MailAccountCapability.class, ACCOUNT_ID))

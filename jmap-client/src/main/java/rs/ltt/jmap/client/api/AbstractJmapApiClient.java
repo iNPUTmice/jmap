@@ -19,6 +19,7 @@ package rs.ltt.jmap.client.api;
 import com.google.common.util.concurrent.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.client.util.ResponseAnalyzer;
@@ -57,6 +58,7 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
         Futures.addCallback(send(json), new FutureCallback<InputStream>() {
             @Override
             public void onSuccess(final InputStream inputStream) {
+                //TODO write test for invalid json response (we probably never call the future
                 final GenericResponse genericResponse = gson.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
                 if (genericResponse instanceof ErrorResponse) {
                     jmapRequest.setException(new ErrorResponseException((ErrorResponse) genericResponse));
