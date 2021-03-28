@@ -16,8 +16,10 @@
 
 package rs.ltt.jmap.mua.util;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -32,11 +34,16 @@ public final class AccountUtil {
         if (atPosition <= 0) {
             return username;
         }
-        return Splitter.onPattern("[\\.\\-_]")
+        final List<String> words = Splitter.onPattern("[\\.\\-_]")
                 .splitToStream(username.substring(0, atPosition))
                 .filter(word -> word.length() > 0)
                 .map(AccountUtil::capitalizeFirst)
-                .collect(Collectors.joining(" "));
+                .collect(Collectors.toList());
+        if (words.size() > 0) {
+            return Joiner.on(' ').join(words);
+        } else {
+            return username;
+        }
     }
 
     private static String capitalizeFirst(final String word) {

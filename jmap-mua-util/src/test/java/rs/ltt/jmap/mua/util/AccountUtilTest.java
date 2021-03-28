@@ -56,4 +56,14 @@ public class AccountUtilTest {
         Assertions.assertEquals("@example.com", AccountUtil.printableName("@example.com"));
     }
 
+    @Test
+    public void singleLetterUsername() {
+        Assertions.assertEquals("A", AccountUtil.printableName("a@example.com"));
+    }
+
+    @Test
+    public void singleSeparatorUsername() {
+        Assertions.assertEquals(".@example.com", AccountUtil.printableName(".@example.com"));
+    }
+
 }
