@@ -1,3 +1,8 @@
+### 0.5.7 (2021-03-31)
+
+* Fixed bug with invalid responses
+* jmap-mua-util: Include more utility functions
+
 ### 0.5.6 (2021-01-03)
 
 * Fix improper ifInState usage in modifyLabels() call

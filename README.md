@@ -39,14 +39,14 @@ A JMAP client library to make JMAP method calls and process the responses. It ha
 
 Gradle:
 ```groovy
-implementation 'rs.ltt.jmap:jmap-client:0.5.6'
+implementation 'rs.ltt.jmap:jmap-client:0.5.7'
 ```
 Maven:
 ```xml
 <dependency>
   <groupId>rs.ltt.jmap</groupId>
   <artifactId>jmap-client</artifactId>
-  <version>0.5.6</version>
+  <version>0.5.7</version>
 </dependency>
 ```
 
@@ -121,14 +121,14 @@ A high level API to act as an email client. It handles everything an email clien
 
 Gradle:
 ```groovy
-implementation 'rs.ltt.jmap:jmap-mua:0.5.6'
+implementation 'rs.ltt.jmap:jmap-mua:0.5.7'
 ```
 Maven:
 ```xml
 <dependency>
   <groupId>rs.ltt.jmap</groupId>
   <artifactId>jmap-mua</artifactId>
-  <version>0.5.6</version>
+  <version>0.5.7</version>
 </dependency>
 ```
 
