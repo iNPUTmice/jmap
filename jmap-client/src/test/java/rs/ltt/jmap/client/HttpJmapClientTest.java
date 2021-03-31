@@ -19,6 +19,7 @@ package rs.ltt.jmap.client;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.JsonParseException;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -131,7 +132,7 @@ public class HttpJmapClientTest {
     }
 
     @Test
-    public void endpointNotFound() throws ExecutionException, InterruptedException, IOException {
+    public void endpointNotFound() throws IOException {
         final MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse().setResponseCode(404));
 
@@ -270,5 +271,31 @@ public class HttpJmapClientTest {
 
         final Session session = jmapClient.getSession().get();
         Assertions.assertNotNull(session.getCapability(WebSocketCapability.class).getUrl());
+    }
+
+    @Test
+    public void invalidJsonResponse() throws IOException {
+        final MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody(readResourceAsString("session-urls/01-session.json")));
+        server.enqueue(new MockResponse().setBody("Garbage"));
+        server.start();
+        final JmapClient jmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+        final ListenableFuture<MethodResponses> future = jmapClient.call(
+                GetMailboxMethodCall.builder().accountId(ACCOUNT_ID).build()
+        );
+
+        final ExecutionException executionException = Assertions.assertThrows(
+                ExecutionException.class,
+                ()-> future.get().getMain(GetMailboxMethodResponse.class)
+        );
+
+        MatcherAssert.assertThat(executionException.getCause(), CoreMatchers.instanceOf(JsonParseException.class));
+
+        server.shutdown();
+
     }
 }
