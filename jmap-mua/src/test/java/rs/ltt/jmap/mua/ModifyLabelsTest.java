@@ -50,9 +50,9 @@ public class ModifyLabelsTest {
                 Email.builder().mailboxId(INBOX_WITH_ID.getId(), true).build()
         );
         try (final Mua mua = Mua.builder()
-                .username(JmapDispatcher.USERNAME)
+                .username("ignored")
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId("ignored")
                 .build()) {
             Assertions.assertThrows(IllegalArgumentException.class, () -> mua.modifyLabels(
                     emails,
@@ -68,9 +68,9 @@ public class ModifyLabelsTest {
                 Email.builder().mailboxId(INBOX_WITH_ID.getId(), true).build()
         );
         try (final Mua mua = Mua.builder()
-                .username(JmapDispatcher.USERNAME)
+                .username("ignored")
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId("ignored")
                 .build()) {
             Assertions.assertThrows(IllegalArgumentException.class, () -> mua.modifyLabels(
                     emails,
@@ -105,9 +105,9 @@ public class ModifyLabelsTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
 
@@ -144,9 +144,9 @@ public class ModifyLabelsTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
 
@@ -203,9 +203,9 @@ public class ModifyLabelsTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -250,9 +250,9 @@ public class ModifyLabelsTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly

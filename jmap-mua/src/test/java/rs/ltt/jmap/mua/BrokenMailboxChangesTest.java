@@ -51,12 +51,13 @@ public class BrokenMailboxChangesTest {
     @Test
     public void errorInSubsequentGetCallsToChangesTriggerIllegalState() throws IOException, ExecutionException, InterruptedException {
         final MockWebServer server = new MockWebServer();
-        server.setDispatcher(new MyMockMailServer(2));
+        final MyMockMailServer myMockMailServer = new MyMockMailServer(2);
+        server.setDispatcher(myMockMailServer);
         try (final Mua mua = Mua.builder()
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(myMockMailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(myMockMailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             final List<IdentifiableEmailWithKeywords> emails = Arrays.asList(

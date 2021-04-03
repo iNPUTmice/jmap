@@ -60,11 +60,17 @@ public class MockMailServer extends StubMailServer {
 
     private boolean reportCanCalculateQueryChanges = false;
 
-    public MockMailServer(int numThreads) {
+    public MockMailServer(final int numThreads, final int accountIndex) {
+        super(accountIndex);
         setup(numThreads);
     }
 
-    protected void setup(int numThreads) {
+    public MockMailServer(final int numThreads) {
+        super(0);
+        setup(numThreads);
+    }
+
+    protected void setup(final int numThreads) {
         this.mailboxes.putAll(Maps.uniqueIndex(generateMailboxes(), MailboxInfo::getId));
         generateEmail(numThreads);
     }
@@ -81,7 +87,7 @@ public class MockMailServer extends StubMailServer {
         for (int thread = 0; thread < numThreads; ++thread) {
             final int numInThread = (thread % 4) + 1;
             for (int i = 0; i < numInThread; ++i) {
-                final Email email = EmailGenerator.get(mailboxId, emailCount, thread, i, numInThread);
+                final Email email = EmailGenerator.get(account, mailboxId, emailCount, thread, i, numInThread);
                 this.emails.put(email.getId(), email);
                 emailCount++;
             }
@@ -90,6 +96,7 @@ public class MockMailServer extends StubMailServer {
 
     public Email generateEmailOnTop() {
         final Email email = EmailGenerator.getOnTop(
+                account,
                 MailboxUtil.find(mailboxes.values(), Role.INBOX).getId(),
                 emails.size()
         );
@@ -118,9 +125,9 @@ public class MockMailServer extends StubMailServer {
         return new MethodResponse[]{
                 GetIdentityMethodResponse.builder()
                         .list(new Identity[]{Identity.builder()
-                                .id(ACCOUNT_ID)
-                                .email(ACCOUNT_ID)
-                                .name(ACCOUNT_NAME)
+                                .id(getAccountId())
+                                .email(account.getEmail())
+                                .name(account.getName())
                                 .build()})
                         .build()
 

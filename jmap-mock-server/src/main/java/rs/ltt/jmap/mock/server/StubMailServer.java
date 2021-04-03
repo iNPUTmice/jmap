@@ -37,6 +37,15 @@ import rs.ltt.jmap.common.method.response.core.EchoMethodResponse;
 import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
 
 public class StubMailServer extends JmapDispatcher {
+
+    public StubMailServer() {
+        super(0);
+    }
+
+    public StubMailServer(int accountIndex) {
+        super(accountIndex);
+    }
+
     @Override
     protected MethodResponse[] dispatch(final MethodCall methodCall, final ListMultimap<String, Response.Invocation> previousResponses) {
         /**

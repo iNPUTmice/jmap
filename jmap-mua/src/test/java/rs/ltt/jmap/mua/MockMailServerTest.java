@@ -43,9 +43,9 @@ public class MockMailServerTest {
 
         try (final Mua mua = Mua.builder()
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             final EmailQuery query = EmailQuery.of(
                     FilterOperator.or(
@@ -70,9 +70,9 @@ public class MockMailServerTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             final Email email = mailServer.generateEmailOnTop();
@@ -93,9 +93,9 @@ public class MockMailServerTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             final Mailbox mailboxBeforeModification = cache.getMailbox(Role.INBOX);
@@ -130,9 +130,9 @@ public class MockMailServerTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             final List<CachedEmail> threadT1 = cache.getEmails("T1");

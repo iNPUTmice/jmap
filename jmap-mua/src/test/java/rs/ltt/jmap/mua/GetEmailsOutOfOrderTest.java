@@ -49,9 +49,9 @@ public class GetEmailsOutOfOrderTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getUsername())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             final Mailbox mailboxBeforeModification = cache.getMailbox(Role.INBOX);

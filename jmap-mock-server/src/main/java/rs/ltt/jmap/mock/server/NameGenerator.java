@@ -16,8 +16,11 @@
 
 package rs.ltt.jmap.mock.server;
 
+import rs.ltt.jmap.common.entity.EmailAddress;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class NameGenerator {
     /**
@@ -143,5 +146,14 @@ public class NameGenerator {
         public String toString() {
             return first+" "+last;
         }
+    }
+
+    public static EmailAddress getEmailAddress(int index) {
+        final NameGenerator.Name name = NameGenerator.get(index);
+        return EmailAddress.builder()
+                .email(name.first.toLowerCase(Locale.ENGLISH) + "." + name.last.toLowerCase(Locale.ENGLISH) + "@example.com")
+                .name(name.first + " " + name.last)
+                .build();
+
     }
 }

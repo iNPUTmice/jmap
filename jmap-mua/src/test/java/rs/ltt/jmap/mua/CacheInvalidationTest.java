@@ -45,9 +45,9 @@ public class CacheInvalidationTest {
         try (final Mua mua = Mua.builder()
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
                 .cache(myInMemoryCache)
-                .username(JmapDispatcher.USERNAME)
+                .username(myMockMailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(myMockMailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             myMockMailServer.bumpVersion();

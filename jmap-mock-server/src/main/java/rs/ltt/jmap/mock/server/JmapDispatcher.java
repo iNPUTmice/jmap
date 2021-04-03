@@ -16,9 +16,11 @@
 
 package rs.ltt.jmap.mock.server;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
+import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
@@ -28,6 +30,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
 import rs.ltt.jmap.common.*;
 import rs.ltt.jmap.common.entity.Account;
+import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.ErrorType;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
 import rs.ltt.jmap.common.entity.capability.MailAccountCapability;
@@ -40,10 +43,9 @@ import javax.annotation.Nonnull;
 
 public abstract class JmapDispatcher extends Dispatcher {
 
-    public static final String ACCOUNT_ID = "test@example.com";
-    public static final String ACCOUNT_NAME = "Alice Test";
-    public static final String USERNAME = "test@example.com";
+    public final EmailAddress account;
     public static final String PASSWORD = "secret";
+
     private static final Gson GSON;
     public static String WELL_KNOWN_PATH = ".well-known/jmap";
 
@@ -54,6 +56,19 @@ public abstract class JmapDispatcher extends Dispatcher {
     }
 
     private int sessionState = 0;
+
+
+    public JmapDispatcher(final int accountIndex) {
+        this.account = NameGenerator.getEmailAddress((accountIndex + 1) * 2048);
+    }
+
+    public String getUsername() {
+        return account.getEmail();
+    }
+
+    public String getAccountId() {
+        return Hashing.sha256().hashString(account.getEmail(), Charsets.UTF_8).toString();
+    }
 
     @Nonnull
     @Override
@@ -67,7 +82,7 @@ public abstract class JmapDispatcher extends Dispatcher {
                 }
             case "/jmap/":
                 final String authorization = request.getHeader("Authorization");
-                if (!Credentials.basic(USERNAME, PASSWORD).equals(authorization)) {
+                if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
                     return new MockResponse().setResponseCode(401);
                 }
                 if ("GET".equals(request.getMethod())) {
@@ -83,18 +98,19 @@ public abstract class JmapDispatcher extends Dispatcher {
     }
 
     private MockResponse session() {
+        final String id = getAccountId();
         final SessionResource sessionResource = SessionResource.builder()
                 .apiUrl("/jmap/")
                 .state(getSessionState())
-                .account(ACCOUNT_ID, Account.builder()
+                .account(id, Account.builder()
                         .accountCapabilities(ImmutableMap.of(
                                 MailAccountCapability.class,
                                 MailAccountCapability.builder().build()
                         ))
-                        .name(ACCOUNT_ID)
+                        .name(account.getEmail())
                         .build())
                 .capabilities(ImmutableMap.of(CoreCapability.class, CoreCapability.builder().maxObjectsInGet(4096L).build()))
-                .primaryAccounts(ImmutableMap.of(MailAccountCapability.class, ACCOUNT_ID))
+                .primaryAccounts(ImmutableMap.of(MailAccountCapability.class, id))
                 .build();
 
         return new MockResponse().setBody(GSON.toJson(sessionResource));

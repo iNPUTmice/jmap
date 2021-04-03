@@ -43,16 +43,17 @@ public class JmapMuaTest {
     @Test
     public void oneInboxMailbox() throws ExecutionException, InterruptedException, IOException {
         final MockWebServer server = new MockWebServer();
-        server.setDispatcher(new EmailServer());
+        final EmailServer emailServer = new EmailServer();
+        server.setDispatcher(emailServer);
 
         final MyInMemoryCache myInMemoryCache = new MyInMemoryCache();
 
         final Mua mua = Mua.builder()
                 .cache(myInMemoryCache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(emailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(emailServer.getAccountId())
                 .build();
         mua.refreshMailboxes().get();
         final Mailbox mailbox = Iterables.getFirst(myInMemoryCache.getMailboxes(), null);
@@ -64,13 +65,14 @@ public class JmapMuaTest {
     @Test
     public void methodNotFound() throws IOException {
         final MockWebServer server = new MockWebServer();
-        server.setDispatcher(new EmailServer());
+        final EmailServer emailServer = new EmailServer();
+        server.setDispatcher(emailServer);
 
         final Mua mua = Mua.builder()
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(emailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(emailServer.getAccountId())
                 .build();
         final ExecutionException executionException = Assertions.assertThrows(
                 ExecutionException.class,
@@ -92,7 +94,7 @@ public class JmapMuaTest {
             return new MethodResponse[]{
                     GetMailboxMethodResponse.builder()
                             .list(new Mailbox[]{Mailbox.builder().name("Inbox").role(Role.INBOX).build()})
-                            .accountId(ACCOUNT_ID).build()
+                            .accountId(getAccountId()).build()
             };
         }
     }

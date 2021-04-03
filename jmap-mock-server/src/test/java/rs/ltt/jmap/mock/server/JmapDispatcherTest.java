@@ -40,6 +40,9 @@ public class JmapDispatcherTest {
 
     private static final Gson GSON;
 
+    private static final String INDEX_0_USERNAME = "dorothy.williams@example.com";
+    private static final String INDEX_1_USERNAME = "ruth.brown@example.com";
+
     static {
         final GsonBuilder gsonBuilder = new GsonBuilder();
         JmapAdapters.register(gsonBuilder);
@@ -49,14 +52,15 @@ public class JmapDispatcherTest {
     @Test
     public void wrongContentType() throws IOException {
         final MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.setDispatcher(new StubMailServer());
+        final StubMailServer stubMailServer = new StubMailServer();
+        mockWebServer.setDispatcher(stubMailServer);
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
 
         final Response response = okHttpClient.newCall(new Request.Builder()
                 .url(mockWebServer.url("/jmap/"))
-                .addHeader("Authorization", Credentials.basic(StubMailServer.USERNAME, StubMailServer.PASSWORD))
+                .addHeader("Authorization", Credentials.basic(INDEX_0_USERNAME, StubMailServer.PASSWORD))
                 .post(RequestBody.create("{}", MediaType.get("text/plain")))
                 .build()).execute();
 
@@ -86,7 +90,7 @@ public class JmapDispatcherTest {
 
         final Response response = okHttpClient.newCall(new Request.Builder()
                 .url(mockWebServer.url("/jmap/"))
-                .addHeader("Authorization", Credentials.basic(StubMailServer.USERNAME, "wrong!"))
+                .addHeader("Authorization", Credentials.basic(INDEX_0_USERNAME, "wrong!"))
                 .post(RequestBody.create("{}", MediaType.get("application/json")))
                 .build()).execute();
 
@@ -105,7 +109,7 @@ public class JmapDispatcherTest {
 
         final Response response = okHttpClient.newCall(new Request.Builder()
                 .url(mockWebServer.url("/jmap/"))
-                .addHeader("Authorization", Credentials.basic(StubMailServer.USERNAME, StubMailServer.PASSWORD))
+                .addHeader("Authorization", Credentials.basic(INDEX_0_USERNAME, StubMailServer.PASSWORD))
                 .post(RequestBody.create("{}", MediaType.get("application/json")))
                 .build()).execute();
 
@@ -135,7 +139,7 @@ public class JmapDispatcherTest {
 
         final Response response = okHttpClient.newCall(new Request.Builder()
                 .url(mockWebServer.url("/jmap/"))
-                .addHeader("Authorization", Credentials.basic(StubMailServer.USERNAME, StubMailServer.PASSWORD))
+                .addHeader("Authorization", Credentials.basic(INDEX_0_USERNAME, StubMailServer.PASSWORD))
                 .post(RequestBody.create("{}}", MediaType.get("application/json")))
                 .build()).execute();
 
@@ -161,7 +165,26 @@ public class JmapDispatcherTest {
         mockWebServer.setDispatcher(new StubMailServer());
 
         final JmapClient jmapClient = new JmapClient(
-                StubMailServer.USERNAME,
+                INDEX_0_USERNAME,
+                StubMailServer.PASSWORD,
+                mockWebServer.url(StubMailServer.WELL_KNOWN_PATH)
+        );
+
+        final EchoMethodResponse response = jmapClient.call(
+                EchoMethodCall.builder().libraryName(Version.getUserAgent()).build()
+        ).get().getMain(EchoMethodResponse.class);
+        Assertions.assertEquals(Version.getUserAgent(), response.getLibraryName());
+        mockWebServer.shutdown();
+    }
+
+    @Test
+    public void secondAccountEcho() throws IOException, ExecutionException, InterruptedException {
+        final MockWebServer mockWebServer = new MockWebServer();
+        final StubMailServer stubMailServer = new StubMailServer(1);
+        mockWebServer.setDispatcher(stubMailServer);
+
+        final JmapClient jmapClient = new JmapClient(
+                INDEX_1_USERNAME,
                 StubMailServer.PASSWORD,
                 mockWebServer.url(StubMailServer.WELL_KNOWN_PATH)
         );

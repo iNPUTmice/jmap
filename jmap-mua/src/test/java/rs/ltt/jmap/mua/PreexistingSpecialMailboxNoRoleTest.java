@@ -58,9 +58,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -97,9 +97,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -136,7 +136,7 @@ public class PreexistingSpecialMailboxNoRoleTest {
                 for (int thread = 0; thread < numThreads; ++thread) {
                     final int numInThread = (thread % 4) + 1;
                     for (int i = 0; i < numInThread; ++i) {
-                        final Email email = EmailGenerator.get(mailboxId, emailCount, thread, i, numInThread);
+                        final Email email = EmailGenerator.get(account, mailboxId, emailCount, thread, i, numInThread);
                         this.emails.put(email.getId(), email);
                         emailCount++;
                     }
@@ -148,9 +148,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -187,9 +187,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -226,9 +226,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -266,9 +266,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -305,9 +305,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -343,9 +343,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -382,9 +382,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -422,9 +422,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly
@@ -463,9 +463,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
         try (final Mua mua = Mua.builder()
                 .cache(cache)
                 .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(JmapDispatcher.USERNAME)
+                .username(mailServer.getUsername())
                 .password(JmapDispatcher.PASSWORD)
-                .accountId(JmapDispatcher.ACCOUNT_ID)
+                .accountId(mailServer.getAccountId())
                 .build()) {
             mua.query(EmailQuery.unfiltered()).get();
             //just reconfirming that mock server is setup correctly

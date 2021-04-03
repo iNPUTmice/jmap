@@ -50,21 +50,22 @@ public class EmailGenerator {
             "Vivamus rhoncus dictum lectus, sed bibendum nisi. Sed sodales nibh ac nunc porttitor, sit amet accumsan nisi sagittis. Donec imperdiet metus molestie diam scelerisque vestibulum. Sed aliquam eros sapien, sed hendrerit mi tincidunt sit amet. Cras nec massa nulla. Sed id mi imperdiet ante finibus lobortis. Duis suscipit nulla ac vehicula maximus."
     );
 
-    public static Email getOnTop(final String mailboxId, final int index) {
+    public static Email getOnTop(final EmailAddress account, final String mailboxId, final int index) {
         final String id = UUID.randomUUID().toString();
         final String threadId = UUID.randomUUID().toString();
         final Instant receivedAt = START_DATE.plus(Duration.ofDays(1)).plus(Duration.ofMinutes(index));
-        return get(id, threadId, receivedAt, mailboxId, index, index, 0, 1);
+        return get(account, id, threadId, receivedAt, mailboxId, index, index, 0, 1);
     }
 
-    public static Email get(final String mailboxId, int index, int thread, int posInThread, int numInThread) {
+    public static Email get(final EmailAddress account, final String mailboxId, int index, int thread, int posInThread, int numInThread) {
         final String id = String.format("M%d", index);
         final String threadId = String.format("T%d", thread);
         final Instant receivedAt = START_DATE.minus(Duration.ofDays(thread)).plus(Duration.ofHours(posInThread));
-        return get(id, threadId, receivedAt, mailboxId, index, thread, posInThread, numInThread);
+        return get(account, id, threadId, receivedAt, mailboxId, index, thread, posInThread, numInThread);
     }
 
-    public static Email get(final String id,
+    public static Email get(final EmailAddress account,
+                            final String id,
                             final String threadId,
                             final Instant receivedAt,
                             final String mailboxId,
@@ -72,16 +73,16 @@ public class EmailGenerator {
                             int thread,
                             int posInThread,
                             int numInThread) {
-        final EmailAddress from = getEmailAddress(index);
+        final EmailAddress from = NameGenerator.getEmailAddress(index);
         final ArrayList<EmailAddress> recipients = new ArrayList<>();
         final int threadStartsAt = index - posInThread;
         final int threadEndsAt = threadStartsAt + numInThread;
         for (int i = threadStartsAt; i < threadEndsAt; ++i) {
             if (i != index) {
-                recipients.add(getEmailAddress(i));
+                recipients.add(NameGenerator.getEmailAddress(i));
             }
         }
-        recipients.add(EmailAddress.builder().email(MockMailServer.USERNAME).build());
+        recipients.add(account);
 
         final String subject = SUBJECT_TEMPLATES.get(thread % SUBJECT_TEMPLATES.size());
 
@@ -109,14 +110,4 @@ public class EmailGenerator {
                 .textBody(emailBodyPart)
                 .build();
     }
-
-    private static EmailAddress getEmailAddress(int index) {
-        final NameGenerator.Name name = NameGenerator.get(index);
-        return EmailAddress.builder()
-                .email(name.first.toLowerCase(Locale.ENGLISH) + "." + name.last.toLowerCase(Locale.ENGLISH) + "@example.com")
-                .name(name.first + " " + name.last)
-                .build();
-
-    }
-
 }
