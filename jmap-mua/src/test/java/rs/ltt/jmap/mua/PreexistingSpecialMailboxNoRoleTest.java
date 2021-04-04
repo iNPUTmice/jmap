@@ -130,9 +130,9 @@ public class PreexistingSpecialMailboxNoRoleTest {
             }
 
             @Override
-            protected void generateEmail(final int numThreads) {
+            protected void generateEmail(final int numThreads, final int offset) {
                 final String mailboxId = MailboxUtil.find(mailboxes.values(), Role.ARCHIVE).getId();
-                int emailCount = 0;
+                int emailCount = offset;
                 for (int thread = 0; thread < numThreads; ++thread) {
                     final int numInThread = (thread % 4) + 1;
                     for (int i = 0; i < numInThread; ++i) {

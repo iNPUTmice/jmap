@@ -62,17 +62,17 @@ public class MockMailServer extends StubMailServer {
 
     public MockMailServer(final int numThreads, final int accountIndex) {
         super(accountIndex);
-        setup(numThreads);
+        setup(numThreads, (accountIndex * 2048) + accountIndex);
     }
 
     public MockMailServer(final int numThreads) {
         super(0);
-        setup(numThreads);
+        setup(numThreads, 0);
     }
 
-    protected void setup(final int numThreads) {
+    protected void setup(final int numThreads, final int offset) {
         this.mailboxes.putAll(Maps.uniqueIndex(generateMailboxes(), MailboxInfo::getId));
-        generateEmail(numThreads);
+        generateEmail(numThreads, offset);
     }
 
     protected List<MailboxInfo> generateMailboxes() {
@@ -81,9 +81,9 @@ public class MockMailServer extends StubMailServer {
         );
     }
 
-    protected void generateEmail(final int numThreads) {
+    protected void generateEmail(final int numThreads, final int offset) {
         final String mailboxId = MailboxUtil.find(mailboxes.values(), Role.INBOX).getId();
-        int emailCount = 0;
+        int emailCount = offset;
         for (int thread = 0; thread < numThreads; ++thread) {
             final int numInThread = (thread % 4) + 1;
             for (int i = 0; i < numInThread; ++i) {

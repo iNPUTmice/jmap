@@ -59,7 +59,7 @@ public abstract class JmapDispatcher extends Dispatcher {
 
 
     public JmapDispatcher(final int accountIndex) {
-        this.account = NameGenerator.getEmailAddress((accountIndex + 1) * 2048);
+        this.account = NameGenerator.getEmailAddress((accountIndex + 1) * 2048 + accountIndex);
     }
 
     public String getUsername() {
