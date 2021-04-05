@@ -22,7 +22,7 @@ public final class Utils {
 
     }
 
-    public static String getFilenameFor(Class clazz) {
+    public static String getFilenameFor(final Class<?> clazz) {
         return "META-INF/"+plural(clazz.getName());
     }
 

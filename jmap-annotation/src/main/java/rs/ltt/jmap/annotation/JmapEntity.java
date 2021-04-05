@@ -17,9 +17,27 @@
 package rs.ltt.jmap.annotation;
 
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
+import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.entity.filter.FilterCondition;
 
 public @interface JmapEntity {
 
-    Class<? extends FilterCondition<? extends AbstractIdentifiableEntity>> filterCondition();
+    Class<? extends FilterCondition<? extends AbstractIdentifiableEntity>> filterCondition() default NoFilterCondition.class;
+
+    abstract class NoFilterCondition implements FilterCondition<AbstractIdentifiableEntity> {
+
+        private NoFilterCondition() {
+            throw new AssertionError("Do not try to instantiate me");
+        }
+
+        @Override
+        public int compareTo(Filter<AbstractIdentifiableEntity> noneFilter) {
+            return 0;
+        }
+
+        @Override
+        public String toQueryString() {
+            return null;
+        }
+    }
 }

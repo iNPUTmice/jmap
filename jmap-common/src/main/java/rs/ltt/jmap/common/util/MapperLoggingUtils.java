@@ -33,10 +33,10 @@ import java.util.Map;
 
 public class MapperLoggingUtils {
 
-    private static final Map<Class, Class> WELL_KNOWN_MAPPINGS;
+    private static final Map<Class<?>, Class<?>> WELL_KNOWN_MAPPINGS;
 
     static {
-        WELL_KNOWN_MAPPINGS = new ImmutableMap.Builder<Class, Class>()
+        WELL_KNOWN_MAPPINGS = new ImmutableMap.Builder<Class<?>, Class<?>>()
                 .put(MethodCall.class, EchoMethodCall.class)
                 .put(MethodResponse.class, EchoMethodResponse.class)
                 .put(MethodErrorResponse.class, UnknownMethodMethodErrorResponse.class)
@@ -46,7 +46,7 @@ public class MapperLoggingUtils {
     }
 
     public static <T> boolean isMissingWellKnown(ImmutableBiMap<String, Class<? extends T>> map, Class<T> type) {
-        final Class wellKnownMapping = WELL_KNOWN_MAPPINGS.get(type);
+        final Class<?> wellKnownMapping = WELL_KNOWN_MAPPINGS.get(type);
         return wellKnownMapping != null && !map.containsValue(wellKnownMapping);
     }
 

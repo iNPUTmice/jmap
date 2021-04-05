@@ -25,6 +25,7 @@ import com.google.common.io.Resources;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rs.ltt.jmap.annotation.JmapEntity;
 import rs.ltt.jmap.common.Utils;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.AccountCapability;
@@ -44,6 +45,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class Mapper {
 
@@ -65,7 +67,7 @@ public final class Mapper {
     }
 
     private Mapper() {
-
+        
     }
 
     private static <T> ImmutableBiMap<String, Class<? extends T>> get(Class<T> type) {
@@ -111,14 +113,14 @@ public final class Mapper {
             }
             return Collections.singletonList(new BufferedReader(new InputStreamReader(is)));
         } else {
-            return Iterables.transform(urls, url -> {
+            return urls.stream().map(url -> {
                 try {
                     return new BufferedReader(Resources.asCharSource(url, Charsets.UTF_8).openStream());
                 } catch (IOException e) {
                     LOGGER.warn("Unable to to read mappings for type {} from url {}", type.getName(), url.toString());
                     return null;
                 }
-            });
+            }).collect(Collectors.toList());
         }
     }
 
@@ -133,7 +135,7 @@ public final class Mapper {
 
     private static ImmutableBiMap<Class<? extends AbstractIdentifiableEntity>, Class<FilterCondition<? extends AbstractIdentifiableEntity>>> getEntityToFilterConditionMap() {
         final ImmutableBiMap.Builder<Class<? extends AbstractIdentifiableEntity>, Class<FilterCondition<? extends AbstractIdentifiableEntity>>> builder = new ImmutableBiMap.Builder<>();
-        for (final BufferedReader bufferedReader : getSystemResources(AbstractIdentifiableEntity.class)) {
+        for (final BufferedReader bufferedReader : getSystemResources(FilterCondition.class)) {
             if (bufferedReader == null) {
                 continue;
             }
