@@ -17,11 +17,17 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.base.Preconditions;
+import rs.ltt.jmap.common.entity.Comparator;
+import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public final class StandardQueries {
+
+    private static final Comparator[] SORT_DEFAULT = new Comparator[]{
+            new Comparator(Email.Property.RECEIVED_AT, false)
+    };
 
     private StandardQueries() {
 
@@ -35,6 +41,7 @@ public final class StandardQueries {
         Preconditions.checkNotNull(mailboxId);
         return EmailQuery.of(
                 EmailFilterCondition.builder().inMailbox(mailboxId).build(),
+                SORT_DEFAULT,
                 true
         );
     }
@@ -46,6 +53,7 @@ public final class StandardQueries {
         //TODO; we probably want to change this to someInThreadHaveKeyword?
         return EmailQuery.of(
                 EmailFilterCondition.builder().hasKeyword(keyword).inMailboxOtherThan(trashAndJunk).build(),
+                SORT_DEFAULT,
                 true
         );
     }
@@ -56,6 +64,7 @@ public final class StandardQueries {
         Preconditions.checkArgument(trashAndJunk.length <= 2, "Provide mailbox ids for trash and junk");
         return EmailQuery.of(
                 EmailFilterCondition.builder().text(searchTerm).inMailboxOtherThan(trashAndJunk).build(),
+                SORT_DEFAULT,
                 true
         );
     }
