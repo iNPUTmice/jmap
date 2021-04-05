@@ -36,7 +36,7 @@ public class QueryChangesEmailSubmissionMethodCall extends QueryChangesMethodCal
     public static class QueryChangesEmailSubmissionMethodCallBuilder {
         public QueryChangesEmailSubmissionMethodCallBuilder query(EmailSubmissionQuery query) {
             filter(query.filter);
-            sort(query.comparators);
+            sort(query.sort);
             return this;
         }
     }

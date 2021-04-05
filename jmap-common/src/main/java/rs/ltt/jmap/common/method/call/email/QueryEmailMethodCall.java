@@ -41,7 +41,7 @@ public class QueryEmailMethodCall extends QueryMethodCall<Email> {
     public static class QueryEmailMethodCallBuilder {
         public QueryEmailMethodCallBuilder query(EmailQuery query) {
             filter(query.filter);
-            sort(query.comparators);
+            sort(query.sort);
             collapseThreads(query.collapseThreads);
             return this;
         }

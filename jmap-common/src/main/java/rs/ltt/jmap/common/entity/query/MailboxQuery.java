@@ -27,15 +27,15 @@ public class MailboxQuery extends Query<Mailbox> {
 
     public final Boolean filterAsTree;
 
-    private MailboxQuery(Filter<Mailbox> filter, Comparator[] comparators, Boolean sortAsTree, Boolean filterAsTree) {
-        super(filter, comparators);
+    private MailboxQuery(Filter<Mailbox> filter, Comparator[] sort, Boolean sortAsTree, Boolean filterAsTree) {
+        super(filter, sort);
         this.sortAsTree = sortAsTree;
         this.filterAsTree = filterAsTree;
     }
 
     @Override
     public String toQueryString() {
-        return QueryStringUtils.toQueryString(L0_DIVIDER, L1_DIVIDER, filter, comparators, sortAsTree, filterAsTree);
+        return QueryStringUtils.toQueryString(L0_DIVIDER, L1_DIVIDER, filter, sort, sortAsTree, filterAsTree);
     }
 
     public static MailboxQuery unfiltered() {
@@ -50,11 +50,11 @@ public class MailboxQuery extends Query<Mailbox> {
         return new MailboxQuery(filter, null, null, null);
     }
 
-    public static MailboxQuery of(Filter<Mailbox> filter, Comparator[] comparators) {
-        return new MailboxQuery(filter, comparators, null, null);
+    public static MailboxQuery of(final Filter<Mailbox> filter, final Comparator[] sort) {
+        return new MailboxQuery(filter, sort, null, null);
     }
 
-    public static MailboxQuery of(Filter<Mailbox> filter, Comparator[] comparators, Boolean sortAsTree, Boolean filterAsTree) {
-        return new MailboxQuery(filter, comparators, sortAsTree, filterAsTree);
+    public static MailboxQuery of(Filter<Mailbox> filter, Comparator[] sort, Boolean sortAsTree, Boolean filterAsTree) {
+        return new MailboxQuery(filter, sort, sortAsTree, filterAsTree);
     }
 }

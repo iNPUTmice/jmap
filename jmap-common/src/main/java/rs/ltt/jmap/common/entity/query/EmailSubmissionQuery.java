@@ -23,28 +23,28 @@ import rs.ltt.jmap.common.util.QueryStringUtils;
 
 public class EmailSubmissionQuery extends Query<EmailSubmission> {
 
-    private EmailSubmissionQuery(Filter<EmailSubmission> filter, Comparator[] comparators) {
-        super(filter, comparators);
+    private EmailSubmissionQuery(Filter<EmailSubmission> filter, Comparator[] sort) {
+        super(filter, sort);
     }
 
     @Override
     public String toQueryString() {
-        return QueryStringUtils.toQueryString(L0_DIVIDER, L1_DIVIDER, filter, comparators);
+        return QueryStringUtils.toQueryString(L0_DIVIDER, L1_DIVIDER, filter, sort);
     }
 
     public static EmailSubmissionQuery unfiltered() {
         return new EmailSubmissionQuery(null, null);
     }
 
-    public static EmailSubmissionQuery unfiltered(Comparator[] comparators) {
-        return new EmailSubmissionQuery(null, comparators);
+    public static EmailSubmissionQuery unfiltered(final Comparator[] sort) {
+        return new EmailSubmissionQuery(null, sort);
     }
 
     public static EmailSubmissionQuery of(Filter<EmailSubmission> filter) {
         return new EmailSubmissionQuery(filter, null);
     }
 
-    public static EmailSubmissionQuery of(Filter<EmailSubmission> filter, Comparator[] comparators) {
-        return new EmailSubmissionQuery(filter, comparators);
+    public static EmailSubmissionQuery of(final Filter<EmailSubmission> filter, final Comparator[] sort) {
+        return new EmailSubmissionQuery(filter, sort);
     }
 }

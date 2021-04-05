@@ -25,10 +25,10 @@ public abstract class Query<T extends AbstractIdentifiableEntity> implements Que
 
     public final Filter<T> filter;
 
-    public final Comparator[] comparators;
+    public final Comparator[] sort;
 
-    protected Query(Filter<T> filter, Comparator[] comparators) {
+    protected Query(final Filter<T> filter, final Comparator[] sort) {
         this.filter = filter;
-        this.comparators = comparators;
+        this.sort = sort;
     }
 }

@@ -36,7 +36,7 @@ public class QueryChangesMailboxMethodCall extends QueryChangesMethodCall<Mailbo
     public static class QueryChangesMailboxMethodCallBuilder {
         public QueryChangesMailboxMethodCallBuilder query(MailboxQuery query) {
             filter(query.filter);
-            sort(query.comparators);
+            sort(query.sort);
             return this;
         }
     }

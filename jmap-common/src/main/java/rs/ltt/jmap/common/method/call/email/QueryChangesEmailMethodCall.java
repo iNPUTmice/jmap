@@ -39,7 +39,7 @@ public class QueryChangesEmailMethodCall extends QueryChangesMethodCall<Email> {
     public static class QueryChangesEmailMethodCallBuilder {
         public QueryChangesEmailMethodCallBuilder query(EmailQuery query) {
             filter(query.filter);
-            sort(query.comparators);
+            sort(query.sort);
             collapseThreads(query.collapseThreads);
             return this;
         }

@@ -43,7 +43,7 @@ public class QueryMailboxMethodCall extends QueryMethodCall<Mailbox> {
     public static class QueryMailboxMethodCallBuilder {
         public QueryMailboxMethodCallBuilder query(MailboxQuery query) {
             filter(query.filter);
-            sort(query.comparators);
+            sort(query.sort);
             sortAsTree(query.sortAsTree);
             filterAsTree(query.filterAsTree);
             return this;

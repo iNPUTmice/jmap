@@ -26,14 +26,14 @@ public class EmailQuery extends Query<Email> {
 
     public final Boolean collapseThreads;
 
-    private EmailQuery(Filter<Email> filter, Comparator[] comparators, Boolean collapseThreads) {
-        super(filter, comparators);
+    private EmailQuery(final Filter<Email> filter, final Comparator[] sort, final Boolean collapseThreads) {
+        super(filter, sort);
         this.collapseThreads = collapseThreads;
     }
 
     @Override
     public String toQueryString() {
-        return QueryStringUtils.toQueryString(L0_DIVIDER, L1_DIVIDER, filter, comparators, collapseThreads);
+        return QueryStringUtils.toQueryString(L0_DIVIDER, L1_DIVIDER, filter, sort, collapseThreads);
     }
 
     public static EmailQuery unfiltered() {
@@ -48,16 +48,16 @@ public class EmailQuery extends Query<Email> {
         return new EmailQuery(filter, null, null);
     }
 
-    public static EmailQuery of(Filter<Email> filter, Comparator[] comparators) {
-        return new EmailQuery(filter, comparators, null);
+    public static EmailQuery of(Filter<Email> filter, Comparator[] sort) {
+        return new EmailQuery(filter, sort, null);
     }
 
     public static EmailQuery of(Filter<Email> filter, boolean collapseThreads) {
         return new EmailQuery(filter, null, collapseThreads);
     }
 
-    public static EmailQuery of(Filter<Email> filter, Comparator[] comparators, boolean collapseThreads) {
-        return new EmailQuery(filter, comparators, collapseThreads);
+    public static EmailQuery of(Filter<Email> filter, Comparator[] sort, boolean collapseThreads) {
+        return new EmailQuery(filter, sort, collapseThreads);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class EmailQuery extends Query<Email> {
         return MoreObjects.toStringHelper(this)
                 .add("collapseThreads", collapseThreads)
                 .add("filter", filter)
-                .add("comparators", comparators)
+                .add("sort", sort)
                 .omitNullValues()
                 .toString();
     }

@@ -210,6 +210,7 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
         public static final String KEYWORDS = "keywords";
         public static final String MAILBOX_IDS = "mailboxIds";
         public static final String THREAD_ID = "threadId";
+        public static final String RECEIVED_AT = "receivedAt";
         public static final String USER_AGENT = "header:User-Agent:asText";
         public static final String AUTOCRYPT = "header:Autocrypt:asText:all";
         public static final String AUTOCRYPT_DRAFT_STATE = "header:Autocrypt-Draft-State:asText";
