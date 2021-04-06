@@ -49,7 +49,7 @@ public class TypeInjectionTest extends AbstractGsonTest {
 
     @Type("aType")
     public static class MyOwnType {
-        String foo = "bar";
+        private String foo = "bar";
     }
 
 }

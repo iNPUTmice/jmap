@@ -124,6 +124,7 @@ public class JmapEntityProcessor extends AbstractProcessor {
         final JmapEntity annotation = typeElement.getAnnotation(JmapEntity.class);
         try {
             final Class<? extends FilterCondition<? extends AbstractIdentifiableEntity>> fc = annotation.filterCondition();
+            System.err.format("FilterCondition %s is not throwing as expected", fc.getSimpleName());
             throw new IllegalStateException("Getting Filter condition from annotation did not throw");
         } catch (MirroredTypeException e) {
             return e.getTypeMirror();
