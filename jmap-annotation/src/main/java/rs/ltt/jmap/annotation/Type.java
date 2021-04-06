@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Daniel Gultsch
+ * Copyright 2021 Daniel Gultsch
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,28 +14,12 @@
  *
  */
 
-package rs.ltt.jmap.common.entity;
+package rs.ltt.jmap.annotation;
 
-import lombok.Builder;
-import lombok.Getter;
-import rs.ltt.jmap.annotation.JmapEntity;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import java.time.Instant;
-
-@Getter
-@Builder(toBuilder = true)
-@JmapEntity
-public class VacationResponse extends AbstractIdentifiableEntity {
-
-    private Boolean isEnabled;
-
-    private Instant fromDate;
-
-    private Instant toDate;
-
-    private String subject;
-
-    private String textBody;
-
-    private String htmlBody;
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Type {
+    String value() default "";
 }

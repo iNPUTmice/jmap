@@ -30,10 +30,13 @@ public final class JmapAdapters {
 
     public static void register(GsonBuilder builder) {
 
+        builder.registerTypeAdapterFactory(new TypeInjectionAdapterFactory());
+
         InstantTypeAdapter.register(builder);
         OffsetDateTimeTypeAdapter.register(builder);
         ResultReferenceTypeAdapter.register(builder);
         PatchObjectNullTypeAdapter.register(builder);
+        TypeStateMapAdapter.register(builder);
 
         CapabilitiesDeserializer.register(builder);
         FilterDeserializer.register(builder);

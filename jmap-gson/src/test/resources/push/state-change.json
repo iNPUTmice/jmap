@@ -1,0 +1,15 @@
+{
+  "@type": "StateChange",
+  "changed": {
+    "max@example.com": {
+      "Email": "d35ecb040aab",
+      "Thread": "428d565f2440"
+    },
+    "sam@example.com": {
+      "Mailbox": "0af7a512ce70",
+      "Identity": "7a4297cecd76",
+      "EmailSubmission": "7a4297cecd76",
+      "VacationResponse": "428d565f2440"
+    }
+  }
+}

@@ -23,6 +23,7 @@ import rs.ltt.jmap.common.entity.filter.FilterCondition;
 public @interface JmapEntity {
 
     Class<? extends FilterCondition<? extends AbstractIdentifiableEntity>> filterCondition() default NoFilterCondition.class;
+    String name() default "";
 
     abstract class NoFilterCondition implements FilterCondition<AbstractIdentifiableEntity> {
 

@@ -18,6 +18,7 @@ package rs.ltt.jmap.annotation.processor;
 
 
 import com.google.auto.service.AutoService;
+import com.google.common.base.Strings;
 import rs.ltt.jmap.annotation.JmapEntity;
 import rs.ltt.jmap.common.Utils;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
@@ -77,10 +78,29 @@ public class JmapEntityProcessor extends AbstractProcessor {
 
         try {
             writeFilterConditions(classes);
+            writeEntities(classes);
         } catch (final Exception e) {
             e.printStackTrace();
         }
         return true;
+    }
+
+    private void writeEntities(final List<TypeElement> classes) throws IOException {
+        final FileObject resourceFile = filer.createResource(StandardLocation.CLASS_OUTPUT, "", Utils.getFilenameFor(AbstractIdentifiableEntity.class));
+        final PrintWriter printWriter = new PrintWriter(resourceFile.openOutputStream());
+        for (final TypeElement typeElement : classes) {
+            final JmapEntity annotation = typeElement.getAnnotation(JmapEntity.class);
+            final String name;
+            if (Strings.isNullOrEmpty(annotation.name())) {
+                name = typeElement.getSimpleName().toString();
+            } else {
+                name = annotation.name();
+            }
+            printWriter.println(String.format("%s %s", typeElement.getQualifiedName(), name));
+        }
+        printWriter.flush();
+        printWriter.close();
+        System.out.println("done writing entity names for " + classes.size() + " classes");
     }
 
     private void writeFilterConditions(final List<TypeElement> classes) throws IOException {

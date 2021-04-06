@@ -24,7 +24,7 @@ import rs.ltt.jmap.annotation.JmapEntity;
 import java.util.List;
 
 @Getter
-@JmapEntity()
+@JmapEntity
 public class Thread extends AbstractIdentifiableEntity {
 
     private List<String> emailIds;

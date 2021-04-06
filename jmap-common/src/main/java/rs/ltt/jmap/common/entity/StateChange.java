@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Daniel Gultsch
+ * Copyright 2021 Daniel Gultsch
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,26 +16,26 @@
 
 package rs.ltt.jmap.common.entity;
 
+import com.google.common.base.MoreObjects;
 import lombok.Builder;
 import lombok.Getter;
-import rs.ltt.jmap.annotation.JmapEntity;
+import lombok.Singular;
+import rs.ltt.jmap.annotation.Type;
 
-import java.time.Instant;
+import java.util.Map;
 
 @Getter
-@Builder(toBuilder = true)
-@JmapEntity
-public class VacationResponse extends AbstractIdentifiableEntity {
+@Builder
+@Type
+public class StateChange {
 
-    private Boolean isEnabled;
+    @Singular("changed")
+    private Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed;
 
-    private Instant fromDate;
-
-    private Instant toDate;
-
-    private String subject;
-
-    private String textBody;
-
-    private String htmlBody;
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("changed", changed)
+                .toString();
+    }
 }

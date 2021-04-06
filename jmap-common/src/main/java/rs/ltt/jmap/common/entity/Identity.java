@@ -19,10 +19,12 @@ package rs.ltt.jmap.common.entity;
 import com.google.common.base.MoreObjects;
 import lombok.Builder;
 import lombok.Getter;
+import rs.ltt.jmap.annotation.JmapEntity;
 
 import java.util.List;
 
 @Getter
+@JmapEntity
 public class Identity extends AbstractIdentifiableEntity implements IdentifiableIdentity {
     private String name;
 
