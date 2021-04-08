@@ -23,6 +23,9 @@ import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.api.HttpJmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClient;
 import rs.ltt.jmap.client.api.SessionStateListener;
+import rs.ltt.jmap.client.event.EventSourcePushService;
+import rs.ltt.jmap.client.event.OnStateChangeListener;
+import rs.ltt.jmap.client.event.PushService;
 import rs.ltt.jmap.client.http.BasicAuthHttpAuthentication;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
@@ -49,9 +52,18 @@ public class JmapClient implements Closeable {
         }
     };
 
+    public JmapClient(String username, String password) {
+        this(new BasicAuthHttpAuthentication(username, password));
+    }
+
     public JmapClient(HttpAuthentication httpAuthentication) {
         this.authentication = httpAuthentication;
         this.sessionClient = new SessionClient(httpAuthentication);
+    }
+
+
+    public JmapClient(String username, String password, HttpUrl base) {
+        this(new BasicAuthHttpAuthentication(username, password), base);
     }
 
     public JmapClient(HttpAuthentication httpAuthentication, HttpUrl sessionResource) {
@@ -59,21 +71,8 @@ public class JmapClient implements Closeable {
         this.sessionClient = new SessionClient(httpAuthentication, sessionResource);
     }
 
-
-    public JmapClient(String username, String password) {
-        this(new BasicAuthHttpAuthentication(username, password));
-    }
-
-    public JmapClient(String username, String password, HttpUrl base) {
-        this(new BasicAuthHttpAuthentication(username, password), base);
-    }
-
     public String getUsername() {
         return authentication.getUsername();
-    }
-
-    public ListenableFuture<Session> getSession() {
-        return executorService.submit(sessionClient::get);
     }
 
     public ListenableFuture<MethodResponses> call(MethodCall methodCall) {
@@ -100,16 +99,38 @@ public class JmapClient implements Closeable {
         }, executorService);
     }
 
+    public ListenableFuture<Session> getSession() {
+        return executorService.submit(sessionClient::get);
+    }
+
+    private boolean isShutdown() {
+        return executorService.isShutdown();
+    }
+
+    public ListenableFuture<PushService> monitorEvents(final OnStateChangeListener onStateChangeListener) {
+        return Futures.transform(
+                getSession(),
+                session -> monitorEvents(session, onStateChangeListener),
+                MoreExecutors.directExecutor()
+        );
+    }
+
+    private PushService monitorEvents(final Session session, final OnStateChangeListener onStateChangeListener) {
+        final EventSourcePushService eventSourcePushService = new EventSourcePushService(
+                session,
+                authentication
+        );
+        eventSourcePushService.setOnStateChangeListener(onStateChangeListener);
+        eventSourcePushService.connect();
+        return eventSourcePushService;
+    }
+
     public MultiCall newMultiCall() {
         return new MultiCall();
     }
 
     public void setSessionCache(SessionCache sessionCache) {
         this.sessionClient.setSessionCache(sessionCache);
-    }
-
-    private boolean isShutdown() {
-        return executorService.isShutdown();
     }
 
     @Override
@@ -119,9 +140,8 @@ public class JmapClient implements Closeable {
 
     public class MultiCall {
 
-        private boolean executed = false;
-
         private final JmapRequest.Builder jmapRequestBuilder = new JmapRequest.Builder();
+        private boolean executed = false;
 
         private MultiCall() {
 
@@ -133,7 +153,7 @@ public class JmapClient implements Closeable {
         }
 
         public synchronized void execute() {
-            Preconditions.checkState(!executed,"You must not execute the same MultiCall twice");
+            Preconditions.checkState(!executed, "You must not execute the same MultiCall twice");
             Preconditions.checkState(!isShutdown(), "Unable to execute MultiCall. JmapClient has been closed already");
             executed = true;
             JmapClient.this.execute(jmapRequestBuilder.build());
