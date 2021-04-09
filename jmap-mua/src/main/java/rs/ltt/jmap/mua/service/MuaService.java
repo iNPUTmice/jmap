@@ -19,10 +19,15 @@ package rs.ltt.jmap.mua.service;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
+import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.error.CannotCalculateChangesMethodErrorResponse;
+import rs.ltt.jmap.common.method.response.standard.ChangesMethodResponse;
+import rs.ltt.jmap.common.util.Mapper;
 import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.ObjectsState;
@@ -34,11 +39,12 @@ import java.util.concurrent.ExecutionException;
 
 public abstract class MuaService {
 
-    private final MuaSession muaSession;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MuaService.class);
     protected final JmapClient jmapClient;
     protected final Cache cache;
     protected final String accountId;
     protected final ListeningExecutorService ioExecutorService;
+    private final MuaSession muaSession;
 
     public MuaService(final MuaSession muaSession) {
         this.muaSession = muaSession;
@@ -48,7 +54,17 @@ public abstract class MuaService {
         this.ioExecutorService = muaSession.getIoExecutorService();
     }
 
-    protected  <T extends MuaService> T getService(Class<T> clazz) {
+    protected static Throwable extractException(final Exception exception) {
+        if (exception instanceof ExecutionException) {
+            final Throwable cause = exception.getCause();
+            if (cause != null) {
+                return cause;
+            }
+        }
+        return exception;
+    }
+
+    protected <T extends MuaService> T getService(Class<T> clazz) {
         return muaSession.getService(clazz);
     }
 
@@ -64,7 +80,17 @@ public abstract class MuaService {
         methodResponsesFuture.addChangesCallback(new FutureCallback<MethodResponses>() {
             @Override
             public void onSuccess(@Nullable MethodResponses methodResponses) {
-
+                final ChangesMethodResponse<?> changesMethodResponse = methodResponses.getMain(ChangesMethodResponse.class);
+                final TypedState<?> oldState = changesMethodResponse.getTypedOldState();
+                final TypedState<?> newState = changesMethodResponse.getTypedNewState();
+                final boolean hasMoreChanges = changesMethodResponse.isHasMoreChanges();
+                if (hasMoreChanges && oldState.equals(newState)) {
+                    LOGGER.error(
+                            "Invalid server response to {} oldState==newState despite having more changes",
+                            Mapper.METHOD_RESPONSES.inverse().get(methodResponses.getMain().getClass())
+                    );
+                    runnable.run();
+                }
             }
 
             @Override
@@ -74,15 +100,5 @@ public abstract class MuaService {
                 }
             }
         }, ioExecutorService);
-    }
-
-    protected static Throwable extractException(final Exception exception) {
-        if (exception instanceof ExecutionException) {
-            final Throwable cause = exception.getCause();
-            if (cause != null) {
-                return cause;
-            }
-        }
-        return exception;
     }
 }
