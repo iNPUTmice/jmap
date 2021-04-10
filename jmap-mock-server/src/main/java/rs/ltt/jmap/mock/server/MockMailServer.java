@@ -17,13 +17,16 @@
 package rs.ltt.jmap.mock.server;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.entity.Thread;
 import rs.ltt.jmap.common.entity.*;
+import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
+import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.method.MethodResponse;
 import rs.ltt.jmap.common.method.call.email.*;
 import rs.ltt.jmap.common.method.call.identity.GetIdentityMethodCall;
@@ -47,10 +50,16 @@ import rs.ltt.jmap.mua.util.MailboxUtil;
 
 import java.util.Comparator;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MockMailServer extends StubMailServer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockMailServer.class);
+
     protected final Map<String, Email> emails = new HashMap<>();
     protected final Map<String, MailboxInfo> mailboxes = new HashMap<>();
 
@@ -63,11 +72,6 @@ public class MockMailServer extends StubMailServer {
     public MockMailServer(final int numThreads, final int accountIndex) {
         super(accountIndex);
         setup(numThreads, (accountIndex * 2048) + accountIndex);
-    }
-
-    public MockMailServer(final int numThreads) {
-        super(0);
-        setup(numThreads, 0);
     }
 
     protected void setup(final int numThreads, final int offset) {
@@ -94,6 +98,11 @@ public class MockMailServer extends StubMailServer {
         }
     }
 
+    public MockMailServer(final int numThreads) {
+        super(0);
+        setup(numThreads, 0);
+    }
+
     public Email generateEmailOnTop() {
         final Email email = EmailGenerator.getOnTop(
                 account,
@@ -118,20 +127,6 @@ public class MockMailServer extends StubMailServer {
 
     public void setReportCanCalculateQueryChanges(final boolean reportCanCalculateQueryChanges) {
         this.reportCanCalculateQueryChanges = reportCanCalculateQueryChanges;
-    }
-
-    @Override
-    protected MethodResponse[] execute(GetIdentityMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
-        return new MethodResponse[]{
-                GetIdentityMethodResponse.builder()
-                        .list(new Identity[]{Identity.builder()
-                                .id(getAccountId())
-                                .email(account.getEmail())
-                                .name(account.getName())
-                                .build()})
-                        .build()
-
-        };
     }
 
     @Override
@@ -214,19 +209,59 @@ public class MockMailServer extends StubMailServer {
 
     @Override
     protected MethodResponse[] execute(QueryEmailMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
-        //TODO handle page size and anchor stuff
-        final ArrayList<Email> temporaryList = new ArrayList<>(emails.values());
-        temporaryList.sort(Comparator.comparing(Email::getReceivedAt).reversed());
-        final HashSet<String> threadIds = new HashSet<>();
-        temporaryList.removeIf(email -> !threadIds.add(email.getThreadId()));
+        final Filter<Email> filter = methodCall.getFilter();
+        Stream<Email> stream = emails.values().stream();
+        stream = applyFilter(filter, stream);
+
+        //sort
+        stream = stream.sorted(Comparator.comparing(Email::getReceivedAt).reversed());
+
+        if (Boolean.TRUE.equals(methodCall.getCollapseThreads())) {
+            stream = stream.filter(distinctByKey(Email::getThreadId));
+        }
+        final List<String> ids = stream
+                .map(Email::getId)
+                .collect(Collectors.toList());
+        final String anchor = methodCall.getAnchor();
+        final int position;
+        if (anchor != null) {
+            final Long anchorOffset = methodCall.getAnchorOffset();
+            final int anchorPosition = ids.indexOf(anchor);
+            if (anchorPosition == -1) {
+                LOGGER.error("anchor not found");
+            }
+            position = Math.toIntExact(anchorPosition + (anchorOffset == null ? 0 : anchorOffset));
+        } else {
+            position = Math.toIntExact(methodCall.getPosition() == null ? 0 : methodCall.getPosition());
+        }
+        final int limit = Math.toIntExact(methodCall.getLimit() == null ? 40 : methodCall.getLimit());
+        final int endPosition = Math.min(position + limit, ids.size());
+        final String[] page = ids.subList(position, endPosition).toArray(new String[0]);
+        LOGGER.info("query email page between {} and {} (inclusive). Page contains {} items", position, endPosition - 1, page.length);
         return new MethodResponse[]{
                 QueryEmailMethodResponse.builder()
                         .canCalculateChanges(this.reportCanCalculateQueryChanges)
                         .queryState(getState())
-                        .ids(Collections2.transform(temporaryList, Email::getId).toArray(new String[0]))
-                        .position(0L)
+                        .ids(page)
+                        .position((long) position)
                         .build()
         };
+    }
+
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        final Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
+
+    private static Stream<Email> applyFilter(final Filter<Email> filter, Stream<Email> emailStream) {
+        if (filter instanceof EmailFilterCondition) {
+            final EmailFilterCondition emailFilterCondition = (EmailFilterCondition) filter;
+            final String inMailbox = emailFilterCondition.getInMailbox();
+            if (inMailbox != null) {
+                emailStream = emailStream.filter(email -> email.getMailboxIds().containsKey(inMailbox));
+            }
+        }
+        return emailStream;
     }
 
     @Override
@@ -269,41 +304,18 @@ public class MockMailServer extends StubMailServer {
         };
     }
 
-    private Email patchEmail(final String id, final Map<String, Object> patches, ListMultimap<String, Response.Invocation> previousResponses) {
-        final Email.EmailBuilder emailBuilder = emails.get(id).toBuilder();
-        for (final Map.Entry<String, Object> patch : patches.entrySet()) {
-            final String fullPath = patch.getKey();
-            final Object modification = patch.getValue();
-            final List<String> pathParts = Splitter.on('/').splitToList(fullPath);
-            final String parameter = pathParts.get(0);
-            if (parameter.equals("keywords")) {
-                if (pathParts.size() == 2 && modification instanceof Boolean) {
-                    final String keyword = pathParts.get(1);
-                    final Boolean value = (Boolean) modification;
-                    emailBuilder.keyword(keyword, value);
-                } else {
-                    throw new IllegalArgumentException("Keyword modification was not split into two parts");
-                }
-            } else if (parameter.equals("mailboxIds")) {
-                if (pathParts.size() == 2 && modification instanceof Boolean) {
-                    final String mailboxId = pathParts.get(1);
-                    final Boolean value = (Boolean) modification;
-                    emailBuilder.mailboxId(mailboxId, value);
-                } else if (modification instanceof Map) {
-                    final Map<String, Boolean> mailboxMap = (Map<String, Boolean>) modification;
-                    emailBuilder.clearMailboxIds();
-                    for (Map.Entry<String, Boolean> mailboxEntry : mailboxMap.entrySet()) {
-                        final String mailboxId = CreationIdResolver.resolveIfNecessary(mailboxEntry.getKey(), previousResponses);
-                        emailBuilder.mailboxId(mailboxId, mailboxEntry.getValue());
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unknown patch object for path " + fullPath);
-                }
-            } else {
-                throw new IllegalArgumentException("Unable to patch " + fullPath);
-            }
-        }
-        return emailBuilder.build();
+    @Override
+    protected MethodResponse[] execute(GetIdentityMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
+        return new MethodResponse[]{
+                GetIdentityMethodResponse.builder()
+                        .list(new Identity[]{Identity.builder()
+                                .id(getAccountId())
+                                .email(account.getEmail())
+                                .name(account.getName())
+                                .build()})
+                        .build()
+
+        };
     }
 
     @Override
@@ -531,6 +543,43 @@ public class MockMailServer extends StubMailServer {
                         .state(getState())
                         .build()
         };
+    }
+
+    private Email patchEmail(final String id, final Map<String, Object> patches, ListMultimap<String, Response.Invocation> previousResponses) {
+        final Email.EmailBuilder emailBuilder = emails.get(id).toBuilder();
+        for (final Map.Entry<String, Object> patch : patches.entrySet()) {
+            final String fullPath = patch.getKey();
+            final Object modification = patch.getValue();
+            final List<String> pathParts = Splitter.on('/').splitToList(fullPath);
+            final String parameter = pathParts.get(0);
+            if (parameter.equals("keywords")) {
+                if (pathParts.size() == 2 && modification instanceof Boolean) {
+                    final String keyword = pathParts.get(1);
+                    final Boolean value = (Boolean) modification;
+                    emailBuilder.keyword(keyword, value);
+                } else {
+                    throw new IllegalArgumentException("Keyword modification was not split into two parts");
+                }
+            } else if (parameter.equals("mailboxIds")) {
+                if (pathParts.size() == 2 && modification instanceof Boolean) {
+                    final String mailboxId = pathParts.get(1);
+                    final Boolean value = (Boolean) modification;
+                    emailBuilder.mailboxId(mailboxId, value);
+                } else if (modification instanceof Map) {
+                    final Map<String, Boolean> mailboxMap = (Map<String, Boolean>) modification;
+                    emailBuilder.clearMailboxIds();
+                    for (Map.Entry<String, Boolean> mailboxEntry : mailboxMap.entrySet()) {
+                        final String mailboxId = CreationIdResolver.resolveIfNecessary(mailboxEntry.getKey(), previousResponses);
+                        emailBuilder.mailboxId(mailboxId, mailboxEntry.getValue());
+                    }
+                } else {
+                    throw new IllegalArgumentException("Unknown patch object for path " + fullPath);
+                }
+            } else {
+                throw new IllegalArgumentException("Unable to patch " + fullPath);
+            }
+        }
+        return emailBuilder.build();
     }
 
     protected static class MailboxInfo implements IdentifiableMailboxWithRole {

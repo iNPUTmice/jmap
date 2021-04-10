@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.common.entity;
 
+import com.google.common.base.MoreObjects;
 import rs.ltt.jmap.common.entity.filter.QueryString;
 import rs.ltt.jmap.common.util.QueryStringUtils;
 
@@ -40,5 +41,14 @@ public class Comparator implements QueryString {
     @Override
     public String toQueryString() {
         return QueryStringUtils.toQueryString(L2_DIVIDER, L3_DIVIDER, property, isAscending, collation);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("property", property)
+                .add("isAscending", isAscending)
+                .add("collation", collation)
+                .toString();
     }
 }
