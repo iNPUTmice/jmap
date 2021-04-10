@@ -151,7 +151,7 @@ public class NameGenerator {
     public static EmailAddress getEmailAddress(int index) {
         final NameGenerator.Name name = NameGenerator.get(index);
         return EmailAddress.builder()
-                .email(name.first.toLowerCase(Locale.ENGLISH) + "." + name.last.toLowerCase(Locale.ENGLISH) + "@example.com")
+                .email(name.first.toLowerCase(Locale.ENGLISH) + "." + name.last.toLowerCase(Locale.ENGLISH) + "@localhost")
                 .name(name.first + " " + name.last)
                 .build();
 

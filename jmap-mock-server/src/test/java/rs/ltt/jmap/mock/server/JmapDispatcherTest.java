@@ -40,8 +40,8 @@ public class JmapDispatcherTest {
 
     private static final Gson GSON;
 
-    private static final String INDEX_0_USERNAME = "dorothy.williams@example.com";
-    private static final String INDEX_1_USERNAME = "edward.davis@example.com";
+    private static final String INDEX_0_USERNAME = "dorothy.williams@localhost";
+    private static final String INDEX_1_USERNAME = "edward.davis@localhost";
 
     static {
         final GsonBuilder gsonBuilder = new GsonBuilder();
