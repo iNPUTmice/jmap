@@ -57,10 +57,10 @@ public class CacheInvalidationTest {
             );
             MatcherAssert.assertThat(exception.getCause(), CoreMatchers.instanceOf(MethodErrorResponseException.class));
         }
-        Assertions.assertTrue(myInMemoryCache.queryCacheInvalidationTriggered.get(),"Query Cache has not been invalidated");
-        Assertions.assertTrue(myInMemoryCache.emailCacheInvalidationTriggered.get(),"Email cache has not been invalidated");
-        Assertions.assertTrue(myInMemoryCache.threadCacheInvalidationTriggered.get(),"Thread cache has not been invalidated");
-        Assertions.assertTrue(myInMemoryCache.mailboxCacheInvalidationTriggered.get(),"Mailbox cache has not been invalidated");
+        Assertions.assertTrue(myInMemoryCache.queryCacheInvalidationTriggered.get(), "Query Cache has not been invalidated");
+        Assertions.assertTrue(myInMemoryCache.emailCacheInvalidationTriggered.get(), "Email cache has not been invalidated");
+        Assertions.assertTrue(myInMemoryCache.threadCacheInvalidationTriggered.get(), "Thread cache has not been invalidated");
+        Assertions.assertTrue(myInMemoryCache.mailboxCacheInvalidationTriggered.get(), "Mailbox cache has not been invalidated");
         server.shutdown();
     }
 
@@ -72,25 +72,11 @@ public class CacheInvalidationTest {
         private final AtomicBoolean mailboxCacheInvalidationTriggered = new AtomicBoolean(false);
 
         @Override
-        public void invalidateQueryResult(final String queryString) {
-            synchronized (this.queryResults) {
-                if (this.queryResults.remove(queryString) == null) {
-                    throw new IllegalStateException(String.format("Unable to find cached query result for %s", queryString));
-                }
-            }
-            this.queryCacheInvalidationTriggered.set(true);
-        }
-
-        @Override
-        public void invalidateEmails() {
-            super.invalidateEmails();
+        public void invalidateEmailThreadsAndQueries() {
+            super.invalidateEmailThreadsAndQueries();
             this.emailCacheInvalidationTriggered.set(true);
-        }
-
-        @Override
-        public void invalidateThreads() {
-            super.invalidateThreads();
             this.threadCacheInvalidationTriggered.set(true);
+            this.queryCacheInvalidationTriggered.set(true);
         }
 
         @Override

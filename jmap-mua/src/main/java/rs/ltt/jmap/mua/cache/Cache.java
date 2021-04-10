@@ -60,9 +60,7 @@ public interface Cache {
 
     void updateEmails(Update<Email> emailUpdate, String[] updatedProperties) throws CacheWriteException, CacheConflictException;
 
-    void invalidateEmails();
-
-    void invalidateThreads();
+    void invalidateEmailThreadsAndQueries();
 
     void invalidateMailboxes();
 

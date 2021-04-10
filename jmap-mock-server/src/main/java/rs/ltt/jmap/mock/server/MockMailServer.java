@@ -214,6 +214,7 @@ public class MockMailServer extends StubMailServer {
 
     @Override
     protected MethodResponse[] execute(QueryEmailMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
+        //TODO handle page size and anchor stuff
         final ArrayList<Email> temporaryList = new ArrayList<>(emails.values());
         temporaryList.sort(Comparator.comparing(Email::getReceivedAt).reversed());
         final HashSet<String> threadIds = new HashSet<>();

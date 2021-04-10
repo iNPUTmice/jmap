@@ -390,18 +390,17 @@ public class InMemoryCache implements Cache {
     }
 
     @Override
-    public void invalidateEmails() {
+    public void invalidateEmailThreadsAndQueries() {
         synchronized (this.emails) {
             this.emails.clear();
             this.emailState = null;
         }
-    }
-
-    @Override
-    public void invalidateThreads() {
         synchronized (this.threads) {
             this.threads.clear();
             this.threadState = null;
+        }
+        synchronized (this.queryResults) {
+            this.queryResults.clear();
         }
     }
 

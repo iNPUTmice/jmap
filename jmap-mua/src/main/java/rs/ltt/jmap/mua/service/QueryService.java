@@ -45,7 +45,10 @@ import rs.ltt.jmap.common.method.response.email.QueryEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
 import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
-import rs.ltt.jmap.mua.cache.*;
+import rs.ltt.jmap.mua.cache.Missing;
+import rs.ltt.jmap.mua.cache.ObjectsState;
+import rs.ltt.jmap.mua.cache.QueryStateWrapper;
+import rs.ltt.jmap.mua.cache.QueryUpdate;
 import rs.ltt.jmap.mua.cache.exception.CacheReadException;
 import rs.ltt.jmap.mua.cache.exception.CacheWriteException;
 import rs.ltt.jmap.mua.cache.exception.CorruptCacheException;
@@ -89,10 +92,8 @@ public class QueryService extends MuaService {
         //update to emails should happen before update to threads
         //when mua queries threads the corresponding emails should already be in the cache
 
-        if (objectsState.emailState != null) {
+        if (objectsState.emailState != null && objectsState.threadState != null) {
             futuresListBuilder.add(getService(EmailService.class).updateEmails(objectsState.emailState, multiCall));
-        }
-        if (objectsState.threadState != null) {
             futuresListBuilder.add(getService(ThreadService.class).updateThreads(objectsState.threadState, multiCall));
         }
         return futuresListBuilder.build();
@@ -365,7 +366,7 @@ public class QueryService extends MuaService {
 
         final ListenableFuture<MethodResponses> getThreadsResponsesFuture;
         final ListenableFuture<MethodResponses> getEmailResponsesFuture;
-        if (queryStateWrapper.objectsState.threadState == null && queryStateWrapper.objectsState.emailState == null) {
+        if (queryStateWrapper.objectsState.threadState == null || queryStateWrapper.objectsState.emailState == null) {
             final JmapRequest.Call threadCall = multiCall.call(
                     GetThreadMethodCall.builder()
                             .accountId(accountId)

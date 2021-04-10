@@ -367,7 +367,7 @@ public class EmailService extends MuaService {
 
     private void invalidateCache() {
         LOGGER.info("Invalidate emails cache after cannotCalculateChanges response");
-        cache.invalidateEmails();
+        cache.invalidateEmailThreadsAndQueries();
     }
 
     public ListenableFuture<Boolean> discardDraft(final @Nonnull IdentifiableEmailWithKeywords email) {

@@ -57,6 +57,6 @@ public class ThreadService extends MuaService {
 
     private void invalidateCache() {
         LOGGER.info("Invalidate threads cache after cannotCalculateChanges response");
-        cache.invalidateThreads();
+        cache.invalidateEmailThreadsAndQueries();
     }
 }
