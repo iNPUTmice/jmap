@@ -1,3 +1,13 @@
+### 0.6.0 (2021-04-11)
+
+* Introduce draft API to listen to events
+
+
+### 0.5.8 (2021-04-05)
+
+* Introduce multi-account support to MockMailServer
+
+
 ### 0.5.7 (2021-03-31)
 
 * Fixed bug with invalid responses
