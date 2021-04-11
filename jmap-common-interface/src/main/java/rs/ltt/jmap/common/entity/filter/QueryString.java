@@ -27,9 +27,9 @@ public interface QueryString {
     char L3_DIVIDER = '\u001e';
     char L4_DIVIDER = '\u001f';
 
-    String toQueryString();
-
     default String asHash() {
         return Hashing.sha256().hashString(this.toQueryString(), Charsets.UTF_8).toString();
     }
+
+    String toQueryString();
 }

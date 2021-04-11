@@ -20,7 +20,6 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
@@ -30,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rs.ltt.jmap.client.api.HttpJmapApiClient;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.StateChange;
@@ -66,11 +66,6 @@ public class EventSourcePushService implements PushService {
         this.authentication = authentication;
     }
 
-    public void disconnect() {
-        disconnect(State.DISCONNECTED);
-        cancelReconnectionFuture();
-    }
-
     private void disconnect(final State state) {
         final EventSource currentEventSource = this.currentEventSource;
         if (currentEventSource != null) {
@@ -80,7 +75,20 @@ public class EventSourcePushService implements PushService {
         transitionTo(state);
     }
 
+    private boolean isStopped() {
+        return this.state == State.STOPPED;
+    }
+
+    private boolean isRunning() {
+        return this.state != State.STOPPED;
+    }
+
     private void transitionTo(final State state) {
+        if (isStopped()) {
+            throw new IllegalStateException(
+                    String.format("Unable to transition to %s. PushService has been stopped", state)
+            );
+        }
         LOGGER.info("transition to {}", state);
         this.state = state;
         if (STATES_NEEDING_RECONNECT.contains(state)) {
@@ -113,7 +121,7 @@ public class EventSourcePushService implements PushService {
         cancelReconnectionFuture();
         transitionTo(State.CONNECTING);
         final EventSource.Factory factory = EventSources.createFactory(
-                new OkHttpClient.Builder()
+                HttpJmapApiClient.OK_HTTP_CLIENT.newBuilder()
                         .readTimeout(pingInterval.plus(pingIntervalTolerance))
                         .retryOnConnectionFailure(false)
                         .build()
@@ -170,8 +178,14 @@ public class EventSourcePushService implements PushService {
         this.onStateChangeListener = onStateChangeListener;
     }
 
+    @Override
+    public void stop() {
+        disconnect(State.STOPPED);
+        cancelReconnectionFuture();
+    }
+
     private enum State {
-        CLOSED, CONNECTING, CONNECTED, FAILED, DISCONNECTED
+        CLOSED, CONNECTING, CONNECTED, FAILED, STOPPED
     }
 
     private static final class Type {
@@ -183,8 +197,10 @@ public class EventSourcePushService implements PushService {
         @Override
         public void onClosed(@NotNull EventSource eventSource) {
             super.onClosed(eventSource);
-            //TODO if CloseAfter.State we should probably reconnect immediately
-            disconnect(State.CLOSED);
+            if (isRunning()) {
+                //TODO if CloseAfter.State we should probably reconnect immediately
+                disconnect(State.CLOSED);
+            }
         }
 
         @Override
@@ -204,21 +220,25 @@ public class EventSourcePushService implements PushService {
         @Override
         public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
             super.onFailure(eventSource, t, response);
-            if (t != null) {
-                LOGGER.warn("Unable to connect to EventSource URL", t);
-            } else if (response != null) {
-                LOGGER.warn("Unable to connect to EventSource URL. Status code was {}", response.code());
-            } else {
-                LOGGER.warn("Unable to connect to EventSource URL");
+            if (isRunning()) {
+                if (t != null) {
+                    LOGGER.warn("Unable to connect to EventSource URL", t);
+                } else if (response != null) {
+                    LOGGER.warn("Unable to connect to EventSource URL. Status code was {}", response.code());
+                } else {
+                    LOGGER.warn("Unable to connect to EventSource URL");
+                }
+                disconnect(State.FAILED);
             }
-            disconnect(State.FAILED);
         }
 
         @Override
         public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
             super.onOpen(eventSource, response);
-            attempt = 0;
-            transitionTo(State.CONNECTED);
+            if (isRunning()) {
+                attempt = 0;
+                transitionTo(State.CONNECTED);
+            }
         }
     }
 }
