@@ -17,8 +17,6 @@
 package rs.ltt.jmap.client.event;
 
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -29,11 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rs.ltt.jmap.client.api.HttpJmapApiClient;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.StateChange;
-import rs.ltt.jmap.gson.JmapAdapters;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -43,6 +39,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import static rs.ltt.jmap.client.Services.GSON;
+import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT;
 
 public class EventSourcePushService implements PushService {
 
@@ -121,7 +120,7 @@ public class EventSourcePushService implements PushService {
         cancelReconnectionFuture();
         transitionTo(State.CONNECTING);
         final EventSource.Factory factory = EventSources.createFactory(
-                HttpJmapApiClient.OK_HTTP_CLIENT.newBuilder()
+                OK_HTTP_CLIENT.newBuilder()
                         .readTimeout(pingInterval.plus(pingIntervalTolerance))
                         .retryOnConnectionFailure(false)
                         .build()
@@ -159,11 +158,7 @@ public class EventSourcePushService implements PushService {
     }
 
     private void onStateEvent(final String id, final String state) {
-        //TODO externalize the gson into a static final something (it's thread safe anyway)
-        final GsonBuilder gsonBuilder = new GsonBuilder();
-        JmapAdapters.register(gsonBuilder);
-        final Gson gson = gsonBuilder.create();
-        final StateChange stateChange = gson.fromJson(state, StateChange.class);
+        final StateChange stateChange = GSON.fromJson(state, StateChange.class);
         if (onStateChangeListener != null) {
             onStateChangeListener.onStateChange(stateChange);
         }

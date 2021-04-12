@@ -20,7 +20,6 @@ package rs.ltt.jmap.client.api;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.*;
-import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.http.BasicAuthHttpAuthentication;
@@ -31,31 +30,13 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
+
 public class HttpJmapApiClient extends AbstractJmapApiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpJmapApiClient.class);
 
     private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json");
-
-    public static final OkHttpClient OK_HTTP_CLIENT;
-
-    static {
-        final OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        final Logger OK_HTTP_LOGGER = LoggerFactory.getLogger(OkHttpClient.class);
-        builder.addInterceptor(new UserAgentInterceptor());
-        if (OK_HTTP_LOGGER.isInfoEnabled()) {
-            final HttpLoggingInterceptor loggingInterceptor;
-            if (OK_HTTP_LOGGER.isDebugEnabled()) {
-                loggingInterceptor = new HttpLoggingInterceptor(OK_HTTP_LOGGER::debug);
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            } else {
-                loggingInterceptor = new HttpLoggingInterceptor(OK_HTTP_LOGGER::info);
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-            }
-            builder.addInterceptor(loggingInterceptor);
-        }
-        OK_HTTP_CLIENT = builder.build();
-    }
 
     private final HttpUrl apiUrl;
     private final HttpAuthentication httpAuthentication;
@@ -90,7 +71,7 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
         requestBuilder.url(apiUrl);
         this.httpAuthentication.authenticate(requestBuilder);
         requestBuilder.post(RequestBody.create(out, MEDIA_TYPE_JSON));
-        OK_HTTP_CLIENT.newCall(requestBuilder.build()).enqueue(new Callback() {
+        OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
             public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
                 settableInputStreamFuture.setException(e);

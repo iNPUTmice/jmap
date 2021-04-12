@@ -16,8 +16,6 @@
 
 package rs.ltt.jmap.client.session;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import okhttp3.HttpUrl;
@@ -27,16 +25,17 @@ import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.api.EndpointNotFoundException;
-import rs.ltt.jmap.client.api.HttpJmapApiClient;
 import rs.ltt.jmap.client.api.InvalidSessionResourceException;
 import rs.ltt.jmap.client.api.UnauthorizedException;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.util.WellKnownUtil;
 import rs.ltt.jmap.common.SessionResource;
-import rs.ltt.jmap.gson.JmapAdapters;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import static rs.ltt.jmap.client.Services.GSON;
+import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
 
 public class SessionClient {
 
@@ -94,7 +93,7 @@ public class SessionClient {
         requestBuilder.url(base);
         httpAuthentication.authenticate(requestBuilder);
 
-        final Response response = HttpJmapApiClient.OK_HTTP_CLIENT.newCall(requestBuilder.build()).execute();
+        final Response response = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build()).execute();
         final int code = response.code();
         if (code == 200 || code == 201) {
             final ResponseBody body = response.body();
@@ -102,12 +101,9 @@ public class SessionClient {
                 throw new InvalidSessionResourceException("Unable to fetch session object. Response body was empty.");
             }
             try (final InputStream inputStream = body.byteStream()) {
-                final GsonBuilder builder = new GsonBuilder();
-                JmapAdapters.register(builder);
-                final Gson gson = builder.create();
                 final SessionResource sessionResource;
                 try {
-                    sessionResource = gson.fromJson(new InputStreamReader(inputStream), SessionResource.class);
+                    sessionResource = GSON.fromJson(new InputStreamReader(inputStream), SessionResource.class);
                 } catch (JsonIOException | JsonSyntaxException e) {
                     throw new InvalidSessionResourceException(e);
                 }

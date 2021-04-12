@@ -28,21 +28,19 @@ import rs.ltt.jmap.gson.JmapAdapters;
 
 import java.io.*;
 
+import static rs.ltt.jmap.client.Services.GSON;
+
 public class FileSessionCache implements SessionCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSessionCache.class);
 
     private final File directory;
 
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
-
     public FileSessionCache() {
-        JmapAdapters.register(this.gsonBuilder);
         this.directory = null;
     }
 
     public FileSessionCache(@NonNull File directory) {
-        JmapAdapters.register(this.gsonBuilder);
         this.directory = directory;
         LOGGER.debug("Initialize cache in {}", directory.getAbsolutePath());
     }
@@ -50,10 +48,9 @@ public class FileSessionCache implements SessionCache {
     @Override
     public void store(String username, HttpUrl sessionResource, Session session) {
         final File file = getFile(getFilename(username, sessionResource));
-        final Gson gson = this.gsonBuilder.create();
         try {
             final FileWriter fileWriter = new FileWriter(file);
-            gson.toJson(session, fileWriter);
+            GSON.toJson(session, fileWriter);
             fileWriter.flush();
             fileWriter.close();
         } catch (IOException e) {
@@ -77,9 +74,8 @@ public class FileSessionCache implements SessionCache {
     @Override
     public Session load(String username, HttpUrl sessionResource) {
         final File file = getFile(getFilename(username, sessionResource));
-        final Gson gson = this.gsonBuilder.create();
         try {
-            final Session session = gson.fromJson(new FileReader(file), Session.class);
+            final Session session = GSON.fromJson(new FileReader(file), Session.class);
             LOGGER.debug("Restored session from {}", file.getAbsolutePath());
             return session;
         } catch (final FileNotFoundException e) {

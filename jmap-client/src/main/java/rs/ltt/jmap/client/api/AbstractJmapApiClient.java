@@ -17,8 +17,6 @@
 package rs.ltt.jmap.client.api;
 
 import com.google.common.util.concurrent.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.client.util.ResponseAnalyzer;
@@ -28,22 +26,15 @@ import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.MethodResponse;
-import rs.ltt.jmap.gson.JmapAdapters;
 
 import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+import static rs.ltt.jmap.client.Services.GSON;
+
 public abstract class AbstractJmapApiClient implements JmapApiClient {
-
-    private final Gson gson;
-
-    AbstractJmapApiClient() {
-        final GsonBuilder gsonBuilder = new GsonBuilder();
-        JmapAdapters.register(gsonBuilder);
-        gson = gsonBuilder.create();
-    }
 
     //TODO this execute() method seems to be specific to Http - we might want to move this to HttpJmapApiClient
     //and leave processResponse(request, GenericResponse) in here
@@ -51,7 +42,7 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
     public void execute(final JmapRequest jmapRequest) {
         final String json;
         try {
-            json = gson.toJson(jmapRequest.getRequest());
+            json = GSON.toJson(jmapRequest.getRequest());
         } catch (final Throwable throwable) {
             jmapRequest.setException(throwable);
             return;
@@ -74,7 +65,7 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
     }
 
     protected void processResponse(final JmapRequest jmapRequest, final InputStream inputStream) {
-        final GenericResponse genericResponse = gson.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
+        final GenericResponse genericResponse = GSON.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
         processResponse(jmapRequest, genericResponse);
     }
 
