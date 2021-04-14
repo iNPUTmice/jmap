@@ -20,6 +20,8 @@ public interface PushService {
 
     void setOnStateChangeListener(OnStateChangeListener onStateChangeListener);
 
+    void connect();
+
     void stop();
 
 }

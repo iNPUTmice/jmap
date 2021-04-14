@@ -17,6 +17,7 @@
 package rs.ltt.jmap.client.api;
 
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.*;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.http.BasicAuthHttpAuthentication;
 import rs.ltt.jmap.client.http.HttpAuthentication;
+import rs.ltt.jmap.client.session.Session;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,14 +48,14 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
         this(apiUrl, new BasicAuthHttpAuthentication(username, password), null);
     }
 
-    public HttpJmapApiClient(final HttpUrl apiUrl, final HttpAuthentication httpAuthentication) {
-        this(apiUrl,httpAuthentication, null);
-    }
-
     public HttpJmapApiClient(final HttpUrl apiUrl, final HttpAuthentication httpAuthentication, @Nullable final SessionStateListener sessionStateListener) {
-        this.apiUrl = apiUrl;
+        this.apiUrl = Preconditions.checkNotNull(apiUrl, "This API URL must not be null");
         this.httpAuthentication = httpAuthentication;
         this.sessionStateListener = sessionStateListener;
+    }
+
+    public HttpJmapApiClient(final HttpUrl apiUrl, final HttpAuthentication httpAuthentication) {
+        this(apiUrl, httpAuthentication, null);
     }
 
     @Override
@@ -105,5 +107,10 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
             }
         });
         return settableInputStreamFuture;
+    }
+
+    @Override
+    public boolean isValidFor(final Session session) {
+        return this.apiUrl.equals(session.getApiUrl());
     }
 }

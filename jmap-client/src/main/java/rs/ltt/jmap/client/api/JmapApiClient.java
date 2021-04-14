@@ -17,8 +17,11 @@
 package rs.ltt.jmap.client.api;
 
 import rs.ltt.jmap.client.JmapRequest;
+import rs.ltt.jmap.client.session.Session;
 
 public interface JmapApiClient {
 
     void execute(JmapRequest jmapRequest);
+
+    boolean isValidFor(final Session session);
 }

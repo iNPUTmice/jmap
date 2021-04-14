@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.*;
 import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.api.HttpJmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClient;
+import rs.ltt.jmap.client.api.JmapApiClientFactory;
 import rs.ltt.jmap.client.api.SessionStateListener;
 import rs.ltt.jmap.client.event.EventSourcePushService;
 import rs.ltt.jmap.client.event.OnStateChangeListener;
@@ -42,6 +43,8 @@ public class JmapClient implements Closeable {
 
     private final SessionClient sessionClient;
     private final HttpAuthentication authentication;
+
+    private JmapApiClient jmapApiClient;
 
     private final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
 
@@ -88,7 +91,7 @@ public class JmapClient implements Closeable {
             @Override
             public void onSuccess(@Nullable Session session) {
                 Preconditions.checkState(session != null, "Session was null");
-                final JmapApiClient apiClient = new HttpJmapApiClient(session.getApiUrl(), authentication, sessionStateListener);
+                final JmapApiClient apiClient = getApiClient(session);
                 apiClient.execute(request);
             }
 
@@ -97,6 +100,24 @@ public class JmapClient implements Closeable {
                 request.setException(throwable);
             }
         }, executorService);
+    }
+
+    private JmapApiClient getApiClient(final Session session) {
+        final JmapApiClient current = this.jmapApiClient;
+        if (current != null && current.isValidFor(session)) {
+            return current;
+        }
+        synchronized (this) {
+            if (this.jmapApiClient != null && this.jmapApiClient.isValidFor(session)) {
+                return this.jmapApiClient;
+            }
+            final JmapApiClientFactory factory = new JmapApiClientFactory(
+                    authentication,
+                    sessionStateListener
+            );
+            this.jmapApiClient = factory.getJmapApiClient(session);
+            return jmapApiClient;
+        }
     }
 
     public ListenableFuture<Session> getSession() {
@@ -116,13 +137,19 @@ public class JmapClient implements Closeable {
     }
 
     private PushService monitorEvents(final Session session, final OnStateChangeListener onStateChangeListener) {
-        final EventSourcePushService eventSourcePushService = new EventSourcePushService(
-                session,
-                authentication
-        );
-        eventSourcePushService.setOnStateChangeListener(onStateChangeListener);
-        eventSourcePushService.connect();
-        return eventSourcePushService;
+        final JmapApiClient jmapApiClient  = getApiClient(session);
+        final PushService pushService;
+        if (jmapApiClient instanceof PushService) {
+            pushService = (PushService) jmapApiClient;
+        } else {
+            pushService = new EventSourcePushService(
+                    session,
+                    authentication
+            );
+        }
+        pushService.setOnStateChangeListener(onStateChangeListener);
+        pushService.connect();
+        return pushService;
     }
 
     public MultiCall newMultiCall() {
