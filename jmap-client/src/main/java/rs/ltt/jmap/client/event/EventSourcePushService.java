@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
+import rs.ltt.jmap.client.util.State;
 import rs.ltt.jmap.common.entity.StateChange;
 
 import java.time.Duration;
@@ -48,7 +49,6 @@ public class EventSourcePushService implements PushService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSourcePushService.class);
 
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
-    private static final List<State> STATES_NEEDING_RECONNECT = Arrays.asList(State.CLOSED, State.FAILED);
     private final Session session;
     private final HttpAuthentication authentication;
     private OnStateChangeListener onStateChangeListener;
@@ -90,7 +90,7 @@ public class EventSourcePushService implements PushService {
         }
         LOGGER.info("transition to {}", state);
         this.state = state;
-        if (STATES_NEEDING_RECONNECT.contains(state)) {
+        if (state.needsReconnect()) {
             scheduleReconnect();
         }
     }
@@ -112,13 +112,16 @@ public class EventSourcePushService implements PushService {
         }
     }
 
+    @Override
     public void connect() {
-        if (!STATES_NEEDING_RECONNECT.contains(this.state)) {
+        //TODO there needs to be some synchronization since connect can be called externally
+        if (!this.state.needsReconnect()) {
             return;
         }
         this.attempt++;
         cancelReconnectionFuture();
         transitionTo(State.CONNECTING);
+        //might be 'fun' to put everything below this point into a separate method
         final EventSource.Factory factory = EventSources.createFactory(
                 OK_HTTP_CLIENT.newBuilder()
                         .readTimeout(pingInterval.plus(pingIntervalTolerance))
@@ -177,10 +180,6 @@ public class EventSourcePushService implements PushService {
     public void stop() {
         disconnect(State.STOPPED);
         cancelReconnectionFuture();
-    }
-
-    private enum State {
-        CLOSED, CONNECTING, CONNECTED, FAILED, STOPPED
     }
 
     private static final class Type {

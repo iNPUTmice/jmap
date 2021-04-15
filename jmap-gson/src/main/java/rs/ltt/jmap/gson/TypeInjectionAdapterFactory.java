@@ -60,13 +60,7 @@ public class TypeInjectionAdapterFactory implements TypeAdapterFactory {
     private static JsonObject annotateWith(final JsonObject original, final String type) {
         final JsonObject annotatedObject = new JsonObject();
         annotatedObject.addProperty("@type", type);
-        addAll(annotatedObject, original.entrySet());
+        GsonUtils.addAll(annotatedObject, original.entrySet());
         return annotatedObject;
-    }
-
-    private static void addAll(final JsonObject to, Set<Map.Entry<String, JsonElement>> entries) {
-        for (final Map.Entry<String, JsonElement> entry : entries) {
-            to.add(entry.getKey(), entry.getValue());
-        }
     }
 }

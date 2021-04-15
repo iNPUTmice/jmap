@@ -16,7 +16,9 @@
 
 package rs.ltt.jmap.client.api;
 
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.SettableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.client.util.ResponseAnalyzer;
@@ -27,47 +29,19 @@ import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.MethodResponse;
 
-import javax.annotation.Nonnull;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
-
-import static rs.ltt.jmap.client.Services.GSON;
 
 public abstract class AbstractJmapApiClient implements JmapApiClient {
 
-    //TODO this execute() method seems to be specific to Http - we might want to move this to HttpJmapApiClient
-    //and leave processResponse(request, GenericResponse) in here
-    @Override
-    public void execute(final JmapRequest jmapRequest) {
-        final String json;
-        try {
-            json = GSON.toJson(jmapRequest.getRequest());
-        } catch (final Throwable throwable) {
-            jmapRequest.setException(throwable);
-            return;
-        }
-        Futures.addCallback(send(json), new FutureCallback<InputStream>() {
-            @Override
-            public void onSuccess(final InputStream inputStream) {
-                try {
-                    processResponse(jmapRequest, inputStream);
-                } catch (final RuntimeException e) {
-                    jmapRequest.setException(e);
-                }
-            }
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractJmapApiClient.class);
 
-            @Override
-            public void onFailure(@Nonnull Throwable throwable) {
-                jmapRequest.setException(throwable);
-            }
-        }, MoreExecutors.directExecutor());
+
+    private final SessionStateListener sessionStateListener;
+
+    protected AbstractJmapApiClient(final SessionStateListener sessionStateListener) {
+        this.sessionStateListener = sessionStateListener;
     }
 
-    protected void processResponse(final JmapRequest jmapRequest, final InputStream inputStream) {
-        final GenericResponse genericResponse = GSON.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
-        processResponse(jmapRequest, genericResponse);
-    }
 
     protected void processResponse(final JmapRequest jmapRequest, final GenericResponse genericResponse) {
         if (genericResponse instanceof ErrorResponse) {
@@ -107,7 +81,10 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
         }
     }
 
-    abstract void onSessionStateRetrieved(String sessionState);
-
-    abstract ListenableFuture<InputStream> send(String out);
+    private void onSessionStateRetrieved(final String sessionState) {
+        LOGGER.debug("Notified of session state='{}'", sessionState);
+        if (sessionStateListener != null) {
+            sessionStateListener.onSessionStateRetrieved(sessionState);
+        }
+    }
 }

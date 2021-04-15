@@ -16,8 +16,11 @@
 
 package rs.ltt.jmap.client.api;
 
+import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
+import rs.ltt.jmap.client.util.WebSocketUtil;
+import rs.ltt.jmap.common.entity.capability.WebSocketCapability;
 
 public class JmapApiClientFactory {
 
@@ -31,6 +34,15 @@ public class JmapApiClientFactory {
 
 
     public JmapApiClient getJmapApiClient(final Session session) {
+        final WebSocketCapability webSocketCapability = session.getCapability(WebSocketCapability.class);
+        if (webSocketCapability != null && webSocketCapability.getSupportsPush()) {
+            final HttpUrl url = WebSocketUtil.normalizeUrl(webSocketCapability.getUrl());
+            return new WebSocketJmapApiClient(
+                    url,
+                    httpAuthentication,
+                    sessionStateListener
+            );
+        }
         return new HttpJmapApiClient(
                 session.getApiUrl(),
                 httpAuthentication,

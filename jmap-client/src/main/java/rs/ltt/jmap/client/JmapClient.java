@@ -32,11 +32,13 @@ import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.client.session.SessionClient;
+import rs.ltt.jmap.client.util.Closeables;
 import rs.ltt.jmap.common.method.MethodCall;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 
 public class JmapClient implements Closeable {
@@ -111,6 +113,7 @@ public class JmapClient implements Closeable {
             if (this.jmapApiClient != null && this.jmapApiClient.isValidFor(session)) {
                 return this.jmapApiClient;
             }
+            //TODO remember to stop/close invalid clients
             final JmapApiClientFactory factory = new JmapApiClientFactory(
                     authentication,
                     sessionStateListener
@@ -162,6 +165,10 @@ public class JmapClient implements Closeable {
 
     @Override
     public void close() {
+        final JmapApiClient apiClient = this.jmapApiClient;
+        if (apiClient instanceof Closeable) {
+            Closeables.closeQuietly((Closeable) apiClient);
+        }
         executorService.shutdown();
     }
 

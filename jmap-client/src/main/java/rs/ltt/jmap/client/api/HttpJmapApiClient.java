@@ -18,20 +18,23 @@ package rs.ltt.jmap.client.api;
 
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.*;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.http.BasicAuthHttpAuthentication;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
+import rs.ltt.jmap.common.GenericResponse;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
+import static rs.ltt.jmap.client.Services.GSON;
 import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
 
 public class HttpJmapApiClient extends AbstractJmapApiClient {
@@ -42,32 +45,22 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
 
     private final HttpUrl apiUrl;
     private final HttpAuthentication httpAuthentication;
-    private final SessionStateListener sessionStateListener;
 
     public HttpJmapApiClient(final HttpUrl apiUrl, String username, String password) {
         this(apiUrl, new BasicAuthHttpAuthentication(username, password), null);
     }
 
     public HttpJmapApiClient(final HttpUrl apiUrl, final HttpAuthentication httpAuthentication, @Nullable final SessionStateListener sessionStateListener) {
+        super(sessionStateListener);
         this.apiUrl = Preconditions.checkNotNull(apiUrl, "This API URL must not be null");
         this.httpAuthentication = httpAuthentication;
-        this.sessionStateListener = sessionStateListener;
     }
 
     public HttpJmapApiClient(final HttpUrl apiUrl, final HttpAuthentication httpAuthentication) {
         this(apiUrl, httpAuthentication, null);
     }
 
-    @Override
-    void onSessionStateRetrieved(final String sessionState) {
-        LOGGER.debug("Notified of session state='{}'", sessionState);
-        if (sessionStateListener != null) {
-            sessionStateListener.onSessionStateRetrieved(sessionState);
-        }
-    }
-
-    @Override
-    ListenableFuture<InputStream> send(final String out) {
+    private ListenableFuture<InputStream> send(final String out) {
         final SettableFuture<InputStream> settableInputStreamFuture = SettableFuture.create();
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(apiUrl);
@@ -107,6 +100,37 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
             }
         });
         return settableInputStreamFuture;
+    }
+
+    @Override
+    public void execute(final JmapRequest jmapRequest) {
+        final String json;
+        try {
+            json = GSON.toJson(jmapRequest.getRequest());
+        } catch (final Throwable throwable) {
+            jmapRequest.setException(throwable);
+            return;
+        }
+        Futures.addCallback(send(json), new FutureCallback<InputStream>() {
+            @Override
+            public void onSuccess(final InputStream inputStream) {
+                try {
+                    processResponse(jmapRequest, inputStream);
+                } catch (final RuntimeException e) {
+                    jmapRequest.setException(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@Nonnull Throwable throwable) {
+                jmapRequest.setException(throwable);
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
+    protected void processResponse(final JmapRequest jmapRequest, final InputStream inputStream) {
+        final GenericResponse genericResponse = GSON.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
+        processResponse(jmapRequest, genericResponse);
     }
 
     @Override

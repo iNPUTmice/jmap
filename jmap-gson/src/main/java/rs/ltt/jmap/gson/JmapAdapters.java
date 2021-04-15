@@ -44,6 +44,7 @@ public final class JmapAdapters {
         PrimaryAccountsDeserializer.register(builder);
         GenericResponseDeserializer.register(builder);
         ResponseInvocationDeserializer.register(builder);
+        WebSocketMessageDeserializer.register(builder);
 
         RequestInvocationTypeAdapter.register(builder);
         CapabilitiesSerializer.register(builder);
@@ -53,6 +54,7 @@ public final class JmapAdapters {
         ListSerializer.register(builder);
         ResponseInvocationSerializer.register(builder);
         StringMapSerializer.register(builder);
+        WebSocketMessageSerializer.register(builder);
     }
 
 }

@@ -1,0 +1,47 @@
+/*
+ * Copyright 2021 Daniel Gultsch
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+package rs.ltt.jmap.client.util;
+
+import com.google.common.collect.ImmutableBiMap;
+import okhttp3.HttpUrl;
+
+import java.util.Locale;
+
+public final class WebSocketUtil {
+
+    private WebSocketUtil() {
+
+    }
+
+    private static final ImmutableBiMap<String, String> SCHEME_MAP = new ImmutableBiMap.Builder<String, String>()
+            .put("ws", "http")
+            .put("wss", "https")
+            .build();
+
+    public static HttpUrl normalizeUrl(final String url) {
+        final int schemeEndIndex = url.indexOf(":");
+        if (schemeEndIndex == -1) {
+            throw new IllegalArgumentException("No scheme found");
+        }
+        final String scheme = url.substring(0, schemeEndIndex).toLowerCase(Locale.ENGLISH);
+        if (SCHEME_MAP.containsKey(scheme)) {
+            final String normalizedScheme = SCHEME_MAP.get(scheme);
+            return HttpUrl.get(normalizedScheme + url.substring(scheme.length()));
+        }
+        return HttpUrl.get(url);
+    }
+}
