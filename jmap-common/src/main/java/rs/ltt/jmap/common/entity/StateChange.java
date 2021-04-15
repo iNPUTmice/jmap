@@ -25,12 +25,15 @@ import rs.ltt.jmap.annotation.Type;
 import java.util.Map;
 
 @Getter
-@Builder
 @Type
 public class StateChange {
 
-    @Singular("changed")
-    private Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed;
+    protected Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed;
+
+    @Builder
+    public StateChange(@Singular("changed") Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed) {
+        this.changed = changed;
+    }
 
     @Override
     public String toString() {

@@ -261,7 +261,7 @@ public class HttpJmapClientTest {
     @Test
     public void webSocketUrl() throws IOException, ExecutionException, InterruptedException {
         final MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().setBody(readResourceAsString("session-urls/01-session.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("session-urls/02-session-ws.json")));
         server.start();
         final JmapClient jmapClient = new JmapClient(
                 USERNAME,

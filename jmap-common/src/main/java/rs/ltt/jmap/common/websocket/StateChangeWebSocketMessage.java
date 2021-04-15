@@ -16,21 +16,27 @@
 
 package rs.ltt.jmap.common.websocket;
 
-import lombok.Builder;
+import com.google.common.base.MoreObjects;
 import lombok.Getter;
-import lombok.Singular;
-import rs.ltt.jmap.annotation.Type;
+import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
+import rs.ltt.jmap.common.entity.StateChange;
 
-import java.util.List;
+import java.util.Map;
 
-@Builder
 @Getter
-@Type("WebSocketPushEnable")
-public class PushEnableWebSocketMessage implements WebSocketMessage {
-
-    @Singular
-    private List<String> dataTypes;
+public class StateChangeWebSocketMessage extends StateChange implements WebSocketMessage {
 
     private String pushState;
 
+    public StateChangeWebSocketMessage(Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed) {
+        super(changed);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("changed", changed)
+                .add("pushState", pushState)
+                .toString();
+    }
 }

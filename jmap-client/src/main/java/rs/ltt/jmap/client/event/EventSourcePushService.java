@@ -27,17 +27,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.client.util.State;
 import rs.ltt.jmap.common.entity.StateChange;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +45,6 @@ public class EventSourcePushService implements PushService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSourcePushService.class);
 
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
     private final Session session;
     private final HttpAuthentication authentication;
     private OnStateChangeListener onStateChangeListener;
@@ -98,7 +94,7 @@ public class EventSourcePushService implements PushService {
     private void scheduleReconnect() {
         final Duration reconnectIn = reconnectionStrategy.getNextReconnectionAttempt(attempt);
         LOGGER.info("schedule reconnect in {}", reconnectIn);
-        this.reconnectionFuture = SCHEDULED_EXECUTOR_SERVICE.schedule(
+        this.reconnectionFuture = Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
                 this::connect,
                 reconnectIn.toMillis(),
                 TimeUnit.MILLISECONDS

@@ -18,7 +18,11 @@
     },
     "urn:ietf:params:jmap:mail": {},
     "urn:ietf:params:jmap:submission": {},
-    "urn:ietf:params:jmap:vacationresponse": {}
+    "urn:ietf:params:jmap:vacationresponse": {},
+    "urn:ietf:params:jmap:websocket": {
+      "url": "/jmap/ws/",
+      "supportsPush": false
+    }
   },
   "accounts": {
     "test@example.com": {

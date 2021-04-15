@@ -21,6 +21,7 @@ import rs.ltt.jmap.common.ErrorResponse;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.websocket.ErrorResponseWebSocketMessage;
 import rs.ltt.jmap.common.websocket.ResponseWebSocketMessage;
+import rs.ltt.jmap.common.websocket.StateChangeWebSocketMessage;
 import rs.ltt.jmap.common.websocket.WebSocketMessage;
 
 import java.lang.reflect.Type;
@@ -59,6 +60,9 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
                     .responseId(requestId)
                     .response(errorResponse)
                     .build();
+        }
+        if ("StateChange".equals(messageType)) {
+            return context.deserialize(jsonElement, StateChangeWebSocketMessage.class);
         }
         throw new JsonParseException(String.format("Unknown WebSocketMessage type %s", messageType));
     }

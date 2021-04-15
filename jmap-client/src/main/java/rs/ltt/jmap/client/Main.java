@@ -62,6 +62,11 @@ public class Main {
         try (final JmapClient client = new JmapClient(username, password, sessionResource)) {
             client.setSessionCache(new FileSessionCache());
 
+            client.monitorEvents(stateChange -> {
+                System.out.println(stateChange.toString());
+                return true;
+            });
+
             final Future<MethodResponses> methodResponsesFuture = client.call(EchoMethodCall.builder().build());
 
             //System.out.println("Echo call result: " + methodResponsesFuture.get().getMain(EchoMethodResponse.class).toString());
@@ -97,8 +102,7 @@ public class Main {
             for (Email email : getEmailMethodResponse.getList()) {
                 System.out.println(email.getSentAt() + " " + email.getFrom() + " " + email.getSubject());
             }
-            System.out.println(emailQueryResponse);
-            String currentState = emailQueryResponse.getQueryState();
+            /*String currentState = emailQueryResponse.getQueryState();
             while (true) {
                 Thread.sleep(5000);
                 final JmapClient.MultiCall updateMultiCall = client.newMultiCall();
@@ -127,7 +131,7 @@ public class Main {
                 }
                 //System.out.println(emailAddedGetResponse);
                 currentState = emailQueryChangesResponse.getNewQueryState();
-            }
+            }*/
         } catch (Exception e) {
             e.printStackTrace();
         }

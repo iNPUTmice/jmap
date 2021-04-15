@@ -54,7 +54,7 @@ public final class JmapAdapters {
         ListSerializer.register(builder);
         ResponseInvocationSerializer.register(builder);
         StringMapSerializer.register(builder);
-        WebSocketMessageSerializer.register(builder);
+        ApiWebSocketMessageSerializer.register(builder);
     }
 
 }

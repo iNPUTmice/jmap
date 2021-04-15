@@ -25,11 +25,15 @@ import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.api.UserAgentInterceptor;
 import rs.ltt.jmap.gson.JmapAdapters;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 public final class Services {
 
     public static final OkHttpClient OK_HTTP_CLIENT;
     public static final OkHttpClient OK_HTTP_CLIENT_LOGGING;
     public static final Gson GSON;
+    public static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
 
     static {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();

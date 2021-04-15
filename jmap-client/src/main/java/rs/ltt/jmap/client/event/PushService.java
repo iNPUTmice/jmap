@@ -18,6 +18,7 @@ package rs.ltt.jmap.client.event;
 
 public interface PushService {
 
+
     void setOnStateChangeListener(OnStateChangeListener onStateChangeListener);
 
     void connect();

@@ -16,5 +16,8 @@
 
 package rs.ltt.jmap.common.websocket;
 
+import rs.ltt.jmap.annotation.Type;
+
+@Type("WebSocketPushDisable")
 public class PushDisableWebSocketMessage implements WebSocketMessage {
 }

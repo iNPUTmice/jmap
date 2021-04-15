@@ -24,45 +24,22 @@ import rs.ltt.jmap.gson.GsonUtils;
 
 import java.lang.reflect.Type;
 
-public class WebSocketMessageSerializer implements JsonSerializer<WebSocketMessage> {
+public class ApiWebSocketMessageSerializer implements JsonSerializer<AbstractApiWebSocketMessage> {
 
-    private static final BiMap<String, Class<? extends WebSocketMessage>> MESSAGE_MAP = new ImmutableBiMap.Builder<String, Class<? extends WebSocketMessage>>()
+    private static final BiMap<String, Class<? extends AbstractApiWebSocketMessage>> MESSAGE_MAP = new ImmutableBiMap.Builder<String, Class<? extends AbstractApiWebSocketMessage>>()
             .put("RequestError", ErrorResponseWebSocketMessage.class)
-            .put("WebSocketPushEnable", PushEnableWebSocketMessage.class)
-            .put("WebSocketPushDisable", PushDisableWebSocketMessage.class)
             .put("Request", RequestWebSocketMessage.class)
             .put("Response", ResponseWebSocketMessage.class)
             .build();
 
     public static void register(final GsonBuilder builder) {
         for (final Class<? extends WebSocketMessage> clazz : MESSAGE_MAP.values()) {
-            builder.registerTypeAdapter(clazz, new WebSocketMessageSerializer());
+            builder.registerTypeAdapter(clazz, new ApiWebSocketMessageSerializer());
         }
     }
 
     @Override
-    public JsonElement serialize(final WebSocketMessage message, final Type type, final JsonSerializationContext context) {
-        if (message instanceof AbstractApiWebSocketMessage) {
-            return serialize((AbstractApiWebSocketMessage) message, context);
-        }
-        if (message instanceof PushDisableWebSocketMessage) {
-            return serialize((PushDisableWebSocketMessage) message, context);
-        }
-        if (message instanceof PushEnableWebSocketMessage) {
-            return serialize((PushEnableWebSocketMessage) message, context);
-        }
-        throw new JsonIOException(String.format("%s is not a registered WebSocketMessage", message.getClass().getName()));
-    }
-
-    private JsonElement serialize(final PushDisableWebSocketMessage message, final JsonSerializationContext context) {
-        return null;
-    }
-
-    private JsonElement serialize(final PushEnableWebSocketMessage message, final JsonSerializationContext context) {
-        return null;
-    }
-
-    private JsonElement serialize(final AbstractApiWebSocketMessage message, final JsonSerializationContext context) {
+    public JsonElement serialize(final AbstractApiWebSocketMessage message, final Type type, final JsonSerializationContext context) {
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("@type", MESSAGE_MAP.inverse().get(message.getClass()));
         jsonObject.addProperty("requestId", message.getRequestId());

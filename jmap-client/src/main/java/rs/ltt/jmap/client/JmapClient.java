@@ -92,9 +92,7 @@ public class JmapClient implements Closeable {
         Futures.addCallback(getSession(), new FutureCallback<Session>() {
             @Override
             public void onSuccess(@Nullable Session session) {
-                Preconditions.checkState(session != null, "Session was null");
-                final JmapApiClient apiClient = getApiClient(session);
-                apiClient.execute(request);
+                execute(request, session);
             }
 
             @Override
@@ -102,6 +100,16 @@ public class JmapClient implements Closeable {
                 request.setException(throwable);
             }
         }, executorService);
+    }
+
+    private void execute(final JmapRequest request, final Session session) {
+        try {
+            Preconditions.checkState(session != null, "Session was null");
+            final JmapApiClient apiClient = getApiClient(session);
+            apiClient.execute(request);
+        } catch (final Throwable throwable) {
+            request.setException(throwable);
+        }
     }
 
     private JmapApiClient getApiClient(final Session session) {
