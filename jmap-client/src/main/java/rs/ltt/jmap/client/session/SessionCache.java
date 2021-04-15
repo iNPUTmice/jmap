@@ -16,10 +16,11 @@
 
 package rs.ltt.jmap.client.session;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import okhttp3.HttpUrl;
 
 public interface SessionCache {
 
     void store(String username, HttpUrl sessionResource, Session session);
-    Session load(String username, HttpUrl sessionResource);
+    ListenableFuture<Session> load(String username, HttpUrl sessionResource);
 }

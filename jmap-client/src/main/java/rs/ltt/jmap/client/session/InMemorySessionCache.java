@@ -18,6 +18,8 @@ package rs.ltt.jmap.client.session;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import okhttp3.HttpUrl;
 
 import java.util.HashMap;
@@ -35,9 +37,9 @@ public class InMemorySessionCache implements SessionCache {
     }
 
     @Override
-    public Session load(final String username, final HttpUrl sessionResource) {
+    public ListenableFuture<Session> load(final String username, final HttpUrl sessionResource) {
         synchronized (this.cache) {
-            return cache.get(getKey(username, sessionResource));
+            return Futures.immediateFuture(cache.get(getKey(username, sessionResource)));
         }
     }
 

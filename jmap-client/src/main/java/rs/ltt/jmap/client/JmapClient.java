@@ -43,7 +43,6 @@ public class JmapClient implements Closeable {
 
     private final SessionClient sessionClient;
     private final HttpAuthentication authentication;
-    private final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
     private final SessionStateListener sessionStateListener = new SessionStateListener() {
         @Override
         public void onSessionStateRetrieved(String sessionState) {
@@ -77,7 +76,8 @@ public class JmapClient implements Closeable {
     }
 
     public ListenableFuture<MethodResponses> call(MethodCall methodCall) {
-        Preconditions.checkState(!isShutdown(), "Unable to call method. JmapClient has been closed already");
+        //TODO check if JmapApiClient has been closed
+        //Preconditions.checkState(!isShutdown(), "Unable to call method. JmapClient has been closed already");
         final JmapRequest.Builder jmapRequestBuilder = new JmapRequest.Builder();
         final ListenableFuture<MethodResponses> methodResponsesFuture = jmapRequestBuilder.call(methodCall).getMethodResponses();
         this.execute(jmapRequestBuilder.build());
@@ -95,7 +95,7 @@ public class JmapClient implements Closeable {
             public void onFailure(@Nonnull Throwable throwable) {
                 request.setException(throwable);
             }
-        }, executorService);
+        }, MoreExecutors.directExecutor());
     }
 
     private void execute(final JmapRequest request, final Session session) {
@@ -128,11 +128,7 @@ public class JmapClient implements Closeable {
     }
 
     public ListenableFuture<Session> getSession() {
-        return executorService.submit(sessionClient::get);
-    }
-
-    private boolean isShutdown() {
-        return executorService.isShutdown();
+        return sessionClient.get();
     }
 
     public ListenableFuture<PushService> monitorEvents(final OnStateChangeListener onStateChangeListener) {
@@ -183,7 +179,6 @@ public class JmapClient implements Closeable {
         if (apiClient instanceof Closeable) {
             Closeables.closeQuietly((Closeable) apiClient);
         }
-        executorService.shutdown();
     }
 
     public class MultiCall {
@@ -202,7 +197,10 @@ public class JmapClient implements Closeable {
 
         public synchronized void execute() {
             Preconditions.checkState(!executed, "You must not execute the same MultiCall twice");
-            Preconditions.checkState(!isShutdown(), "Unable to execute MultiCall. JmapClient has been closed already");
+
+            //TODO check if jmapApiClient is shutdown or closed or something
+
+            //Preconditions.checkState(!isShutdown(), "Unable to execute MultiCall. JmapClient has been closed already");
             this.executed = true;
             JmapClient.this.execute(jmapRequestBuilder.build());
         }

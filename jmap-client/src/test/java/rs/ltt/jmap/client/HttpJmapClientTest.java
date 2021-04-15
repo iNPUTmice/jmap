@@ -77,6 +77,34 @@ public class HttpJmapClientTest {
         server.shutdown();
     }
 
+    @Test
+    public void repeatedSessionFetches() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        server.start();
+
+        final JmapClient jmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+
+        final ListenableFuture<Session> firstSessionFuture = jmapClient.getSession();
+        final ListenableFuture<Session> secondSessionFuture = jmapClient.getSession();
+
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        final Session firstSession = firstSessionFuture.get();
+        final Session secondSession = secondSessionFuture.get();
+        Assertions.assertEquals("/jmap/", firstSession.getApiUrl().encodedPath());
+        Assertions.assertEquals("/jmap/", secondSession.getApiUrl().encodedPath());
+
+        final ListenableFuture<Session> thirdSessionFuture = jmapClient.getSession();
+        Assertions.assertEquals("/jmap/", thirdSessionFuture.get().getApiUrl().encodedPath());
+
+        server.shutdown();
+    }
+
     public static String readResourceAsString(String filename) throws IOException {
         return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8).read().trim();
     }

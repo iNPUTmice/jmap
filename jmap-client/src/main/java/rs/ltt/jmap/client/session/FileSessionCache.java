@@ -18,21 +18,24 @@ package rs.ltt.jmap.client.session;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import okhttp3.HttpUrl;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rs.ltt.jmap.gson.JmapAdapters;
 
 import java.io.*;
+import java.util.concurrent.Executors;
 
 import static rs.ltt.jmap.client.Services.GSON;
 
 public class FileSessionCache implements SessionCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSessionCache.class);
+
+    private static final ListeningExecutorService EXECUTOR_SERVICE = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
     private final File directory;
 
@@ -47,14 +50,36 @@ public class FileSessionCache implements SessionCache {
 
     @Override
     public void store(String username, HttpUrl sessionResource, Session session) {
+        EXECUTOR_SERVICE.execute(() -> {
+            final File file = getFile(getFilename(username, sessionResource));
+            try {
+                final FileWriter fileWriter = new FileWriter(file);
+                GSON.toJson(session, fileWriter);
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                LOGGER.error("Unable to cache session in {}", file.getAbsolutePath());
+            }
+        });
+    }
+
+    @Override
+    public ListenableFuture<Session> load(String username, HttpUrl sessionResource) {
+        return EXECUTOR_SERVICE.submit(() -> loadFromFile(username, sessionResource));
+    }
+
+    private Session loadFromFile(final String username, final HttpUrl sessionResource) {
         final File file = getFile(getFilename(username, sessionResource));
         try {
-            final FileWriter fileWriter = new FileWriter(file);
-            GSON.toJson(session, fileWriter);
-            fileWriter.flush();
-            fileWriter.close();
-        } catch (IOException e) {
-            LOGGER.error("Unable to cache session in {}", file.getAbsolutePath());
+            final Session session = GSON.fromJson(new FileReader(file), Session.class);
+            LOGGER.debug("Restored session from {}", file.getAbsolutePath());
+            return session;
+        } catch (final FileNotFoundException e) {
+            LOGGER.debug("Unable to restore session. {} not found", file.getAbsolutePath());
+            return null;
+        } catch (final Exception e) {
+            LOGGER.warn("Unable to restore session", e);
+            return null;
         }
     }
 
@@ -69,21 +94,5 @@ public class FileSessionCache implements SessionCache {
     private static String getFilename(String username, HttpUrl sessionResource) {
         final String name = username + ':' + (sessionResource == null ? '\00' : sessionResource.toString());
         return "session-cache-" + Hashing.sha256().hashString(name, Charsets.UTF_8).toString();
-    }
-
-    @Override
-    public Session load(String username, HttpUrl sessionResource) {
-        final File file = getFile(getFilename(username, sessionResource));
-        try {
-            final Session session = GSON.fromJson(new FileReader(file), Session.class);
-            LOGGER.debug("Restored session from {}", file.getAbsolutePath());
-            return session;
-        } catch (final FileNotFoundException e) {
-            LOGGER.debug("Unable to restore session. {} not found", file.getAbsolutePath());
-            return null;
-        } catch (final Exception e) {
-            LOGGER.warn("Unable to restore session", e);
-            return null;
-        }
     }
 }

@@ -16,12 +16,12 @@
 
 package rs.ltt.jmap.client.session;
 
+import com.google.common.util.concurrent.*;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import okhttp3.*;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.api.EndpointNotFoundException;
@@ -31,6 +31,7 @@ import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.util.WellKnownUtil;
 import rs.ltt.jmap.common.SessionResource;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -45,6 +46,7 @@ public class SessionClient {
     private final HttpAuthentication httpAuthentication;
     private SessionCache sessionCache;
     private Session currentSession = null;
+    private ListenableFuture<Session> currentSessionFuture = Futures.immediateCancelledFuture();
     private boolean sessionResourceChanged = false;
 
     public SessionClient(final HttpAuthentication authentication) {
@@ -57,43 +59,76 @@ public class SessionClient {
         this.httpAuthentication = authentication;
     }
 
-    public Session get() throws Exception {
-        synchronized (this) {
-            if (!sessionResourceChanged && currentSession != null) {
-                return currentSession;
-            }
-
-            final String username = httpAuthentication.getUsername();
-            final HttpUrl resource;
-            if (sessionResource != null) {
-                resource = sessionResource;
-            } else {
-                resource = WellKnownUtil.fromUsername(username);
-            }
-
-            final SessionCache cache = sessionCache;
-            Session session = !sessionResourceChanged && cache != null ? cache.load(username, resource) : null;
-            if (session == null) {
-                session = fetchSession(resource);
-                sessionResourceChanged = false;
-                if (cache != null) {
-                    LOGGER.debug("caching to {}", cache.getClass().getSimpleName());
-                    cache.store(username, resource, session);
-                }
-            }
-
-            currentSession = session;
-
+    public synchronized ListenableFuture<Session> get() {
+        if (!sessionResourceChanged && currentSession != null) {
+            return Futures.immediateFuture(currentSession);
         }
-        return currentSession;
+        final String username = httpAuthentication.getUsername();
+        final HttpUrl resource;
+        try {
+            resource = getSessionResource();
+        } catch (final WellKnownUtil.MalformedUsernameException e) {
+            return Futures.immediateFailedFuture(e);
+        }
+        if (!currentSessionFuture.isDone()) {
+            return currentSessionFuture;
+        }
+        this.currentSessionFuture = fetchSession(username, resource);
+        return this.currentSessionFuture;
     }
 
-    private Session fetchSession(final HttpUrl base) throws Exception {
+    private HttpUrl getSessionResource() throws WellKnownUtil.MalformedUsernameException {
+        final String username = httpAuthentication.getUsername();
+        if (sessionResource != null) {
+            return sessionResource;
+        } else {
+            return WellKnownUtil.fromUsername(username);
+        }
+    }
+
+    private ListenableFuture<Session> fetchSession(final String username, final HttpUrl sessionResource) {
+        final SessionCache cache = sessionResourceChanged ? null : sessionCache;
+        final ListenableFuture<Session> cachedSessionFuture;
+        if (cache == null) {
+            cachedSessionFuture = Futures.immediateFuture(null);
+        } else {
+            cachedSessionFuture = cache.load(username, sessionResource);
+        }
+        return Futures.transformAsync(cachedSessionFuture, session -> {
+            if (session != null) {
+                return Futures.immediateFuture(session);
+            }
+            return fetchSessionHttp(username, sessionResource);
+        }, MoreExecutors.directExecutor());
+    }
+
+    private ListenableFuture<Session> fetchSessionHttp(final String username, final HttpUrl base) throws Exception {
+        final SettableFuture<Session> settableFuture = SettableFuture.create();
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(base);
         httpAuthentication.authenticate(requestBuilder);
 
-        final Response response = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build()).execute();
+        final Call call = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build());
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                settableFuture.setException(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                try {
+                    settableFuture.set(processResponse(base, response));
+                } catch (final Exception e) {
+                    settableFuture.setException(e);
+                }
+            }
+        });
+        registerSuccessCallback(settableFuture, username, base);
+        return settableFuture;
+    }
+
+    private static Session processResponse(final HttpUrl base, final Response response) throws Exception {
         final int code = response.code();
         if (code == 200 || code == 201) {
             final ResponseBody body = response.body();
@@ -120,22 +155,46 @@ public class SessionClient {
         }
     }
 
-    public void setLatestSessionState(String sessionState) {
-        synchronized (this) {
-            if (sessionResourceChanged) {
-                return;
+    private void registerSuccessCallback(final ListenableFuture<Session> future, final String username, final HttpUrl resource) {
+        Futures.addCallback(future, new FutureCallback<Session>() {
+            @Override
+            public void onSuccess(@Nullable Session session) {
+                if (session != null) {
+                    setSession(username, resource, session);
+                }
             }
 
-            final Session existingSession = this.currentSession;
-            if (existingSession == null) {
-                sessionResourceChanged = true;
-                return;
-            }
+            @Override
+            public void onFailure(final Throwable throwable) {
 
-            final String oldState = existingSession.getState();
-            if (oldState == null || !oldState.equals(sessionState)) {
-                sessionResourceChanged = true;
             }
+        }, MoreExecutors.directExecutor());
+    }
+
+    private synchronized void setSession(String username, HttpUrl resource, final Session session) {
+        this.sessionResourceChanged = false;
+        this.currentSession = session;
+        final SessionCache cache = sessionCache;
+        if (cache != null) {
+            LOGGER.debug("caching to {}", cache.getClass().getSimpleName());
+            cache.store(username, resource, session);
+        }
+    }
+
+    public synchronized void setLatestSessionState(String sessionState) {
+        if (sessionResourceChanged) {
+            return;
+        }
+
+        final Session existingSession = this.currentSession;
+        if (existingSession == null) {
+            sessionResourceChanged = true;
+            return;
+        }
+
+        final String oldState = existingSession.getState();
+        if (oldState == null || !oldState.equals(sessionState)) {
+            sessionResourceChanged = true;
         }
     }
 
