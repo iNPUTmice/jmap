@@ -20,7 +20,6 @@ package rs.ltt.jmap.client;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.*;
 import okhttp3.HttpUrl;
-import rs.ltt.jmap.client.api.HttpJmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClientFactory;
 import rs.ltt.jmap.client.api.SessionStateListener;
@@ -38,24 +37,21 @@ import rs.ltt.jmap.common.method.MethodCall;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.Executors;
 
 public class JmapClient implements Closeable {
 
     private final SessionClient sessionClient;
     private final HttpAuthentication authentication;
-
-    private JmapApiClient jmapApiClient;
-
     private final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
-
     private final SessionStateListener sessionStateListener = new SessionStateListener() {
         @Override
         public void onSessionStateRetrieved(String sessionState) {
             sessionClient.setLatestSessionState(sessionState);
         }
     };
+    private JmapApiClient jmapApiClient;
+    private boolean useWebSocket = false;
 
     public JmapClient(String username, String password) {
         this(new BasicAuthHttpAuthentication(username, password));
@@ -126,7 +122,7 @@ public class JmapClient implements Closeable {
                     authentication,
                     sessionStateListener
             );
-            this.jmapApiClient = factory.getJmapApiClient(session);
+            this.jmapApiClient = factory.getJmapApiClient(session, this.useWebSocket);
             return jmapApiClient;
         }
     }
@@ -148,7 +144,7 @@ public class JmapClient implements Closeable {
     }
 
     private PushService monitorEvents(final Session session, final OnStateChangeListener onStateChangeListener) {
-        final JmapApiClient jmapApiClient  = getApiClient(session);
+        final JmapApiClient jmapApiClient = getApiClient(session);
         final PushService pushService;
         if (jmapApiClient instanceof PushService) {
             pushService = (PushService) jmapApiClient;
@@ -169,6 +165,16 @@ public class JmapClient implements Closeable {
 
     public void setSessionCache(SessionCache sessionCache) {
         this.sessionClient.setSessionCache(sessionCache);
+    }
+
+    public void setUseWebSocket(final boolean useWebSocket) {
+        synchronized (this) {
+            Preconditions.checkState(
+                    this.jmapApiClient == null,
+                    "WebSocket preference needs to be set before making the first API call"
+            );
+        }
+        this.useWebSocket = useWebSocket;
     }
 
     @Override
@@ -197,7 +203,7 @@ public class JmapClient implements Closeable {
         public synchronized void execute() {
             Preconditions.checkState(!executed, "You must not execute the same MultiCall twice");
             Preconditions.checkState(!isShutdown(), "Unable to execute MultiCall. JmapClient has been closed already");
-            executed = true;
+            this.executed = true;
             JmapClient.this.execute(jmapRequestBuilder.build());
         }
 

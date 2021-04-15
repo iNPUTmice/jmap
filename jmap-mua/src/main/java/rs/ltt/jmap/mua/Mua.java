@@ -291,6 +291,7 @@ public class Mua extends MuaSession {
         private SessionCache sessionCache = new InMemorySessionCache();
         private Cache cache = new InMemoryCache();
         private Long queryPageSize = null;
+        private boolean useWebSocket = false;
 
         private Builder() {
 
@@ -320,6 +321,11 @@ public class Mua extends MuaSession {
             return this;
         }
 
+        public Builder useWebSocket(final boolean useWebSocket) {
+            this.useWebSocket = useWebSocket;
+            return this;
+        }
+
         public Builder queryPageSize(int queryPageSize) {
             return queryPageSize((long) queryPageSize);
         }
@@ -344,6 +350,7 @@ public class Mua extends MuaSession {
 
             final JmapClient jmapClient = new JmapClient(this.username, this.password, this.sessionResource);
             jmapClient.setSessionCache(this.sessionCache);
+            jmapClient.setUseWebSocket(this.useWebSocket);
             final Mua mua = new Mua(jmapClient, cache, accountId);
             mua.setQueryPageSize(this.queryPageSize);
             return mua;
