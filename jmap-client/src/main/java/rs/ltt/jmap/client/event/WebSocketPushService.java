@@ -18,14 +18,22 @@ package rs.ltt.jmap.client.event;
 
 import okhttp3.HttpUrl;
 import org.jetbrains.annotations.Nullable;
+import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.api.SessionStateListener;
 import rs.ltt.jmap.client.api.WebSocketJmapApiClient;
 import rs.ltt.jmap.client.http.HttpAuthentication;
+import rs.ltt.jmap.client.util.State;
+import rs.ltt.jmap.common.websocket.PushDisableWebSocketMessage;
 import rs.ltt.jmap.common.websocket.PushEnableWebSocketMessage;
 import rs.ltt.jmap.common.websocket.StateChangeWebSocketMessage;
 import rs.ltt.jmap.common.websocket.WebSocketMessage;
 
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 public class WebSocketPushService extends WebSocketJmapApiClient implements PushService {
+
+    private ReconnectionStrategy reconnectionStrategy = ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
 
     private OnStateChangeListener onStateChangeListener;
 
@@ -41,7 +49,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     }
 
     @Override
-    public void connect() {
+    public void enable() {
         this.enablePushNotifications = true;
         if (readyToSend()) {
             enablePushNotifications();
@@ -49,15 +57,44 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     }
 
     @Override
-    public void stop() {
+    public void disable() {
         this.enablePushNotifications = false;
+        if (state == State.CONNECTED) {
+            disablePushNotifications();
+        }
     }
 
     private void enablePushNotifications() {
-        System.out.println("enable push notifications");
+        LOGGER.info("Enable push notifications");
         final PushEnableWebSocketMessage message = PushEnableWebSocketMessage.builder()
                 .build();
         send(message);
+    }
+
+    private void disablePushNotifications() {
+        LOGGER.info("Disable push notifications");
+        final PushDisableWebSocketMessage message = PushDisableWebSocketMessage.builder()
+                .build();
+        send(message);
+    }
+
+    @Override
+    protected void transitionTo(final State state) {
+        super.transitionTo(state);
+        if (state.needsReconnect() && enablePushNotifications) {
+            scheduleReconnect();
+        }
+    }
+
+    private void scheduleReconnect() {
+        final int attempt = this.attempt;
+        final Duration reconnectIn = reconnectionStrategy.getNextReconnectionAttempt(attempt);
+        LOGGER.info("schedule reconnect in {} for {} time", reconnectIn, attempt + 1);
+        this.reconnectionFuture = Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
+                this::connectWebSocket,
+                reconnectIn.toMillis(),
+                TimeUnit.MILLISECONDS
+        );
     }
 
     @Override

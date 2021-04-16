@@ -55,6 +55,7 @@ public class EventSourcePushService implements PushService {
     private int attempt = 0;
     private State state = State.CLOSED;
     private ScheduledFuture<?> reconnectionFuture;
+    private boolean enablePushNotifications = false;
 
     public EventSourcePushService(final Session session, final HttpAuthentication authentication) {
         this.session = session;
@@ -70,30 +71,18 @@ public class EventSourcePushService implements PushService {
         transitionTo(state);
     }
 
-    private boolean isStopped() {
-        return this.state == State.STOPPED;
-    }
-
-    private boolean isRunning() {
-        return this.state != State.STOPPED;
-    }
-
     private void transitionTo(final State state) {
-        if (isStopped()) {
-            throw new IllegalStateException(
-                    String.format("Unable to transition to %s. PushService has been stopped", state)
-            );
-        }
         LOGGER.info("transition to {}", state);
         this.state = state;
-        if (state.needsReconnect()) {
+        if (state.needsReconnect() && enablePushNotifications) {
             scheduleReconnect();
         }
     }
 
     private void scheduleReconnect() {
+        final int attempt = this.attempt;
         final Duration reconnectIn = reconnectionStrategy.getNextReconnectionAttempt(attempt);
-        LOGGER.info("schedule reconnect in {}", reconnectIn);
+        LOGGER.info("schedule reconnect in {} for {} time ", reconnectIn, attempt + 1);
         this.reconnectionFuture = Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
                 this::connect,
                 reconnectIn.toMillis(),
@@ -108,8 +97,7 @@ public class EventSourcePushService implements PushService {
         }
     }
 
-    @Override
-    public void connect() {
+    private void connect() {
         //TODO there needs to be some synchronization since connect can be called externally
         if (!this.state.needsReconnect()) {
             return;
@@ -121,7 +109,7 @@ public class EventSourcePushService implements PushService {
         final EventSource.Factory factory = EventSources.createFactory(
                 OK_HTTP_CLIENT.newBuilder()
                         .readTimeout(pingInterval.plus(pingIntervalTolerance))
-                        .retryOnConnectionFailure(false)
+                        .retryOnConnectionFailure(true)
                         .build()
         );
         final HttpUrl eventSourceUrl = session.getEventSourceUrl(
@@ -173,8 +161,15 @@ public class EventSourcePushService implements PushService {
     }
 
     @Override
-    public void stop() {
-        disconnect(State.STOPPED);
+    public void enable() {
+        this.enablePushNotifications = true;
+        connect();
+    }
+
+    @Override
+    public void disable() {
+        this.enablePushNotifications = false;
+        disconnect(State.CLOSED);
         cancelReconnectionFuture();
     }
 
@@ -187,10 +182,7 @@ public class EventSourcePushService implements PushService {
         @Override
         public void onClosed(@NotNull EventSource eventSource) {
             super.onClosed(eventSource);
-            if (isRunning()) {
-                //TODO if CloseAfter.State we should probably reconnect immediately
-                disconnect(State.CLOSED);
-            }
+            disconnect(State.CLOSED);
         }
 
         @Override
@@ -210,7 +202,7 @@ public class EventSourcePushService implements PushService {
         @Override
         public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
             super.onFailure(eventSource, t, response);
-            if (isRunning()) {
+            if (enablePushNotifications) {
                 if (t != null) {
                     LOGGER.warn("Unable to connect to EventSource URL", t);
                 } else if (response != null) {
@@ -225,10 +217,8 @@ public class EventSourcePushService implements PushService {
         @Override
         public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
             super.onOpen(eventSource, response);
-            if (isRunning()) {
-                attempt = 0;
-                transitionTo(State.CONNECTED);
-            }
+            attempt = 0;
+            transitionTo(State.CONNECTED);
         }
     }
 }

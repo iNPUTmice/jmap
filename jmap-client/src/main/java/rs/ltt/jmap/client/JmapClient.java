@@ -151,7 +151,7 @@ public class JmapClient implements Closeable {
             );
         }
         pushService.setOnStateChangeListener(onStateChangeListener);
-        pushService.connect();
+        pushService.enable();
         return pushService;
     }
 

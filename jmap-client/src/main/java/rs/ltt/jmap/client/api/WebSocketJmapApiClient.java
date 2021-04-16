@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.Services;
-import rs.ltt.jmap.client.event.ReconnectionStrategy;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.client.util.State;
@@ -34,43 +33,27 @@ import rs.ltt.jmap.common.websocket.WebSocketMessage;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.ListIterator;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Closeable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketJmapApiClient.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(WebSocketJmapApiClient.class);
 
     private final HttpUrl webSocketUrl;
     private final HttpAuthentication authentication;
     private final ArrayList<JmapRequest> requestQueue = new ArrayList<>();
     private final HashMap<String, JmapRequest> inFlightRequests = new HashMap<>();
+    protected int attempt = 0;
+    protected State state = State.CLOSED;
+    protected ScheduledFuture<?> reconnectionFuture;
     private WebSocket currentWebSocket;
-    private ReconnectionStrategy reconnectionStrategy = ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
-    private int attempt = 0;
-    private State state = State.CLOSED;
-    private ScheduledFuture<?> reconnectionFuture;
 
     public WebSocketJmapApiClient(final HttpUrl webSocketUrl, final HttpAuthentication httpAuthentication, @Nullable final SessionStateListener sessionStateListener) {
         super(sessionStateListener);
         this.webSocketUrl = Preconditions.checkNotNull(webSocketUrl, "This WebSocket URL must not be null");
         this.authentication = httpAuthentication;
     }
-
-    private void disconnect(final State state) {
-        final WebSocket currentWebSocket = this.currentWebSocket;
-        if (currentWebSocket != null) {
-            currentWebSocket.cancel();
-        }
-        this.currentWebSocket = null;
-        transitionTo(state);
-    }
-
 
     @Override
     public synchronized void execute(final JmapRequest jmapRequest) {
@@ -97,7 +80,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     }
 
     protected void send(final WebSocketMessage message) {
-        System.out.println(Services.GSON.toJson(message));
+        LOGGER.debug("--> {}", Services.GSON.toJson(message));
         requireWebSocket().send(Services.GSON.toJson(message));
     }
 
@@ -111,7 +94,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         return current;
     }
 
-    protected synchronized boolean readyToSend() {
+    protected boolean readyToSend() {
         if (state == State.CONNECTED) {
             return true;
         } else if (state.needsReconnect()) {
@@ -124,24 +107,16 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         }
     }
 
-    private void transitionTo(final State state) {
-        LOGGER.info("transition to {}", state);
-        System.out.println("transition to " + state);
-        this.state = state;
-        if (state.needsReconnect()) {
-            scheduleReconnect();
-        }
+    protected void connectWebSocket() {
+        this.attempt++;
+        cancelReconnectionFuture();
+        transitionTo(State.CONNECTING);
+        startWebSocket();
     }
 
-    private void scheduleReconnect() {
-        final Duration reconnectIn = reconnectionStrategy.getNextReconnectionAttempt(attempt);
-        LOGGER.info("schedule reconnect in {}", reconnectIn);
-        System.out.println("reconnect in " + reconnectIn);
-        this.reconnectionFuture = Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
-                this::connectWebSocket,
-                reconnectIn.toMillis(),
-                TimeUnit.MILLISECONDS
-        );
+    protected void transitionTo(final State state) {
+        LOGGER.info("transition to {}", state);
+        this.state = state;
     }
 
     private void cancelReconnectionFuture() {
@@ -149,13 +124,6 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         if (future != null && !future.isDone()) {
             future.cancel(false);
         }
-    }
-
-    private void connectWebSocket() {
-        this.attempt++;
-        cancelReconnectionFuture();
-        transitionTo(State.CONNECTING);
-        startWebSocket();
     }
 
     private void startWebSocket() {
@@ -176,7 +144,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     }
 
     private void onMessage(final String text) {
-        System.out.println("onMessage("+text+")");
+        LOGGER.debug("<-- {}", text);
         onWebSocketMessage(Services.GSON.fromJson(text, WebSocketMessage.class));
     }
 
@@ -209,9 +177,32 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         }
     }
 
-    private void onFailure(final Throwable throwable, final Response response) {
+    private synchronized void onFailure(final Throwable throwable, final Response response) {
         disconnect(State.FAILED);
-        throwable.printStackTrace();
+        LOGGER.info("Unable to connect to WebSocket URL", throwable);
+        failPendingRequests(throwable);
+    }
+
+    private void disconnect(final State state) {
+        final WebSocket currentWebSocket = this.currentWebSocket;
+        if (currentWebSocket != null) {
+            currentWebSocket.cancel();
+        }
+        this.currentWebSocket = null;
+        transitionTo(state);
+    }
+
+    private void failPendingRequests(final Throwable throwable) {
+        failPendingRequests(requestQueue.listIterator(), throwable);
+        failPendingRequests(inFlightRequests.values().iterator(), throwable);
+    }
+
+    private static void failPendingRequests(Iterator<JmapRequest> iterator, final Throwable throwable) {
+        while (iterator.hasNext()) {
+            final JmapRequest jmapRequest = iterator.next();
+            jmapRequest.setException(throwable);
+            iterator.remove();
+        }
     }
 
     private void onClosed(final int code, final String reason) {

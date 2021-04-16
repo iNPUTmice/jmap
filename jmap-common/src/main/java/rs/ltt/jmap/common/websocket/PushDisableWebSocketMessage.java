@@ -16,8 +16,10 @@
 
 package rs.ltt.jmap.common.websocket;
 
+import lombok.Builder;
 import rs.ltt.jmap.annotation.Type;
 
+@Builder
 @Type("WebSocketPushDisable")
 public class PushDisableWebSocketMessage implements WebSocketMessage {
 }

@@ -21,8 +21,8 @@ public interface PushService {
 
     void setOnStateChangeListener(OnStateChangeListener onStateChangeListener);
 
-    void connect();
+    void enable();
 
-    void stop();
+    void disable();
 
 }

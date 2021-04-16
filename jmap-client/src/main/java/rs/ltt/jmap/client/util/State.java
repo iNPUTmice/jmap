@@ -24,7 +24,7 @@ public enum State {
 
     //TODO do we want to add CLOSING and regard CONNECTING and CLOSING as some inbetween states?
 
-    CLOSED, CONNECTING, CONNECTED, FAILED, STOPPED;
+    CLOSED, CONNECTING, CONNECTED, FAILED;
 
     private static final List<State> STATES_NEEDING_RECONNECT = Arrays.asList(State.CLOSED, State.FAILED);
 

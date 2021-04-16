@@ -291,7 +291,7 @@ public class Mua extends MuaSession {
         private SessionCache sessionCache = new InMemorySessionCache();
         private Cache cache = new InMemoryCache();
         private Long queryPageSize = null;
-        private boolean useWebSocket = false;
+        private boolean useWebSocket = true;
 
         private Builder() {
 
