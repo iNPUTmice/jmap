@@ -1,0 +1,1 @@
+{"@type":"Request","requestId":"my-id","using":["urn:ietf:params:jmap:core","urn:ietf:params:jmap:mail"],"methodCalls":[["Email/set",{"accountId":"accountId","ifInState":"state","update":{"M123":{"keywords/$seen":null}}},"0"]]}

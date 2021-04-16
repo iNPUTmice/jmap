@@ -17,16 +17,21 @@
 package rs.ltt.jmap.gson;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.method.call.email.SetEmailMethodCall;
 import rs.ltt.jmap.common.util.Patches;
 import rs.ltt.jmap.common.websocket.RequestWebSocketMessage;
+import rs.ltt.jmap.common.websocket.ResponseWebSocketMessage;
+import rs.ltt.jmap.common.websocket.WebSocketMessage;
+
+import java.io.IOException;
 
 public class WebSocketMessageTest extends AbstractGsonTest {
 
     @Test
-    public void serializeRequest() {
+    public void serializeRequest() throws IOException {
         final Request request = new Request.Builder().call(
                 SetEmailMethodCall.builder()
                         .accountId("accountId")
@@ -38,7 +43,15 @@ public class WebSocketMessageTest extends AbstractGsonTest {
                 .requestId("my-id")
                 .request(request)
                 .build();
-        System.out.println(getGson().toJson(message));
+        Assertions.assertEquals(readResourceAsString("websocket/request.json"), getGson().toJson(message));
+    }
+
+    @Test
+    public void deserializeResponse() throws IOException {
+        final WebSocketMessage webSocketMessage = parseFromResource("websocket/response.json", WebSocketMessage.class);
+        Assertions.assertTrue(webSocketMessage instanceof ResponseWebSocketMessage);
+        final ResponseWebSocketMessage responseWebSocketMessage = (ResponseWebSocketMessage) webSocketMessage;
+        Assertions.assertEquals(2, responseWebSocketMessage.getResponse().getMethodResponses().length);
     }
 
 }

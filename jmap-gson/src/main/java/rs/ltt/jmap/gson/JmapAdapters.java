@@ -32,6 +32,7 @@ public final class JmapAdapters {
 
         builder.registerTypeAdapterFactory(new TypeInjectionAdapterFactory());
 
+        ApiWebSocketMessageTypeAdapter.register(builder);
         InstantTypeAdapter.register(builder);
         OffsetDateTimeTypeAdapter.register(builder);
         ResultReferenceTypeAdapter.register(builder);
@@ -54,7 +55,6 @@ public final class JmapAdapters {
         ListSerializer.register(builder);
         ResponseInvocationSerializer.register(builder);
         StringMapSerializer.register(builder);
-        ApiWebSocketMessageSerializer.register(builder);
     }
 
 }

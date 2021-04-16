@@ -16,7 +16,6 @@
 
 package rs.ltt.jmap.gson.adapter;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.TypeAdapter;
@@ -24,26 +23,14 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.method.MethodCall;
-import rs.ltt.jmap.gson.JmapAdapters;
 
 import java.io.IOException;
 
 import static rs.ltt.jmap.common.util.Mapper.METHOD_CALLS;
+import static rs.ltt.jmap.gson.GsonUtils.NULL_SERIALIZING_GSON;
+import static rs.ltt.jmap.gson.GsonUtils.REGULAR_GSON;
 
 public class RequestInvocationTypeAdapter extends TypeAdapter<Request.Invocation> {
-
-    private static final Gson REGULAR_GSON;
-    private static final Gson NULL_SERIALIZING_GSON;
-
-
-    static {
-        GsonBuilder regularBuilder = new GsonBuilder();
-        JmapAdapters.register(regularBuilder);
-        REGULAR_GSON = regularBuilder.create();
-        GsonBuilder nullSerializingBuilder = new GsonBuilder();
-        nullSerializingBuilder.serializeNulls();
-        NULL_SERIALIZING_GSON = nullSerializingBuilder.create();
-    }
 
     public static void register(final GsonBuilder builder) {
         builder.registerTypeAdapter(Request.Invocation.class, new RequestInvocationTypeAdapter());
