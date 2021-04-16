@@ -41,13 +41,13 @@ import java.util.concurrent.TimeUnit;
 import static rs.ltt.jmap.client.Services.GSON;
 import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT;
 
-public class EventSourcePushService implements PushService {
+public class EventSourcePushService implements PushService, OnStateChangeListenerManager.Callback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSourcePushService.class);
 
     private final Session session;
     private final HttpAuthentication authentication;
-    private OnStateChangeListener onStateChangeListener;
+    private final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(this);
     private EventSource currentEventSource;
     private Duration pingInterval = Duration.ofSeconds(30);
     private Duration pingIntervalTolerance = Duration.ofSeconds(10);
@@ -55,7 +55,6 @@ public class EventSourcePushService implements PushService {
     private int attempt = 0;
     private State state = State.CLOSED;
     private ScheduledFuture<?> reconnectionFuture;
-    private boolean enablePushNotifications = false;
 
     public EventSourcePushService(final Session session, final HttpAuthentication authentication) {
         this.session = session;
@@ -74,7 +73,7 @@ public class EventSourcePushService implements PushService {
     private void transitionTo(final State state) {
         LOGGER.info("transition to {}", state);
         this.state = state;
-        if (state.needsReconnect() && enablePushNotifications) {
+        if (state.needsReconnect() && this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
             scheduleReconnect();
         }
     }
@@ -112,6 +111,7 @@ public class EventSourcePushService implements PushService {
                         .retryOnConnectionFailure(true)
                         .build()
         );
+        //TODO catch exception when unable to create URL
         final HttpUrl eventSourceUrl = session.getEventSourceUrl(
                 Collections.emptyList(),
                 CloseAfter.NO,
@@ -146,9 +146,7 @@ public class EventSourcePushService implements PushService {
 
     private void onStateEvent(final String id, final String state) {
         final StateChange stateChange = GSON.fromJson(state, StateChange.class);
-        if (onStateChangeListener != null) {
-            onStateChangeListener.onStateChange(stateChange);
-        }
+        this.onStateChangeListenerManager.onStateChange(stateChange);
     }
 
     private void onPingEvent() {
@@ -156,21 +154,24 @@ public class EventSourcePushService implements PushService {
     }
 
     @Override
-    public void setOnStateChangeListener(final OnStateChangeListener onStateChangeListener) {
-        this.onStateChangeListener = onStateChangeListener;
+    public void addOnStateChangeListener(final OnStateChangeListener onStateChangeListener) {
+        this.onStateChangeListenerManager.addOnStateChangeListener(onStateChangeListener);
     }
 
     @Override
-    public void enable() {
-        this.enablePushNotifications = true;
-        connect();
+    public void removeOnStateChangeListener(OnStateChangeListener onStateChangeListener) {
+        this.onStateChangeListenerManager.removeOnStateChangeListener(onStateChangeListener);
     }
 
     @Override
     public void disable() {
-        this.enablePushNotifications = false;
         disconnect(State.CLOSED);
         cancelReconnectionFuture();
+    }
+
+    @Override
+    public void enable() {
+        connect();
     }
 
     private static final class Type {
@@ -202,7 +203,7 @@ public class EventSourcePushService implements PushService {
         @Override
         public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
             super.onFailure(eventSource, t, response);
-            if (enablePushNotifications) {
+            if (onStateChangeListenerManager.isPushNotificationsEnabled()) {
                 if (t != null) {
                     LOGGER.warn("Unable to connect to EventSource URL", t);
                 } else if (response != null) {

@@ -18,11 +18,8 @@ package rs.ltt.jmap.client.event;
 
 public interface PushService {
 
+    void addOnStateChangeListener(OnStateChangeListener onStateChangeListener);
 
-    void setOnStateChangeListener(OnStateChangeListener onStateChangeListener);
-
-    void enable();
-
-    void disable();
+    void removeOnStateChangeListener(OnStateChangeListener onStateChangeListener);
 
 }

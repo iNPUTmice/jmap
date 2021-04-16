@@ -31,44 +31,30 @@ import rs.ltt.jmap.common.websocket.WebSocketMessage;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public class WebSocketPushService extends WebSocketJmapApiClient implements PushService {
+public class WebSocketPushService extends WebSocketJmapApiClient implements PushService, OnStateChangeListenerManager.Callback {
 
+    private final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(this);
     private ReconnectionStrategy reconnectionStrategy = ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
-
-    private OnStateChangeListener onStateChangeListener;
-
-    private boolean enablePushNotifications = false;
 
     public WebSocketPushService(HttpUrl webSocketUrl, HttpAuthentication httpAuthentication, @Nullable SessionStateListener sessionStateListener) {
         super(webSocketUrl, httpAuthentication, sessionStateListener);
     }
 
     @Override
-    public void setOnStateChangeListener(final OnStateChangeListener onStateChangeListener) {
-        this.onStateChangeListener = onStateChangeListener;
+    public void addOnStateChangeListener(final OnStateChangeListener onStateChangeListener) {
+        this.onStateChangeListenerManager.addOnStateChangeListener(onStateChangeListener);
     }
 
     @Override
-    public void enable() {
-        this.enablePushNotifications = true;
-        if (readyToSend()) {
-            enablePushNotifications();
-        }
+    public void removeOnStateChangeListener(OnStateChangeListener onStateChangeListener) {
+        this.onStateChangeListenerManager.removeOnStateChangeListener(onStateChangeListener);
     }
 
     @Override
     public void disable() {
-        this.enablePushNotifications = false;
         if (state == State.CONNECTED) {
             disablePushNotifications();
         }
-    }
-
-    private void enablePushNotifications() {
-        LOGGER.info("Enable push notifications");
-        final PushEnableWebSocketMessage message = PushEnableWebSocketMessage.builder()
-                .build();
-        send(message);
     }
 
     private void disablePushNotifications() {
@@ -79,9 +65,23 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     }
 
     @Override
+    public void enable() {
+        if (readyToSend()) {
+            enablePushNotifications();
+        }
+    }
+
+    private void enablePushNotifications() {
+        LOGGER.info("Enable push notifications");
+        final PushEnableWebSocketMessage message = PushEnableWebSocketMessage.builder()
+                .build();
+        send(message);
+    }
+
+    @Override
     protected void transitionTo(final State state) {
         super.transitionTo(state);
-        if (state.needsReconnect() && enablePushNotifications) {
+        if (state.needsReconnect() && this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
             scheduleReconnect();
         }
     }
@@ -103,7 +103,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
             return true;
         }
         if (message instanceof StateChangeWebSocketMessage) {
-            onStateChangeWebSocketMessage((StateChangeWebSocketMessage) message);
+            this.onStateChangeListenerManager.onStateChange((StateChangeWebSocketMessage) message);
             return true;
         }
         return false;
@@ -112,14 +112,15 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     @Override
     protected void onOpen() {
         super.onOpen();
-        if (enablePushNotifications) {
+        if (this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
             enablePushNotifications();
         }
     }
 
-    private void onStateChangeWebSocketMessage(final StateChangeWebSocketMessage message) {
-        if (onStateChangeListener != null) {
-            onStateChangeListener.onStateChange(message);
-        }
+    @Override
+    public void close() {
+        this.onStateChangeListenerManager.removeAllListeners();
+        super.close();
     }
+
 }

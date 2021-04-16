@@ -60,6 +60,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         if (readyToSend()) {
             send(jmapRequest);
         } else {
+            LOGGER.info("Queued up JmapRequest because not ready to send in state {}", this.state);
             requestQueue.add(jmapRequest);
         }
     }
@@ -166,7 +167,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         return false;
     }
 
-    protected void onOpen() {
+    protected synchronized void onOpen() {
         attempt = 0;
         transitionTo(State.CONNECTED);
         final ListIterator<JmapRequest> iterator = requestQueue.listIterator();
@@ -213,8 +214,10 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     public void close() {
         final WebSocket webSocket = this.currentWebSocket;
         if (webSocket != null) {
+            //TODO we probably want to call a regular close()
             webSocket.cancel();
         }
+        cancelReconnectionFuture();
     }
 
     private static class WebSocketProcessor extends WebSocketListener {
