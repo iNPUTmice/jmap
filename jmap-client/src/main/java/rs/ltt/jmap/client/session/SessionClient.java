@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.client.session;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.*;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -96,16 +97,19 @@ public class SessionClient {
         }
         return Futures.transformAsync(cachedSessionFuture, session -> {
             if (session != null) {
+                synchronized (this) {
+                    this.currentSession = session;
+                }
                 return Futures.immediateFuture(session);
             }
-            return fetchSessionHttp(username, sessionResource);
+            return fetchSession(sessionResource);
         }, MoreExecutors.directExecutor());
     }
 
-    private ListenableFuture<Session> fetchSessionHttp(final String username, final HttpUrl base) throws Exception {
+    private ListenableFuture<Session> fetchSession(final HttpUrl sessionResource)  {
         final SettableFuture<Session> settableFuture = SettableFuture.create();
         final Request.Builder requestBuilder = new Request.Builder();
-        requestBuilder.url(base);
+        requestBuilder.url(sessionResource);
         httpAuthentication.authenticate(requestBuilder);
 
         final Call call = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build());
@@ -118,17 +122,16 @@ public class SessionClient {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
-                    settableFuture.set(processResponse(base, response));
+                    settableFuture.set(processResponse(sessionResource, response));
                 } catch (final Exception e) {
                     settableFuture.setException(e);
                 }
             }
         });
-        registerSuccessCallback(settableFuture, username, base);
         return settableFuture;
     }
 
-    private static Session processResponse(final HttpUrl base, final Response response) throws Exception {
+    private Session processResponse(final HttpUrl base, final Response response) throws Exception {
         final int code = response.code();
         if (code == 200 || code == 201) {
             final ResponseBody body = response.body();
@@ -142,11 +145,14 @@ public class SessionClient {
                 } catch (JsonIOException | JsonSyntaxException e) {
                     throw new InvalidSessionResourceException(e);
                 }
+                validateSessionResource(sessionResource);
                 final HttpUrl currentBaseUrl = response.request().url();
                 if (!base.equals(currentBaseUrl)) {
                     LOGGER.info("Processed new base URL {}", currentBaseUrl.url());
                 }
-                return new Session(currentBaseUrl, sessionResource);
+                final Session session = new Session(currentBaseUrl, sessionResource);
+                setSession(base, session);
+                return session;
             }
         } else if (code == 401) {
             throw new UnauthorizedException(String.format("Session object(%s) was unauthorized", base.toString()));
@@ -155,45 +161,38 @@ public class SessionClient {
         }
     }
 
-    private void registerSuccessCallback(final ListenableFuture<Session> future, final String username, final HttpUrl resource) {
-        Futures.addCallback(future, new FutureCallback<Session>() {
-            @Override
-            public void onSuccess(@Nullable Session session) {
-                if (session != null) {
-                    setSession(username, resource, session);
-                }
-            }
-
-            @Override
-            public void onFailure(final Throwable throwable) {
-
-            }
-        }, MoreExecutors.directExecutor());
+    private void validateSessionResource(final SessionResource sessionResource) throws InvalidSessionResourceException {
+        if (sessionResource.getApiUrl() == null) {
+            throw new InvalidSessionResourceException("Missing API URL");
+        }
     }
 
-    private synchronized void setSession(String username, HttpUrl resource, final Session session) {
+    private synchronized void setSession(final HttpUrl resource, final Session session) {
         this.sessionResourceChanged = false;
         this.currentSession = session;
         final SessionCache cache = sessionCache;
         if (cache != null) {
+            final String username = httpAuthentication.getUsername();
             LOGGER.debug("caching to {}", cache.getClass().getSimpleName());
             cache.store(username, resource, session);
         }
     }
 
-    public synchronized void setLatestSessionState(String sessionState) {
+    public synchronized void setLatestSessionState(final String sessionState) {
         if (sessionResourceChanged) {
             return;
         }
 
         final Session existingSession = this.currentSession;
         if (existingSession == null) {
+            LOGGER.warn("Flag existing session as changed after session was null");
             sessionResourceChanged = true;
             return;
         }
 
         final String oldState = existingSession.getState();
         if (oldState == null || !oldState.equals(sessionState)) {
+            LOGGER.warn("Flag existing session as changed. was {} is {}", oldState, sessionState);
             sessionResourceChanged = true;
         }
     }

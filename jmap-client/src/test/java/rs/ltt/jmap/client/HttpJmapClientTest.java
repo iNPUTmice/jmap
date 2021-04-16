@@ -31,6 +31,7 @@ import rs.ltt.jmap.client.api.EndpointNotFoundException;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
 import rs.ltt.jmap.client.api.MethodResponseNotFoundException;
 import rs.ltt.jmap.client.event.CloseAfter;
+import rs.ltt.jmap.client.session.InMemorySessionCache;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.Mailbox;
@@ -43,6 +44,7 @@ import rs.ltt.jmap.common.method.response.mailbox.GetMailboxMethodResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpJmapClientTest {
 
@@ -218,6 +220,70 @@ public class HttpJmapClientTest {
 
         Assertions.assertEquals(server.url("/api/jmap/"), server.takeRequest().getRequestUrl());
 
+
+        server.shutdown();
+    }
+
+    @Test
+    public void useStoredSessionResource() throws IOException, ExecutionException, InterruptedException {
+        final AtomicInteger cacheReadAttempts = new AtomicInteger();
+        final AtomicInteger cacheHits = new AtomicInteger();
+        final InMemorySessionCache sessionCache = new InMemorySessionCache() {
+            @Override
+            public ListenableFuture<Session> load(final String username, final HttpUrl sessionResource) {
+                cacheReadAttempts.incrementAndGet();
+                final ListenableFuture<Session> future = super.load(username, sessionResource);
+                try {
+                    if (future.get() != null) {
+                        cacheHits.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    //ignored
+                }
+                return future;
+            }
+        };
+        final MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/02-mailboxes.json")));
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/02-mailboxes.json")));
+        server.start();
+
+        final JmapClient jmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+        jmapClient.setSessionCache(sessionCache);
+        jmapClient.getSession().get();
+
+        final JmapClient secondJmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+        secondJmapClient.setSessionCache(sessionCache);
+
+
+        final ListenableFuture<MethodResponses> firstFuture = secondJmapClient.call(
+                GetMailboxMethodCall.builder().accountId(ACCOUNT_ID).build()
+        );
+
+        final GetMailboxMethodResponse firstMailboxResponse = firstFuture.get().getMain(GetMailboxMethodResponse.class);
+
+        Assertions.assertEquals(7, firstMailboxResponse.getList().length);
+
+        final ListenableFuture<MethodResponses> secondFuture = secondJmapClient.call(
+                GetMailboxMethodCall.builder().accountId(ACCOUNT_ID).build()
+        );
+
+        final GetMailboxMethodResponse secondMailboxResponse = secondFuture.get().getMain(GetMailboxMethodResponse.class);
+
+        Assertions.assertEquals(7, secondMailboxResponse.getList().length);
+
+        Assertions.assertEquals(2, cacheReadAttempts.get(), "Unexpected number of session cache read attempts");
+
+        Assertions.assertEquals(1, cacheHits.get(), "Unexpected number of session cache read attempts");
 
         server.shutdown();
     }
