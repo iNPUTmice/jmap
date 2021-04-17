@@ -143,9 +143,16 @@ public abstract class JmapDispatcher extends Dispatcher {
         this.account = NameGenerator.getEmailAddress((accountIndex + 1) * 2048 + accountIndex);
     }
 
+    public void setAdvertiseWebSocket(final boolean advertiseWebSocket) {
+        this.advertiseWebSocket = advertiseWebSocket;
+    }
 
     public void setFailureTrigger(final FailureTrigger failureTrigger) {
         this.failureTrigger = failureTrigger;
+    }
+
+    public boolean hasPushEnabledWebSockets() {
+        return !this.pushEnabledWebSockets.isEmpty();
     }
 
     @Nonnull

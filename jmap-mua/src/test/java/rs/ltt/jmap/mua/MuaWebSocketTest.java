@@ -27,6 +27,7 @@ import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.client.api.WebSocketClosedException;
 import rs.ltt.jmap.client.event.OnStateChangeListener;
 import rs.ltt.jmap.client.event.PushService;
+import rs.ltt.jmap.client.event.WebSocketPushService;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.filter.FilterOperator;
@@ -207,15 +208,23 @@ public class MuaWebSocketTest {
 
             final ListenableFuture<PushService> pushService = mua.getJmapClient().monitorEvents(changeListener);
 
+            MatcherAssert.assertThat(pushService.get(), CoreMatchers.instanceOf(WebSocketPushService.class));
+
             awaitRoundTrip(mua);
+
+            Assertions.assertTrue(mailServer.hasPushEnabledWebSockets(),"No WebSockets have been enabled for push");
 
             final Email email = mailServer.generateEmailOnTop();
 
             awaitRoundTrip(mua);
 
+            Assertions.assertEquals(1, stateChangeCount.get());
+
             pushService.get().removeOnStateChangeListener(changeListener);
 
             awaitRoundTrip(mua);
+
+            Assertions.assertFalse(mailServer.hasPushEnabledWebSockets(),"Some WebSockets have been enabled for push");
 
         }
 
