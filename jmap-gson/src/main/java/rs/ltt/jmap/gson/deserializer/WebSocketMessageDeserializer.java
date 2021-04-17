@@ -18,11 +18,9 @@ package rs.ltt.jmap.gson.deserializer;
 
 import com.google.gson.*;
 import rs.ltt.jmap.common.ErrorResponse;
+import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.Response;
-import rs.ltt.jmap.common.websocket.ErrorResponseWebSocketMessage;
-import rs.ltt.jmap.common.websocket.ResponseWebSocketMessage;
-import rs.ltt.jmap.common.websocket.StateChangeWebSocketMessage;
-import rs.ltt.jmap.common.websocket.WebSocketMessage;
+import rs.ltt.jmap.common.websocket.*;
 
 import java.lang.reflect.Type;
 
@@ -57,12 +55,19 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
         if ("ErrorResponse".equals(messageType)) {
             final ErrorResponse errorResponse = context.deserialize(jsonElement, ErrorResponse.class);
             return ErrorResponseWebSocketMessage.builder()
-                    .responseId(requestId)
+                    .requestId(requestId)
                     .response(errorResponse)
                     .build();
         }
         if ("StateChange".equals(messageType)) {
             return context.deserialize(jsonElement, StateChangeWebSocketMessage.class);
+        }
+        if ("Request".equals(messageType)) {
+            final Request request = context.deserialize(jsonElement, Request.class);
+            return RequestWebSocketMessage.builder()
+                    .requestId(requestId)
+                    .request(request)
+                    .build();
         }
         throw new JsonParseException(String.format("Unknown WebSocketMessage type %s", messageType));
     }

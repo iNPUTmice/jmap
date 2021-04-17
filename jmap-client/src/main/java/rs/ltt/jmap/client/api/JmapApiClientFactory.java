@@ -37,8 +37,8 @@ public class JmapApiClientFactory {
     public JmapApiClient getJmapApiClient(final Session session, final boolean useWebSocket) {
         final WebSocketCapability webSocketCapability = session.getCapability(WebSocketCapability.class);
         if (validWebSocketCapability(webSocketCapability) && useWebSocket) {
-            final HttpUrl url = WebSocketUtil.normalizeUrl(webSocketCapability.getUrl());
-            if (webSocketCapability.getSupportsPush()) {
+            final HttpUrl url = WebSocketUtil.normalizeUrl(session.getBase(), webSocketCapability.getUrl());
+            if (Boolean.TRUE.equals(webSocketCapability.getSupportsPush())) {
                 return new WebSocketPushService(
                         url,
                         httpAuthentication,

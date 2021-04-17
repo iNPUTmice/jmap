@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.common.websocket;
 
+import com.google.common.base.MoreObjects;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.common.Request;
@@ -35,5 +36,13 @@ public class RequestWebSocketMessage extends AbstractApiWebSocketMessage {
     @Override
     public Request getPayload() {
         return request;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("requestId", requestId)
+                .add("request", request)
+                .toString();
     }
 }

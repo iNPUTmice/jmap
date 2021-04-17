@@ -18,7 +18,10 @@ package rs.ltt.jmap.client;
 
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.api.JmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClientFactory;
@@ -37,7 +40,6 @@ import rs.ltt.jmap.common.method.MethodCall;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Closeable;
-import java.util.concurrent.Executors;
 
 public class JmapClient implements Closeable {
 

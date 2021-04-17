@@ -16,18 +16,21 @@
 
 package rs.ltt.jmap.client;
 
+import okhttp3.HttpUrl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.client.util.WebSocketUtil;
 
 public class WebSocketUtilTest {
 
+    private static final HttpUrl BASE = HttpUrl.get("http://example.com:8080");
+
     @Test
     public void regularWss() {
         final String input = "wss://localhost/path";
         Assertions.assertEquals(
                 "https://localhost/path",
-                WebSocketUtil.normalizeUrl(input).toString()
+                WebSocketUtil.normalizeUrl(BASE, input).toString()
         );
     }
 
@@ -36,15 +39,24 @@ public class WebSocketUtilTest {
         final String input = "ws://localhost/path";
         Assertions.assertEquals(
                 "http://localhost/path",
-                WebSocketUtil.normalizeUrl(input).toString()
+                WebSocketUtil.normalizeUrl(BASE, input).toString()
         );
     }
 
     @Test
     public void unknownScheme() {
         Assertions.assertThrows(IllegalArgumentException.class,() ->{
-           WebSocketUtil.normalizeUrl("unknown://localhost/path");
+           WebSocketUtil.normalizeUrl(BASE, "unknown://localhost/path");
         });
+    }
+
+    @Test
+    public void pathOnly() {
+        final String input = "/path";
+        Assertions.assertEquals(
+                "http://example.com:8080/path",
+                WebSocketUtil.normalizeUrl(BASE, input).toString()
+        );
     }
 
 }

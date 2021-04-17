@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.client.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
 import okhttp3.HttpUrl;
 
@@ -32,10 +33,15 @@ public final class WebSocketUtil {
             .put("wss", "https")
             .build();
 
-    public static HttpUrl normalizeUrl(final String url) {
+    public static HttpUrl normalizeUrl(final HttpUrl base, final String url) {
         final int schemeEndIndex = url.indexOf(":");
         if (schemeEndIndex == -1) {
-            throw new IllegalArgumentException("No scheme found");
+            final HttpUrl.Builder builder = base.newBuilder(url);
+            Preconditions.checkState(
+                    builder != null,
+                    String.format("Unable to assemble final WebSocket URL from base=%s and downloadUrl=%s", base, url)
+            );
+            return builder.build();
         }
         final String scheme = url.substring(0, schemeEndIndex).toLowerCase(Locale.ENGLISH);
         if (SCHEME_MAP.containsKey(scheme)) {

@@ -25,8 +25,8 @@ public class ErrorResponseWebSocketMessage extends AbstractApiWebSocketMessage {
     private ErrorResponse response;
 
     @Builder
-    public ErrorResponseWebSocketMessage(String responseId, final ErrorResponse response) {
-        this.requestId = responseId;
+    public ErrorResponseWebSocketMessage(String requestId, final ErrorResponse response) {
+        this.requestId = requestId;
         this.response = response;
     }
 

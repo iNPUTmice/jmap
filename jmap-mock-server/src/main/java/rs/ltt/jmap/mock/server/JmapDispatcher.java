@@ -25,17 +25,24 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import okhttp3.Credentials;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
+import okio.ByteString;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rs.ltt.jmap.common.*;
 import rs.ltt.jmap.common.entity.Account;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.ErrorType;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
 import rs.ltt.jmap.common.entity.capability.MailAccountCapability;
+import rs.ltt.jmap.common.entity.capability.WebSocketCapability;
 import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.method.MethodResponse;
+import rs.ltt.jmap.common.websocket.*;
 import rs.ltt.jmap.gson.JmapAdapters;
 
 import javax.annotation.Nonnull;
@@ -43,11 +50,11 @@ import javax.annotation.Nonnull;
 
 public abstract class JmapDispatcher extends Dispatcher {
 
-    public final EmailAddress account;
     public static final String PASSWORD = "secret";
-
     private static final Gson GSON;
-    public static String WELL_KNOWN_PATH = ".well-known/jmap";
+    public static final String WELL_KNOWN_PATH = "/.well-known/jmap";
+    private static final String API_PATH = "/jmap/";
+    private static final String WEB_SOCKET_PATH = "/jmap/ws";
 
     static {
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -55,52 +62,112 @@ public abstract class JmapDispatcher extends Dispatcher {
         GSON = gsonBuilder.create();
     }
 
+    public final EmailAddress account;
     private int sessionState = 0;
+
+    private final WebSocketListener webSocketListener = new WebSocketListener() {
+        @Override
+        public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+            super.onClosed(webSocket, code, reason);
+        }
+
+        @Override
+        public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+            super.onClosing(webSocket, code, reason);
+        }
+
+        @Override
+        public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @Nullable okhttp3.Response response) {
+            super.onFailure(webSocket, t, response);
+        }
+
+        @Override
+        public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
+            final WebSocketMessage webSocketMessage = GSON.fromJson(text, WebSocketMessage.class);
+            if (webSocketMessage instanceof RequestWebSocketMessage) {
+                final AbstractApiWebSocketMessage response = dispatch(((RequestWebSocketMessage) webSocketMessage));
+                webSocket.send(GSON.toJson(response));
+                return;
+            }
+            //TODO support Push enable / push disable
+            super.onMessage(webSocket, text);
+        }
+
+        @Override
+        public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
+            super.onMessage(webSocket, bytes);
+        }
+
+        @Override
+        public void onOpen(@NotNull WebSocket webSocket, @NotNull okhttp3.Response response) {
+            super.onOpen(webSocket, response);
+        }
+    };
 
 
     public JmapDispatcher(final int accountIndex) {
         this.account = NameGenerator.getEmailAddress((accountIndex + 1) * 2048 + accountIndex);
     }
 
-    public String getUsername() {
-        return account.getEmail();
-    }
-
-    public String getAccountId() {
-        return Hashing.sha256().hashString(account.getEmail(), Charsets.UTF_8).toString();
-    }
-
     @Nonnull
     @Override
     public MockResponse dispatch(final RecordedRequest request) {
         switch (Strings.nullToEmpty(request.getPath())) {
-            case "/.well-known/jmap":
-                if ("GET".equals(request.getMethod())) {
-                    return new MockResponse().setResponseCode(301).addHeader("Location: /jmap/");
-                } else {
-                    return new MockResponse().setResponseCode(404);
-                }
-            case "/jmap/":
-                final String authorization = request.getHeader("Authorization");
-                if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
-                    return new MockResponse().setResponseCode(401);
-                }
-                if ("GET".equals(request.getMethod())) {
-                    return session();
-                } else if ("POST".equals(request.getMethod())) {
-                    return request(request);
-                } else {
-                    return new MockResponse().setResponseCode(404);
-                }
+            case WELL_KNOWN_PATH:
+                return dispatchWellKnown(request);
+            case API_PATH:
+                return dispatchJmap(request);
+            case WEB_SOCKET_PATH:
+                return dispatchJmapWebSocket(request);
             default:
                 return new MockResponse().setResponseCode(404);
         }
     }
 
+    private MockResponse dispatchWellKnown(final RecordedRequest request) {
+        if ("GET".equals(request.getMethod())) {
+            return new MockResponse().setResponseCode(301).addHeader("Location: /jmap/");
+        } else {
+            return new MockResponse().setResponseCode(404);
+        }
+    }
+
+    private MockResponse dispatchJmap(final RecordedRequest request) {
+        final String authorization = request.getHeader("Authorization");
+        if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
+            return new MockResponse().setResponseCode(401);
+        }
+        if ("GET".equals(request.getMethod())) {
+            return session();
+        } else if ("POST".equals(request.getMethod())) {
+            return request(request);
+        } else {
+            return new MockResponse().setResponseCode(404);
+        }
+    }
+
+    private MockResponse dispatchJmapWebSocket(final RecordedRequest request) {
+        final String authorization = request.getHeader("Authorization");
+        if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
+            return new MockResponse().setResponseCode(401);
+        }
+        if ("GET".equals(request.getMethod())) {
+            //TODO check that proper protocol is set
+            return new MockResponse().withWebSocketUpgrade(webSocketListener);
+        } else {
+            return new MockResponse().setResponseCode(404);
+        }
+    }
+
+
+    public String getUsername() {
+        return account.getEmail();
+    }
+
     private MockResponse session() {
         final String id = getAccountId();
         final SessionResource sessionResource = SessionResource.builder()
-                .apiUrl("/jmap/")
+                .apiUrl(API_PATH)
                 .state(getSessionState())
                 .account(id, Account.builder()
                         .accountCapabilities(ImmutableMap.of(
@@ -109,11 +176,19 @@ public abstract class JmapDispatcher extends Dispatcher {
                         ))
                         .name(account.getEmail())
                         .build())
-                .capabilities(ImmutableMap.of(CoreCapability.class, CoreCapability.builder().maxObjectsInGet(4096L).build()))
+                .capabilities(ImmutableMap.of(
+                        CoreCapability.class, CoreCapability.builder().maxObjectsInGet(4096L).build(),
+                        WebSocketCapability.class, WebSocketCapability.builder().url(WEB_SOCKET_PATH).build()
+                        )
+                )
                 .primaryAccounts(ImmutableMap.of(MailAccountCapability.class, id))
                 .build();
 
         return new MockResponse().setBody(GSON.toJson(sessionResource));
+    }
+
+    public String getAccountId() {
+        return Hashing.sha256().hashString(account.getEmail(), Charsets.UTF_8).toString();
     }
 
     protected String getSessionState() {
@@ -142,6 +217,7 @@ public abstract class JmapDispatcher extends Dispatcher {
         return new MockResponse().setResponseCode(200).setBody(GSON.toJson(response));
     }
 
+
     protected GenericResponse dispatch(final Request request) {
         final Request.Invocation[] methodCalls = request.getMethodCalls();
         final String[] using = request.getUsing();
@@ -160,6 +236,24 @@ public abstract class JmapDispatcher extends Dispatcher {
                 response.values().toArray(new Response.Invocation[0]),
                 getSessionState()
         );
+    }
+
+    private AbstractApiWebSocketMessage dispatch(RequestWebSocketMessage webSocketMessage) {
+        final String id = webSocketMessage.getRequestId();
+        final GenericResponse response = dispatch(webSocketMessage.getRequest());
+        if (response instanceof Response) {
+            return ResponseWebSocketMessage.builder()
+                    .response((Response) response)
+                    .requestId(id)
+                    .build();
+        } else if (response instanceof ErrorResponse) {
+            return ErrorResponseWebSocketMessage.builder()
+                    .response((ErrorResponse) response)
+                    .requestId(id)
+                    .build();
+        } else {
+            throw new IllegalArgumentException("WebSocketMessage was of unknown type");
+        }
     }
 
     protected abstract MethodResponse[] dispatch(
