@@ -51,7 +51,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     }
 
     @Override
-    public void disable() {
+    public synchronized void disable() {
         if (state == State.CONNECTED) {
             disablePushNotifications();
         }
@@ -65,7 +65,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     }
 
     @Override
-    public void enable() {
+    public synchronized void enable() {
         if (readyToSend()) {
             enablePushNotifications();
         }
@@ -110,7 +110,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     }
 
     @Override
-    protected void onOpen() {
+    protected synchronized void onOpen() {
         super.onOpen();
         if (this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
             enablePushNotifications();
@@ -118,7 +118,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         this.onStateChangeListenerManager.removeAllListeners();
         super.close();
     }

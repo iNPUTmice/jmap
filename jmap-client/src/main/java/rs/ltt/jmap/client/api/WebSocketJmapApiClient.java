@@ -77,12 +77,16 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
                 .requestId(requestId)
                 .request(jmapRequest.getRequest())
                 .build();
-        send(message);
+        if (send(message)) {
+            return;
+        }
+        jmapRequest.setException(new Exception("Unable to send. WebSocket was closed"));
+        this.inFlightRequests.remove(requestId);
     }
 
-    protected void send(final WebSocketMessage message) {
+    protected boolean send(final WebSocketMessage message) {
         LOGGER.debug("--> {}", Services.GSON.toJson(message));
-        requireWebSocket().send(Services.GSON.toJson(message));
+        return requireWebSocket().send(Services.GSON.toJson(message));
     }
 
     private WebSocket requireWebSocket() {
@@ -144,9 +148,24 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         this.currentWebSocket = webSocket;
     }
 
-    private void onMessage(final String text) {
+    private synchronized void onMessage(final WebSocket webSocket, final String text) {
         LOGGER.debug("<-- {}", text);
-        onWebSocketMessage(Services.GSON.fromJson(text, WebSocketMessage.class));
+        final WebSocketMessage message;
+        try {
+            message = Services.GSON.fromJson(text, WebSocketMessage.class);
+        } catch (final Exception e) {
+            LOGGER.error("Unable to parse incoming WebSocketMessage", e);
+            //If a client receives a message that is not in the form of a JSON Problem Details object,
+            //a JMAP Response object, or a JMAP StateChange object, the client can either ignore the message
+            //or close the WebSocket connection. In the latter case, the endpoint MAY send a Close frame with
+            //a status code of 1007 (Invalid frame payload data),
+
+            //we rather fail our pending requests instead of missing a response and never calling the future
+            disconnect(State.FAILED);
+            failPendingRequests(e);
+            return;
+        }
+        onWebSocketMessage(message);
     }
 
     protected boolean onWebSocketMessage(final WebSocketMessage message) {
@@ -167,6 +186,28 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         return false;
     }
 
+    private void disconnect(final State state) {
+        final WebSocket currentWebSocket = this.currentWebSocket;
+        if (currentWebSocket != null) {
+            currentWebSocket.cancel();
+            this.currentWebSocket = null;
+            transitionTo(state);
+        }
+    }
+
+    private void failPendingRequests(final Throwable throwable) {
+        failPendingRequests(requestQueue.listIterator(), throwable);
+        failPendingRequests(inFlightRequests.values().iterator(), throwable);
+    }
+
+    private static void failPendingRequests(Iterator<JmapRequest> iterator, final Throwable throwable) {
+        while (iterator.hasNext()) {
+            final JmapRequest jmapRequest = iterator.next();
+            jmapRequest.setException(throwable);
+            iterator.remove();
+        }
+    }
+
     protected synchronized void onOpen() {
         attempt = 0;
         transitionTo(State.CONNECTED);
@@ -184,39 +225,15 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         failPendingRequests(throwable);
     }
 
-    private void disconnect(final State state) {
-        final WebSocket currentWebSocket = this.currentWebSocket;
-        if (currentWebSocket != null) {
-            currentWebSocket.cancel();
-        }
-        this.currentWebSocket = null;
-        transitionTo(state);
-    }
-
-    private void failPendingRequests(final Throwable throwable) {
-        failPendingRequests(requestQueue.listIterator(), throwable);
-        failPendingRequests(inFlightRequests.values().iterator(), throwable);
-    }
-
-    private static void failPendingRequests(Iterator<JmapRequest> iterator, final Throwable throwable) {
-        while (iterator.hasNext()) {
-            final JmapRequest jmapRequest = iterator.next();
-            jmapRequest.setException(throwable);
-            iterator.remove();
-        }
-    }
-
-    private void onClosed(final int code, final String reason) {
+    private void onClosing(WebSocket webSocket, int code, String reason) {
+        LOGGER.info("Server closed the connection with code {} and reason {}", code, reason);
         disconnect(State.CLOSED);
+        failPendingRequests(new WebSocketClosedException(code, reason));
     }
 
     @Override
-    public void close() {
-        final WebSocket webSocket = this.currentWebSocket;
-        if (webSocket != null) {
-            //TODO we probably want to call a regular close()
-            webSocket.cancel();
-        }
+    public synchronized void close() {
+        disconnect(State.CLOSED);
         cancelReconnectionFuture();
     }
 
@@ -229,14 +246,9 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         }
 
         @Override
-        public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-            super.onClosed(webSocket, code, reason);
-            client.onClosed(code, reason);
-        }
-
-        @Override
         public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
             super.onClosing(webSocket, code, reason);
+            client.onClosing(webSocket, code, reason);;
         }
 
         @Override
@@ -248,7 +260,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         @Override
         public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
             super.onMessage(webSocket, text);
-            client.onMessage(text);
+            client.onMessage(webSocket, text);
         }
 
         @Override

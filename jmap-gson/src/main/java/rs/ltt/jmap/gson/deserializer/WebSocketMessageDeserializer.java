@@ -38,6 +38,9 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
             throw new JsonParseException("Expected JSON object for WebSocketMessage. Got " + jsonElement.getClass().getSimpleName());
         }
         final JsonObject jsonObject = jsonElement.getAsJsonObject();
+        if (!jsonObject.has("@type")) {
+            throw new JsonParseException("WebSocketMessage had no @type attribute");
+        }
         final String messageType = jsonObject.get("@type").getAsString();
         final String requestId;
         if (jsonObject.has("requestId")) {
@@ -68,6 +71,12 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
                     .requestId(requestId)
                     .request(request)
                     .build();
+        }
+        if ("WebSocketPushEnable".equals(messageType)) {
+            return context.deserialize(jsonElement, PushEnableWebSocketMessage.class);
+        }
+        if ("WebSocketPushDisable".equals(messageType)) {
+            return context.deserialize(jsonElement, PushDisableWebSocketMessage.class);
         }
         throw new JsonParseException(String.format("Unknown WebSocketMessage type %s", messageType));
     }

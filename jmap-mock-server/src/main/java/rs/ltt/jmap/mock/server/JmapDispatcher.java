@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rs.ltt.jmap.common.*;
 import rs.ltt.jmap.common.entity.Account;
+import rs.ltt.jmap.common.entity.Capability;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.ErrorType;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
@@ -46,15 +47,19 @@ import rs.ltt.jmap.common.websocket.*;
 import rs.ltt.jmap.gson.JmapAdapters;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public abstract class JmapDispatcher extends Dispatcher {
 
     public static final String PASSWORD = "secret";
-    private static final Gson GSON;
+    protected static final Gson GSON;
     public static final String WELL_KNOWN_PATH = "/.well-known/jmap";
     private static final String API_PATH = "/jmap/";
     private static final String WEB_SOCKET_PATH = "/jmap/ws";
+
+
 
     static {
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -65,6 +70,12 @@ public abstract class JmapDispatcher extends Dispatcher {
     public final EmailAddress account;
     private int sessionState = 0;
 
+    protected final List<WebSocket> pushEnabledWebSockets = new ArrayList<>();
+
+    private FailureTrigger failureTrigger = FailureTrigger.NONE;
+    private boolean advertiseWebSocket = true;
+
+
     private final WebSocketListener webSocketListener = new WebSocketListener() {
         @Override
         public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
@@ -74,6 +85,7 @@ public abstract class JmapDispatcher extends Dispatcher {
         @Override
         public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
             super.onClosing(webSocket, code, reason);
+            System.out.println("MockServer received code "+code);
         }
 
         @Override
@@ -83,14 +95,36 @@ public abstract class JmapDispatcher extends Dispatcher {
 
         @Override
         public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
+            super.onMessage(webSocket, text);
+            if (failureTrigger == FailureTrigger.CLOSE) {
+                webSocket.close(1000,null);
+                return;
+            }
+            if (failureTrigger == FailureTrigger.IGNORE) {
+                return;
+            }
+            if (failureTrigger == FailureTrigger.INVALID) {
+                webSocket.send("[]");
+                return;
+            }
             final WebSocketMessage webSocketMessage = GSON.fromJson(text, WebSocketMessage.class);
             if (webSocketMessage instanceof RequestWebSocketMessage) {
                 final AbstractApiWebSocketMessage response = dispatch(((RequestWebSocketMessage) webSocketMessage));
                 webSocket.send(GSON.toJson(response));
                 return;
             }
+            if (webSocketMessage instanceof PushEnableWebSocketMessage) {
+                if (pushEnabledWebSockets.contains(webSocket)) {
+                    return;
+                }
+                pushEnabledWebSockets.add(webSocket);
+                return;
+            }
+            if (webSocketMessage instanceof PushDisableWebSocketMessage) {
+                pushEnabledWebSockets.remove(webSocket);
+                return;
+            }
             //TODO support Push enable / push disable
-            super.onMessage(webSocket, text);
         }
 
         @Override
@@ -107,6 +141,11 @@ public abstract class JmapDispatcher extends Dispatcher {
 
     public JmapDispatcher(final int accountIndex) {
         this.account = NameGenerator.getEmailAddress((accountIndex + 1) * 2048 + accountIndex);
+    }
+
+
+    public void setFailureTrigger(final FailureTrigger failureTrigger) {
+        this.failureTrigger = failureTrigger;
     }
 
     @Nonnull
@@ -165,6 +204,14 @@ public abstract class JmapDispatcher extends Dispatcher {
     }
 
     private MockResponse session() {
+        ImmutableMap.Builder<Class<? extends Capability>, Capability> capabilityBuilder = ImmutableMap.builder();
+        capabilityBuilder.put(CoreCapability.class, CoreCapability.builder().maxObjectsInGet(4096L).build());
+        if (this.advertiseWebSocket) {
+            capabilityBuilder.put(WebSocketCapability.class, WebSocketCapability.builder()
+                    .url(WEB_SOCKET_PATH)
+                    .supportsPush(true)
+                    .build());
+        }
         final String id = getAccountId();
         final SessionResource sessionResource = SessionResource.builder()
                 .apiUrl(API_PATH)
@@ -176,11 +223,7 @@ public abstract class JmapDispatcher extends Dispatcher {
                         ))
                         .name(account.getEmail())
                         .build())
-                .capabilities(ImmutableMap.of(
-                        CoreCapability.class, CoreCapability.builder().maxObjectsInGet(4096L).build(),
-                        WebSocketCapability.class, WebSocketCapability.builder().url(WEB_SOCKET_PATH).build()
-                        )
-                )
+                .capabilities(capabilityBuilder.build())
                 .primaryAccounts(ImmutableMap.of(MailAccountCapability.class, id))
                 .build();
 
@@ -263,5 +306,9 @@ public abstract class JmapDispatcher extends Dispatcher {
 
     protected void incrementSessionState() {
         this.sessionState++;
+    }
+
+    public enum FailureTrigger {
+        NONE, CLOSE, IGNORE, INVALID
     }
 }

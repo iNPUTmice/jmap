@@ -17,6 +17,7 @@
 package rs.ltt.jmap.mock.server;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
@@ -45,6 +46,8 @@ import rs.ltt.jmap.common.method.response.mailbox.GetMailboxMethodResponse;
 import rs.ltt.jmap.common.method.response.mailbox.SetMailboxMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.ChangesThreadMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
+import rs.ltt.jmap.common.websocket.StateChangeWebSocketMessage;
+import rs.ltt.jmap.gson.GsonUtils;
 import rs.ltt.jmap.mock.server.util.FuzzyRoleParser;
 import rs.ltt.jmap.mua.util.MailboxUtil;
 
@@ -113,8 +116,23 @@ public class MockMailServer extends StubMailServer {
         emails.put(email.getId(), email);
         incrementState();
         final String newVersion = getState();
-        this.updates.put(oldVersion, Update.created(email, newVersion));
+        this.pushUpdate(oldVersion, Update.created(email, newVersion));
         return email;
+    }
+
+
+    private void pushUpdate(final String oldVersion, final Update update) {
+        this.updates.put(oldVersion, update);
+        final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>,String> changedBuilder = ImmutableMap.builder();
+        changedBuilder.put(Thread.class,update.getNewVersion());
+        changedBuilder.put(Email.class, update.getNewVersion());
+        changedBuilder.put(Mailbox.class, update.getNewVersion());
+        final StateChangeWebSocketMessage stateChange = new StateChangeWebSocketMessage(
+                ImmutableMap.of(getAccountId(),changedBuilder.build()),
+                update.getNewVersion()
+        );
+        final String message = GSON.toJson(stateChange);
+        pushEnabledWebSockets.forEach(webSocket -> webSocket.send(message));
     }
 
     protected void incrementState() {
