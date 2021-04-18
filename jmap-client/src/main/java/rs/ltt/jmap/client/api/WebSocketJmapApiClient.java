@@ -33,6 +33,8 @@ import rs.ltt.jmap.common.websocket.WebSocketMessage;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
+import java.io.EOFException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
@@ -44,10 +46,12 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     private final HttpAuthentication authentication;
     private final ArrayList<JmapRequest> requestQueue = new ArrayList<>();
     private final HashMap<String, JmapRequest> inFlightRequests = new HashMap<>();
+    protected final List<Long> connectionDurations = new ArrayList<>();
     protected int attempt = 0;
     protected State state = State.CLOSED;
     protected ScheduledFuture<?> reconnectionFuture;
     private WebSocket currentWebSocket;
+    private long lastFrameReceived = 0;
 
     public WebSocketJmapApiClient(final HttpUrl webSocketUrl, final HttpAuthentication httpAuthentication, @Nullable final SessionStateListener sessionStateListener) {
         super(sessionStateListener);
@@ -137,8 +141,15 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         requestBuilder.url(this.webSocketUrl);
         authentication.authenticate(requestBuilder);
         final Request request = requestBuilder.build();
-        //TODO me might want to reconfigure OK_HTTP_CLIENT with a non-zero pingInterval
-        setCurrentWebSocket(Services.OK_HTTP_CLIENT.newWebSocket(request, new WebSocketProcessor(this)));
+        final OkHttpClient okHttpClient = Services.OK_HTTP_CLIENT
+                .newBuilder()
+                .pingInterval(getPingInterval())
+                .build();
+        setCurrentWebSocket(okHttpClient.newWebSocket(request, new WebSocketProcessor(this)));
+    }
+
+    protected Duration getPingInterval() {
+        return Duration.ZERO;
     }
 
     private void setCurrentWebSocket(final WebSocket webSocket) {
@@ -149,6 +160,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     }
 
     private synchronized void onMessage(final WebSocket webSocket, final String text) {
+        this.lastFrameReceived = System.nanoTime();
         LOGGER.debug("<-- {}", text);
         final WebSocketMessage message;
         try {
@@ -209,8 +221,9 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     }
 
     protected synchronized void onOpen() {
-        attempt = 0;
+        this.attempt = 0;
         transitionTo(State.CONNECTED);
+        this.lastFrameReceived = System.nanoTime();
         final ListIterator<JmapRequest> iterator = requestQueue.listIterator();
         while (iterator.hasNext()) {
             final JmapRequest jmapRequest = iterator.next();
@@ -220,8 +233,12 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     }
 
     private synchronized void onFailure(final Throwable throwable, final Response response) {
+        final boolean wasConnected = state == State.CONNECTED;
         disconnect(State.FAILED);
         LOGGER.info("Unable to connect to WebSocket URL", throwable);
+        if (throwable instanceof EOFException && wasConnected) {
+            this.connectionDurations.add(System.nanoTime() - lastFrameReceived);
+        }
         failPendingRequests(throwable);
     }
 
