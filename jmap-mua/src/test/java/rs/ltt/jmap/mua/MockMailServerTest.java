@@ -19,12 +19,17 @@ package rs.ltt.jmap.mua;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import rs.ltt.jmap.common.entity.*;
+import rs.ltt.jmap.common.entity.Email;
+import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.common.entity.Mailbox;
+import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.filter.FilterOperator;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
+import rs.ltt.jmap.mua.cache.InMemoryCache;
+import rs.ltt.jmap.mua.util.KeywordUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -122,6 +127,61 @@ public class MockMailServerTest {
     }
 
     @Test
+    public void multipleChanges() throws IOException, ExecutionException, InterruptedException {
+        final MockWebServer server = new MockWebServer();
+        final MockMailServer mailServer = new MockMailServer(64);
+        server.setDispatcher(mailServer);
+        final MyInMemoryCache cache = new MyInMemoryCache();
+
+        final Mua reader = Mua.builder()
+                .cache(cache)
+                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                .username(mailServer.getUsername())
+                .password(JmapDispatcher.PASSWORD)
+                .accountId(mailServer.getAccountId())
+                .build();
+
+        final Mua writer = Mua.builder()
+                .cache(new InMemoryCache())
+                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                .username(mailServer.getUsername())
+                .password(JmapDispatcher.PASSWORD)
+                .accountId(mailServer.getAccountId())
+                .build();
+
+        reader.query(EmailQuery.unfiltered()).get();
+        writer.query(EmailQuery.unfiltered()).get();
+        final Mailbox mailboxBeforeModification = cache.getMailbox(Role.INBOX);
+        final Mailbox archiveBeforeModification = cache.getMailbox(Role.ARCHIVE);
+        Assertions.assertNull(archiveBeforeModification);
+        Assertions.assertEquals(64, mailboxBeforeModification.getUnreadThreads(), "Miss match in unread threads");
+        final List<CachedEmail> t1 = cache.getEmails("T1");
+        writer.setKeyword(t1, Keyword.SEEN).get();
+
+        final List<CachedEmail> threadT0 = cache.getEmails("T0");
+
+        writer.refresh().get();
+        writer.archive(threadT0).get();
+
+        reader.refresh().get();
+
+        final Mailbox mailboxAfterModification = cache.getMailbox(Role.INBOX);
+        Assertions.assertEquals(
+                62, //one read, one archived
+                mailboxAfterModification.getUnreadThreads(),
+                "Miss match in unread thread after modification"
+        );
+        final Mailbox archiveAfterModification = cache.getMailbox(Role.ARCHIVE);
+        Assertions.assertEquals(1, archiveAfterModification.getTotalThreads());
+
+        final List<CachedEmail> t1AfterModification = cache.getEmails("T1");
+
+        Assertions.assertTrue(KeywordUtil.everyHas(t1AfterModification, Keyword.SEEN));
+
+        server.shutdown();
+    }
+
+    @Test
     public void queryAndRemoveFromInbox() throws ExecutionException, InterruptedException {
         final MockWebServer server = new MockWebServer();
         final MockMailServer mailServer = new MockMailServer(2);
@@ -137,8 +197,6 @@ public class MockMailServerTest {
             mua.query(EmailQuery.unfiltered()).get();
             final List<CachedEmail> threadT1 = cache.getEmails("T1");
             mua.archive(threadT1).get();
-            //creating the archive mailbox and adding email are two steps / two versions
-            Assertions.assertEquals(Status.HAS_MORE, mua.refresh().get());
             Assertions.assertEquals(Status.UPDATED, mua.refresh().get());
 
             final Mailbox inboxAfterModification = cache.getMailbox(Role.INBOX);

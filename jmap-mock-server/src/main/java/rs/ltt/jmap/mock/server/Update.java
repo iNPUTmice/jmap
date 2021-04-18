@@ -16,7 +16,11 @@
 
 package rs.ltt.jmap.mock.server;
 
+import com.google.common.base.Function;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Maps;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.Mailbox;
@@ -25,6 +29,7 @@ import rs.ltt.jmap.common.method.response.mailbox.SetMailboxMethodResponse;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Update {
@@ -46,12 +51,27 @@ public class Update {
                         new Changes(
                                 nullToEmpty(setMailboxMethodResponse.getUpdated()).keySet().toArray(new String[0]),
                                 nullToEmpty(setMailboxMethodResponse.getCreated()).values().stream().map(Mailbox::getId).toArray(String[]::new))
-                        ),
+                ),
                 newVersion
         );
     }
 
-    private static <T extends AbstractIdentifiableEntity> Map<String,T> nullToEmpty(Map<String, T> value) {
+    public static Update merge(final Collection<Update> updates) {
+        final ImmutableMultimap.Builder<Class<? extends AbstractIdentifiableEntity>, Changes> changesBuilder = ImmutableMultimap.builder();
+        String newVersion = null;
+        for(final Update update : updates) {
+            for(Map.Entry<Class<? extends AbstractIdentifiableEntity>, Changes> entityChanges : update.changes.entrySet()) {
+                changesBuilder.put(entityChanges.getKey(), entityChanges.getValue());
+            }
+            newVersion = update.newVersion;
+        }
+        ImmutableMap<Class<? extends AbstractIdentifiableEntity>, Collection<Changes>> multiMap = changesBuilder.build().asMap();
+        Map<Class<? extends AbstractIdentifiableEntity>, Changes> changes = Maps.transformValues(multiMap, Changes::merge);
+
+        return new Update(changes, newVersion);
+    }
+
+    private static <T extends AbstractIdentifiableEntity> Map<String, T> nullToEmpty(Map<String, T> value) {
         return value == null ? Collections.emptyMap() : value;
     }
 
@@ -77,5 +97,13 @@ public class Update {
 
     public String getNewVersion() {
         return newVersion;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("changes", changes)
+                .add("newVersion", newVersion)
+                .toString();
     }
 }

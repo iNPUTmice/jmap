@@ -17,6 +17,7 @@
 package rs.ltt.jmap.mock.server;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
@@ -66,7 +67,7 @@ public class MockMailServer extends StubMailServer {
     protected final Map<String, Email> emails = new HashMap<>();
     protected final Map<String, MailboxInfo> mailboxes = new HashMap<>();
 
-    protected final Map<String, Update> updates = new HashMap<>();
+    protected final LinkedHashMap<String, Update> updates = new LinkedHashMap<>();
 
     private int state = 0;
 
@@ -121,6 +122,19 @@ public class MockMailServer extends StubMailServer {
     }
 
 
+    private Update getAccumulatedUpdateSince(final String oldVersion) {
+        final ArrayList<Update> updates = new ArrayList<>();
+        for(Map.Entry<String,Update> updateEntry : this.updates.entrySet()) {
+            if (updateEntry.getKey().equals(oldVersion) || updates.size() > 0) {
+                updates.add(updateEntry.getValue());
+            }
+        }
+        if (updates.isEmpty()) {
+            return null;
+        }
+        return Update.merge(updates);
+    }
+
     private void pushUpdate(final String oldVersion, final Update update) {
         this.updates.put(oldVersion, update);
         final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>,String> changedBuilder = ImmutableMap.builder();
@@ -161,7 +175,7 @@ public class MockMailServer extends StubMailServer {
                             .build()
             };
         } else {
-            final Update update = this.updates.get(since);
+            final Update update = getAccumulatedUpdateSince(since);
             if (update == null) {
                 return new MethodResponse[]{new CannotCalculateChangesMethodErrorResponse()};
             } else {
@@ -351,7 +365,7 @@ public class MockMailServer extends StubMailServer {
                             .build()
             };
         } else {
-            final Update update = this.updates.get(since);
+            final Update update = getAccumulatedUpdateSince(since);
             if (update == null) {
                 return new MethodResponse[]{new CannotCalculateChangesMethodErrorResponse()};
             } else {
@@ -515,7 +529,7 @@ public class MockMailServer extends StubMailServer {
                             .build()
             };
         } else {
-            final Update update = this.updates.get(since);
+            final Update update = getAccumulatedUpdateSince(since);
             if (update == null) {
                 return new MethodResponse[]{new CannotCalculateChangesMethodErrorResponse()};
             } else {

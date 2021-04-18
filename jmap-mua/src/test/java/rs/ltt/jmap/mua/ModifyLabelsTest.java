@@ -117,8 +117,6 @@ public class ModifyLabelsTest {
 
             mua.modifyLabels(threadT1, Collections.emptyList(), ImmutableList.of(inbox)).get();
 
-            //creating the archive mailbox and adding email are two steps / two versions
-            Assertions.assertEquals(Status.HAS_MORE, mua.refresh().get());
             Assertions.assertEquals(Status.UPDATED, mua.refresh().get());
 
             final Mailbox inboxAfterModification = cache.getMailbox(Role.INBOX);
@@ -159,8 +157,6 @@ public class ModifyLabelsTest {
 
             mua.modifyLabels(threadT1, ImmutableList.of(JMAP), Collections.emptyList()).get();
 
-            //creating the jmap mailbox and adding email are two steps / two versions
-            Assertions.assertEquals(Status.HAS_MORE, mua.refresh().get());
             Assertions.assertEquals(Status.UPDATED, mua.refresh().get());
 
             final Mailbox inboxAfterModification = cache.getMailbox(Role.INBOX);
@@ -265,7 +261,6 @@ public class ModifyLabelsTest {
 
             mua.modifyLabels(threadT1, ImmutableList.of(JMAP, inbox), Collections.emptyList()).get();
 
-            Assertions.assertEquals(Status.HAS_MORE, mua.refresh().get());
             Assertions.assertEquals(Status.UPDATED, mua.refresh().get());
 
             final Mailbox jmap = cache.getMailboxes().stream().filter(mailbox -> mailbox.getName().equals("JMAP")).findFirst().orElse(null);
