@@ -40,6 +40,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
 
     private Duration pingInterval = null;
     private Duration pingIntervalTolerance = Duration.ofSeconds(10);
+    private String pushState = null;
 
     public WebSocketPushService(HttpUrl webSocketUrl, HttpAuthentication httpAuthentication, @Nullable SessionStateListener sessionStateListener) {
         super(webSocketUrl, httpAuthentication, sessionStateListener);
@@ -113,6 +114,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     private void enablePushNotifications() {
         LOGGER.info("Enable push notifications");
         final PushEnableWebSocketMessage message = PushEnableWebSocketMessage.builder()
+                .pushState(pushState)
                 .build();
         send(message);
     }
@@ -146,7 +148,11 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
             return true;
         }
         if (message instanceof StateChangeWebSocketMessage) {
-            this.onStateChangeListenerManager.onStateChange((StateChangeWebSocketMessage) message);
+            final StateChangeWebSocketMessage stateChange = (StateChangeWebSocketMessage) message;
+            final String pushState = stateChange.getPushState();
+            if (this.onStateChangeListenerManager.onStateChange(stateChange)) {
+                this.pushState = pushState;
+            }
             return true;
         }
         return false;

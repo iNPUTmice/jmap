@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.client.event.OnStateChangeListener;
 import rs.ltt.jmap.client.event.OnStateChangeListenerManager;
+import rs.ltt.jmap.common.entity.StateChange;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -148,5 +149,46 @@ public class OnStateChangeListenerManagerTest {
         Assertions.assertEquals(1, enableCount.get(), "Enable count is wrong");
         Assertions.assertEquals(1, disableCount.get(), "Disable count is wrong");
 
+    }
+
+    @Test
+    public void oneListenerReturnsTrue() {
+        final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(
+                new OnStateChangeListenerManager.Callback() {
+                    @Override
+                    public void disable() {
+                        //ignored
+                    }
+
+                    @Override
+                    public void enable() {
+                        //ignored
+                    }
+                }
+        );
+        onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
+        onStateChangeListenerManager.addOnStateChangeListener(stateChange -> true);
+        onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
+        Assertions.assertTrue(onStateChangeListenerManager.onStateChange(StateChange.builder().build()));
+    }
+
+    @Test
+    public void twoListenerReturnFalse() {
+        final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(
+                new OnStateChangeListenerManager.Callback() {
+                    @Override
+                    public void disable() {
+                        //ignored
+                    }
+
+                    @Override
+                    public void enable() {
+                        //ignored
+                    }
+                }
+        );
+        onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
+        onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
+        Assertions.assertFalse(onStateChangeListenerManager.onStateChange(StateChange.builder().build()));
     }
 }

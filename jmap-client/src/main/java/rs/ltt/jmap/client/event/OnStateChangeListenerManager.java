@@ -20,6 +20,7 @@ import rs.ltt.jmap.common.entity.StateChange;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OnStateChangeListenerManager {
 
@@ -67,10 +68,14 @@ public class OnStateChangeListenerManager {
         }
     }
 
-    public void onStateChange(StateChange stateChange) {
+    public boolean onStateChange(StateChange stateChange) {
+        final AtomicBoolean result = new AtomicBoolean(false);
         synchronized (this.onStateChangeListeners) {
-            this.onStateChangeListeners.forEach(listener -> listener.onStateChange(stateChange));
+            this.onStateChangeListeners.forEach(listener -> {
+                result.compareAndSet(false, listener.onStateChange(stateChange));
+            });
         }
+        return result.get();
     }
 
 
