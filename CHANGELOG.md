@@ -1,3 +1,7 @@
+### 0.6.1 (2021-04-19)
+
+* Add support for WebSockets (including push)
+
 ### 0.6.0 (2021-04-11)
 
 * Introduce draft API to listen to events
