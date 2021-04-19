@@ -115,9 +115,11 @@ public abstract class JmapDispatcher extends Dispatcher {
             }
             if (webSocketMessage instanceof PushEnableWebSocketMessage) {
                 if (pushEnabledWebSockets.contains(webSocket)) {
+                    System.out.println("skip adding socket");
                     return;
                 }
                 pushEnabledWebSockets.add(webSocket);
+                System.out.println("added socket for a total of "+pushEnabledWebSockets.size());
                 return;
             }
             if (webSocketMessage instanceof PushDisableWebSocketMessage) {

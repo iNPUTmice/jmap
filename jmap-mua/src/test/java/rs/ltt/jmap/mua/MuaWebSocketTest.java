@@ -33,6 +33,7 @@ import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.filter.FilterOperator;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.common.method.call.core.EchoMethodCall;
+import rs.ltt.jmap.common.method.response.core.EchoMethodResponse;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
 
@@ -105,6 +106,18 @@ public class MuaWebSocketTest {
         server.shutdown();
     }
 
+    private static void awaitRoundTrip(final Mua mua) throws ExecutionException, InterruptedException {
+        Assertions.assertEquals(
+                "jmap-mua",
+                mua.getJmapClient()
+                        .call(new EchoMethodCall("jmap-mua"))
+                        .get()
+                        .getMain(EchoMethodResponse.class)
+                        .getLibraryName()
+        );
+        System.out.println("got round trip");
+    }
+
     @Test
     public void serverShutdown() throws ExecutionException, InterruptedException, IOException {
         final MyInMemoryCache cache = new MyInMemoryCache();
@@ -129,10 +142,6 @@ public class MuaWebSocketTest {
         }
         final ExecutionException executionException = Assertions.assertThrows(ExecutionException.class, () -> future.get(5, TimeUnit.SECONDS));
         MatcherAssert.assertThat(executionException.getCause(), CoreMatchers.instanceOf(IOException.class));
-    }
-
-    private static void awaitRoundTrip(final Mua mua) throws ExecutionException, InterruptedException {
-        mua.getJmapClient().call(new EchoMethodCall("jmap-mua")).get();
     }
 
     @Test
@@ -199,6 +208,10 @@ public class MuaWebSocketTest {
                 .accountId(mailServer.getAccountId())
                 .build()) {
 
+            //fetches session. starts WebSocket
+            //If we don’t do that the next round trip call might race the push enable message
+            awaitRoundTrip(mua);
+
             final AtomicInteger stateChangeCount = new AtomicInteger();
 
             final OnStateChangeListener changeListener = stateChange -> {
@@ -212,7 +225,7 @@ public class MuaWebSocketTest {
 
             awaitRoundTrip(mua);
 
-            Assertions.assertTrue(mailServer.hasPushEnabledWebSockets(),"No WebSockets have been enabled for push");
+            Assertions.assertTrue(mailServer.hasPushEnabledWebSockets(), "No WebSockets have been enabled for push");
 
             final Email email = mailServer.generateEmailOnTop();
 
@@ -224,7 +237,7 @@ public class MuaWebSocketTest {
 
             awaitRoundTrip(mua);
 
-            Assertions.assertFalse(mailServer.hasPushEnabledWebSockets(),"Some WebSockets have been enabled for push");
+            Assertions.assertFalse(mailServer.hasPushEnabledWebSockets(), "Some WebSockets have been enabled for push");
 
         }
 
