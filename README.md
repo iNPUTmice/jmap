@@ -15,11 +15,11 @@ The library is divided into separate modules. *Most people will probably want to
 
 ### jmap-annotation
 
-Each JMAP method call and response is a POJO annotated with `@JmapMethod`. An annotation processor collects a lists of all available JMAP Methods. This modules only holds the annotations. When extending the library you need to include `jmap-annotation-processor` as well.
+Each JMAP method call and response is a POJO annotated with `@JmapMethod`. An annotation processor collects a lists of all available JMAP Methods. This module only holds the annotations. When extending the library you need to include `jmap-annotation-processor` as well.
 
 ### jmap-annotation-processor
 
-The annotation processors that compile lists of JMAP methods, JMAP errors and capabilities into resource files. This modules is only required when extending the library.
+The annotation processors that compile lists of JMAP methods, JMAP errors and capabilities into resource files. This module is only required when extending the library.
 
 ### jmap-common
 
