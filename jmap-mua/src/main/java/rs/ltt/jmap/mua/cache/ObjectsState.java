@@ -27,4 +27,34 @@ public class ObjectsState {
         this.threadState = threadState;
         this.emailState = emailState;
     }
+
+    public static ObjectsState.Builder builder() {
+        return new ObjectsState.Builder();
+    }
+
+    public static class Builder {
+
+        private String mailboxState;
+        private String threadState;
+        private String emailState;
+
+        public Builder setMailboxState(String mailboxState) {
+            this.mailboxState = mailboxState;
+            return this;
+        }
+
+        public Builder setThreadState(String threadState) {
+            this.threadState = threadState;
+            return this;
+        }
+
+        public Builder setEmailState(String emailState) {
+            this.emailState = emailState;
+            return this;
+        }
+
+        public ObjectsState build() {
+            return new ObjectsState(mailboxState, threadState, emailState);
+        }
+    }
 }
