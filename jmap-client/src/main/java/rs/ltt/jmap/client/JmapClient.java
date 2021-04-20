@@ -133,7 +133,11 @@ public class JmapClient implements Closeable {
         return sessionClient.get();
     }
 
-    public ListenableFuture<PushService> monitorEvents(final OnStateChangeListener onStateChangeListener) {
+    public ListenableFuture<PushService> monitorEvents() {
+        return monitorEvents(null);
+    }
+
+    public ListenableFuture<PushService> monitorEvents(@Nullable final OnStateChangeListener onStateChangeListener) {
         return Futures.transform(
                 getSession(),
                 session -> monitorEvents(session, onStateChangeListener),
@@ -141,7 +145,7 @@ public class JmapClient implements Closeable {
         );
     }
 
-    private PushService monitorEvents(final Session session, final OnStateChangeListener onStateChangeListener) {
+    private PushService monitorEvents(final Session session, @Nullable final OnStateChangeListener onStateChangeListener) {
         final JmapApiClient jmapApiClient = getApiClient(session);
         final PushService pushService;
         if (jmapApiClient instanceof PushService) {
@@ -152,7 +156,9 @@ public class JmapClient implements Closeable {
                     authentication
             );
         }
-        pushService.addOnStateChangeListener(onStateChangeListener);
+        if (onStateChangeListener != null) {
+            pushService.addOnStateChangeListener(onStateChangeListener);
+        }
         return pushService;
     }
 
