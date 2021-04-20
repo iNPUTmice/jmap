@@ -1,3 +1,7 @@
+### 0.6.2 (2021-04-20)
+
+* JmapClient.monitorEvents() now doesn’t require listener
+
 ### 0.6.1 (2021-04-19)
 
 * Add support for WebSockets (including push)
