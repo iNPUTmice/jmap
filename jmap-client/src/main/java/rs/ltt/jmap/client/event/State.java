@@ -16,14 +16,27 @@
 
 package rs.ltt.jmap.client.event;
 
-public interface PushService {
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
-    void addOnStateChangeListener(OnStateChangeListener onStateChangeListener);
+public enum State {
 
-    void removeOnStateChangeListener(OnStateChangeListener onStateChangeListener);
+    FAILED, CLOSED, CONNECTING, CONNECTED;
 
-    void addOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener);
+    private static final List<State> STATES_NEEDING_RECONNECT = Arrays.asList(State.CLOSED, State.FAILED);
 
-    void removeOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener);
+    public boolean needsReconnect() {
+        return STATES_NEEDING_RECONNECT.contains(this);
+    }
+
+    public static State reduce(Collection<State> states) {
+        for(final State state : State.values()) {
+            if (states.contains(state)) {
+                return state;
+            }
+        }
+        return FAILED;
+    }
 
 }

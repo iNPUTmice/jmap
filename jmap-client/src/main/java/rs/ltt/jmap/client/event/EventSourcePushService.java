@@ -30,11 +30,12 @@ import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
-import rs.ltt.jmap.client.util.State;
 import rs.ltt.jmap.common.entity.StateChange;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -55,6 +56,7 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     private int attempt = 0;
     private State state = State.CLOSED;
     private ScheduledFuture<?> reconnectionFuture;
+    private final List<OnConnectionStateChangeListener> onConnectionStateListeners = new ArrayList<>();
 
     public EventSourcePushService(final Session session, final HttpAuthentication authentication) {
         this.session = session;
@@ -73,6 +75,11 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     private void transitionTo(final State state) {
         LOGGER.info("transition to {}", state);
         this.state = state;
+        synchronized (this.onConnectionStateListeners) {
+            for(OnConnectionStateChangeListener listener : this.onConnectionStateListeners) {
+                listener.onConnectionStateChange(state);
+            }
+        }
         if (state.needsReconnect() && this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
             scheduleReconnect();
         }
@@ -161,6 +168,20 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     @Override
     public void removeOnStateChangeListener(OnStateChangeListener onStateChangeListener) {
         this.onStateChangeListenerManager.removeOnStateChangeListener(onStateChangeListener);
+    }
+
+    @Override
+    public void addOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener) {
+        synchronized (this.onConnectionStateListeners) {
+            this.onConnectionStateListeners.add(onConnectionStateListener);
+        }
+    }
+
+    @Override
+    public void removeOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener) {
+        synchronized (this.onConnectionStateListeners) {
+            this.onConnectionStateListeners.remove(onConnectionStateListener);
+        }
     }
 
     @Override

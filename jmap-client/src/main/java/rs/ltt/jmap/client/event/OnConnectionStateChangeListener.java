@@ -14,22 +14,8 @@
  *
  */
 
-package rs.ltt.jmap.client.util;
+package rs.ltt.jmap.client.event;
 
-import java.util.Arrays;
-import java.util.List;
-
-public enum State {
-
-
-    //TODO do we want to add CLOSING and regard CONNECTING and CLOSING as some inbetween states?
-
-    CLOSED, CONNECTING, CONNECTED, FAILED;
-
-    private static final List<State> STATES_NEEDING_RECONNECT = Arrays.asList(State.CLOSED, State.FAILED);
-
-    public boolean needsReconnect() {
-        return STATES_NEEDING_RECONNECT.contains(this);
-    }
-
+public interface OnConnectionStateChangeListener {
+    void onConnectionStateChange(State state);
 }

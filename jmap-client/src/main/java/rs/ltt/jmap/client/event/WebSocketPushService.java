@@ -23,13 +23,14 @@ import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.api.SessionStateListener;
 import rs.ltt.jmap.client.api.WebSocketJmapApiClient;
 import rs.ltt.jmap.client.http.HttpAuthentication;
-import rs.ltt.jmap.client.util.State;
 import rs.ltt.jmap.common.websocket.PushDisableWebSocketMessage;
 import rs.ltt.jmap.common.websocket.PushEnableWebSocketMessage;
 import rs.ltt.jmap.common.websocket.StateChangeWebSocketMessage;
 import rs.ltt.jmap.common.websocket.WebSocketMessage;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     private Duration pingInterval = null;
     private Duration pingIntervalTolerance = Duration.ofSeconds(10);
     private String pushState = null;
+    private final List<OnConnectionStateChangeListener> onConnectionStateListeners = new ArrayList<>();
 
     public WebSocketPushService(HttpUrl webSocketUrl, HttpAuthentication httpAuthentication, @Nullable SessionStateListener sessionStateListener) {
         super(webSocketUrl, httpAuthentication, sessionStateListener);
@@ -56,45 +58,26 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
         this.onStateChangeListenerManager.removeOnStateChangeListener(onStateChangeListener);
     }
 
-    /**
-     * The ping frame interval used when pushes are enabled. Set to 0 to disable.
-     * Set to null to use automatic adjustment based on the time between receiving the last frame
-     * and receiving an EOF.
-     *
-     * @param pingInterval Set to null to use automatic adjustment
-     */
-    public void setPingInterval(final Duration pingInterval) {
-        this.pingInterval = pingInterval;
+    @Override
+    public void addOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener) {
+        synchronized (this.onConnectionStateListeners) {
+            this.onConnectionStateListeners.add(onConnectionStateListener);
+        }
     }
+
+    @Override
+    public void removeOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener) {
+        synchronized (this.onConnectionStateListeners) {
+            this.onConnectionStateListeners.remove(onConnectionStateListener);
+        }
+    }
+
 
     @Override
     public synchronized void disable() {
         if (state == State.CONNECTED) {
             disablePushNotifications();
         }
-    }
-
-    @Override
-    protected Duration getPingInterval() {
-        final Duration duration;
-        if (onStateChangeListenerManager.isPushNotificationsEnabled()) {
-            if (this.pingInterval != null) {
-                duration = this.pingInterval.minus(pingIntervalTolerance);
-                LOGGER.info("Using configured ping interval of {}", duration);
-            } else {
-                final int count = this.connectionDurations.size();
-                if (count >= 5) {
-                    final Duration median = Duration.ofNanos(Math.round(Quantiles.median().compute(this.connectionDurations)));
-                    duration =  median.minus(pingIntervalTolerance);
-                    LOGGER.info("Using automatically adjusted ping interval of {}", duration);
-                } else {
-                    duration = Duration.ZERO;
-                }
-            }
-        } else {
-            duration = Duration.ZERO;
-        }
-        return duration;
     }
 
     private void disablePushNotifications() {
@@ -122,24 +105,48 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     @Override
     protected void transitionTo(final State state) {
         super.transitionTo(state);
+        synchronized (this.onConnectionStateListeners) {
+            for(OnConnectionStateChangeListener listener : this.onConnectionStateListeners) {
+                listener.onConnectionStateChange(state);
+            }
+        }
         if (state.needsReconnect() && this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
             scheduleReconnect();
         }
     }
 
-    private void scheduleReconnect() {
-        final ScheduledFuture<?> currentFuture = this.reconnectionFuture;
-        final int attempt = this.attempt;
-        final Duration reconnectIn = reconnectionStrategy.getNextReconnectionAttempt(attempt);
-        LOGGER.info("schedule reconnect in {} for {} time", reconnectIn, attempt + 1);
-        this.reconnectionFuture = Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
-                this::connectWebSocket,
-                reconnectIn.toMillis(),
-                TimeUnit.MILLISECONDS
-        );
-        if (currentFuture != null) {
-            currentFuture.cancel(true);
+    @Override
+    protected Duration getPingInterval() {
+        final Duration duration;
+        if (onStateChangeListenerManager.isPushNotificationsEnabled()) {
+            if (this.pingInterval != null) {
+                duration = this.pingInterval.minus(pingIntervalTolerance);
+                LOGGER.info("Using configured ping interval of {}", duration);
+            } else {
+                final int count = this.connectionDurations.size();
+                if (count >= 5) {
+                    final Duration median = Duration.ofNanos(Math.round(Quantiles.median().compute(this.connectionDurations)));
+                    duration = median.minus(pingIntervalTolerance);
+                    LOGGER.info("Using automatically adjusted ping interval of {}", duration);
+                } else {
+                    duration = Duration.ZERO;
+                }
+            }
+        } else {
+            duration = Duration.ZERO;
         }
+        return duration;
+    }
+
+    /**
+     * The ping frame interval used when pushes are enabled. Set to 0 to disable.
+     * Set to null to use automatic adjustment based on the time between receiving the last frame
+     * and receiving an EOF.
+     *
+     * @param pingInterval Set to null to use automatic adjustment
+     */
+    public void setPingInterval(final Duration pingInterval) {
+        this.pingInterval = pingInterval;
     }
 
     @Override
@@ -170,6 +177,21 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     public synchronized void close() {
         this.onStateChangeListenerManager.removeAllListeners();
         super.close();
+    }
+
+    private void scheduleReconnect() {
+        final ScheduledFuture<?> currentFuture = this.reconnectionFuture;
+        final int attempt = this.attempt;
+        final Duration reconnectIn = reconnectionStrategy.getNextReconnectionAttempt(attempt);
+        LOGGER.info("schedule reconnect in {} for {} time", reconnectIn, attempt + 1);
+        this.reconnectionFuture = Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
+                this::connectWebSocket,
+                reconnectIn.toMillis(),
+                TimeUnit.MILLISECONDS
+        );
+        if (currentFuture != null) {
+            currentFuture.cancel(true);
+        }
     }
 
 }

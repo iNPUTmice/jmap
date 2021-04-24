@@ -25,7 +25,7 @@ import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
-import rs.ltt.jmap.client.util.State;
+import rs.ltt.jmap.client.event.State;
 import rs.ltt.jmap.common.GenericResponse;
 import rs.ltt.jmap.common.websocket.AbstractApiWebSocketMessage;
 import rs.ltt.jmap.common.websocket.RequestWebSocketMessage;
