@@ -26,4 +26,6 @@ public interface PushService {
 
     void removeOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener);
 
+    State getConnectionState();
+
 }

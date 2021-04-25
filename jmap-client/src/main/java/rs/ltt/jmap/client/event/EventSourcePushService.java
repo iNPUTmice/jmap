@@ -185,6 +185,11 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     }
 
     @Override
+    public State getConnectionState() {
+        return this.state;
+    }
+
+    @Override
     public void disable() {
         disconnect(State.CLOSED);
         cancelReconnectionFuture();

@@ -72,6 +72,11 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
         }
     }
 
+    @Override
+    public State getConnectionState() {
+        return this.state;
+    }
+
 
     @Override
     public synchronized void disable() {
