@@ -387,8 +387,7 @@ public class QueryService extends MuaService {
             }
         }, ioExecutorService);
     }
-
-    //TODO we need to test this
+    
     private Long calculateQueryPageSize(final QueryStateWrapper queryStateWrapper, final Session session) {
         final Long configuredQueryPageSize = getQueryPageSize();
         if (queryStateWrapper.upTo != null) {

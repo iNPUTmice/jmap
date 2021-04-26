@@ -75,6 +75,8 @@ public abstract class JmapDispatcher extends Dispatcher {
     private FailureTrigger failureTrigger = FailureTrigger.NONE;
     private boolean advertiseWebSocket = true;
 
+    private long maxObjectsInGet = 4096;
+
 
     private final WebSocketListener webSocketListener = new WebSocketListener() {
         @Override
@@ -149,6 +151,10 @@ public abstract class JmapDispatcher extends Dispatcher {
         this.advertiseWebSocket = advertiseWebSocket;
     }
 
+    public void setMaxObjectsInGet(final long maxObjectsInGet) {
+        this.maxObjectsInGet = maxObjectsInGet;
+    }
+
     public void setFailureTrigger(final FailureTrigger failureTrigger) {
         this.failureTrigger = failureTrigger;
     }
@@ -214,7 +220,7 @@ public abstract class JmapDispatcher extends Dispatcher {
 
     private MockResponse session() {
         ImmutableMap.Builder<Class<? extends Capability>, Capability> capabilityBuilder = ImmutableMap.builder();
-        capabilityBuilder.put(CoreCapability.class, CoreCapability.builder().maxObjectsInGet(4096L).build());
+        capabilityBuilder.put(CoreCapability.class, CoreCapability.builder().maxObjectsInGet(maxObjectsInGet).build());
         if (this.advertiseWebSocket) {
             capabilityBuilder.put(WebSocketCapability.class, WebSocketCapability.builder()
                     .url(WEB_SOCKET_PATH)

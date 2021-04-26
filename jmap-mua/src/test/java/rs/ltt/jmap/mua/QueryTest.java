@@ -110,7 +110,7 @@ public class QueryTest {
             mua.query(emailQuery, lastEmailId).get();
 
             Assertions.assertEquals(
-                    Arrays.asList("T0", "T1", "T2", "T3", "T4","T5","T6","T7","T8","T9"),
+                    Arrays.asList("T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9"),
                     myInMemoryCache.getThreadIdsInQuery(emailQuery.asHash())
             );
         }
@@ -118,7 +118,100 @@ public class QueryTest {
         server.shutdown();
     }
 
-    //TODO coping queryPagination with a followed up refresh() is a good opportunity to test calculateQueryPageSizet
+    @Test
+    public void queryRefreshMoreThanPageSize() throws IOException, InterruptedException, ExecutionException {
+        final MockMailServer mockMailServer = new MockMailServer(128);
+        final MockWebServer server = new MockWebServer();
+        server.setDispatcher(mockMailServer);
+
+        final MyInMemoryCache myInMemoryCache = new MyInMemoryCache();
+
+        final EmailQuery emailQuery = EmailQuery.unfiltered(true);
+
+        try (final Mua mua = Mua.builder()
+                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                .cache(myInMemoryCache)
+                .username(mockMailServer.getUsername())
+                .password(JmapDispatcher.PASSWORD)
+                .accountId(mockMailServer.getAccountId())
+                .queryPageSize(5)
+                .build()) {
+
+            mua.query(emailQuery).get();
+
+            Assertions.assertEquals(
+                    Arrays.asList("T0", "T1", "T2", "T3", "T4"),
+                    myInMemoryCache.getThreadIdsInQuery(emailQuery.asHash())
+            );
+
+            final String lastEmailId = myInMemoryCache.getItems(emailQuery.asHash()).get(4).getEmailId();
+
+            Assertions.assertEquals("M10", lastEmailId);
+
+
+            mua.query(emailQuery, lastEmailId).get();
+
+            mockMailServer.generateEmailOnTop();
+
+            mua.query(emailQuery).get();
+
+            final List<String> threadIds = myInMemoryCache.getThreadIdsInQuery(emailQuery.asHash());
+
+            Assertions.assertEquals(10, threadIds.size());
+
+            Assertions.assertEquals("T8", threadIds.get(9));
+        }
+
+        server.shutdown();
+    }
+
+    @Test
+    public void queryRefreshMoreThanPageSizeAndGetLimit() throws IOException, InterruptedException, ExecutionException {
+        final MockMailServer mockMailServer = new MockMailServer(128);
+        mockMailServer.setMaxObjectsInGet(8);
+        final MockWebServer server = new MockWebServer();
+        server.setDispatcher(mockMailServer);
+
+        final MyInMemoryCache myInMemoryCache = new MyInMemoryCache();
+
+        final EmailQuery emailQuery = EmailQuery.unfiltered(true);
+
+        try (final Mua mua = Mua.builder()
+                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                .cache(myInMemoryCache)
+                .username(mockMailServer.getUsername())
+                .password(JmapDispatcher.PASSWORD)
+                .accountId(mockMailServer.getAccountId())
+                .queryPageSize(5)
+                .build()) {
+
+            mua.query(emailQuery).get();
+
+            Assertions.assertEquals(
+                    Arrays.asList("T0", "T1", "T2", "T3", "T4"),
+                    myInMemoryCache.getThreadIdsInQuery(emailQuery.asHash())
+            );
+
+            final String lastEmailId = myInMemoryCache.getItems(emailQuery.asHash()).get(4).getEmailId();
+
+            Assertions.assertEquals("M10", lastEmailId);
+
+
+            mua.query(emailQuery, lastEmailId).get();
+
+            mockMailServer.generateEmailOnTop();
+
+            mua.query(emailQuery).get();
+
+            final List<String> threadIds = myInMemoryCache.getThreadIdsInQuery(emailQuery.asHash());
+
+            Assertions.assertEquals(8, threadIds.size());
+
+            Assertions.assertEquals("T6", threadIds.get(7));
+        }
+
+        server.shutdown();
+    }
 
     private static class MyInMemoryCache extends InMemoryCache {
 

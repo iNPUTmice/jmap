@@ -54,16 +54,6 @@ public abstract class MuaService {
         this.ioExecutorService = muaSession.getIoExecutorService();
     }
 
-    protected static Throwable extractException(final Exception exception) {
-        if (exception instanceof ExecutionException) {
-            final Throwable cause = exception.getCause();
-            if (cause != null) {
-                return cause;
-            }
-        }
-        return exception;
-    }
-
     protected <T extends MuaService> T getService(Class<T> clazz) {
         return muaSession.getService(clazz);
     }
