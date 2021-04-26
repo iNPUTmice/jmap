@@ -115,6 +115,7 @@ public class CacheInvalidationTest {
         server.shutdown();
     }
 
+    //TODO write variant that has queryChanges at the same time and *NOT* invalidates cache
     @Test
     public void invalidationOnAnchorNotFound() throws IOException, InterruptedException, ExecutionException {
         final MyMockMailServer myMockMailServer = new MyMockMailServer(128);

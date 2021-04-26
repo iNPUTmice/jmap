@@ -44,6 +44,7 @@ public class MuaSession implements Closeable {
                 .put(IdentityService.class, new IdentityService(this))
                 .put(MailboxService.class, new MailboxService(this))
                 .put(QueryService.class, new QueryService(this))
+                .put(RefreshService.class, new RefreshService(this))
                 .put(ThreadService.class, new ThreadService(this))
                 .build();
     }

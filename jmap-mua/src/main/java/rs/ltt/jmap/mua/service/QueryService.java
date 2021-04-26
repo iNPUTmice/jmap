@@ -17,7 +17,6 @@
 package rs.ltt.jmap.mua.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -48,7 +47,6 @@ import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
 import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Missing;
-import rs.ltt.jmap.mua.cache.ObjectsState;
 import rs.ltt.jmap.mua.cache.QueryStateWrapper;
 import rs.ltt.jmap.mua.cache.QueryUpdate;
 import rs.ltt.jmap.mua.cache.exception.CacheReadException;
@@ -94,47 +92,6 @@ public class QueryService extends MuaService {
         } catch (final Exception e) {
             return true;
         }
-    }
-
-    public ListenableFuture<Status> refresh() {
-        return Futures.transformAsync(getObjectsState(), this::refresh, MoreExecutors.directExecutor());
-    }
-
-    private ListenableFuture<Status> refresh(ObjectsState objectsState) {
-        final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
-        List<ListenableFuture<Status>> futuresList = refresh(objectsState, multiCall);
-        multiCall.execute();
-        return transform(futuresList);
-    }
-
-    private List<ListenableFuture<Status>> refresh(ObjectsState objectsState, JmapClient.MultiCall multiCall) {
-        ImmutableList.Builder<ListenableFuture<Status>> futuresListBuilder = new ImmutableList.Builder<>();
-        if (objectsState.mailboxState != null) {
-            futuresListBuilder.add(getService(MailboxService.class).updateMailboxes(objectsState.mailboxState, multiCall));
-        } else {
-            futuresListBuilder.add(getService(MailboxService.class).loadMailboxes(multiCall));
-        }
-
-        //update to emails should happen before update to threads
-        //when mua queries threads the corresponding emails should already be in the cache
-
-        if (objectsState.emailState != null && objectsState.threadState != null) {
-            futuresListBuilder.add(getService(EmailService.class).updateEmails(objectsState.emailState, multiCall));
-            futuresListBuilder.add(getService(ThreadService.class).updateThreads(objectsState.threadState, multiCall));
-        }
-        return futuresListBuilder.build();
-    }
-
-    private static ListenableFuture<Status> transform(List<ListenableFuture<Status>> list) {
-        return Futures.transform(Futures.allAsList(list), statuses -> {
-            if (statuses.contains(Status.HAS_MORE)) {
-                return Status.HAS_MORE;
-            }
-            if (statuses.contains(Status.UPDATED)) {
-                return Status.UPDATED;
-            }
-            return Status.UNCHANGED;
-        }, MoreExecutors.directExecutor());
     }
 
     public ListenableFuture<Status> query(Filter<Email> filter) {
@@ -251,7 +208,8 @@ public class QueryService extends MuaService {
         Preconditions.checkNotNull(queryStateWrapper.queryState, "QueryState can not be null when attempting to refresh query");
         LOGGER.info("Refreshing query {}", query.toString());
 
-        final List<ListenableFuture<Status>> piggyBackedFuturesList = refresh(queryStateWrapper.objectsState, multiCall);
+        final List<ListenableFuture<Status>> piggyBackedFuturesList = getService(RefreshService.class)
+                .refresh(queryStateWrapper.objectsState, multiCall);
 
         final JmapRequest.Call queryChangesCall = multiCall.call(
                 //TODO do we want to include upTo?
@@ -352,7 +310,8 @@ public class QueryService extends MuaService {
         JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
 
         //these need to be processed *before* the Query call or else the fetchMissing will not honor newly fetched ids
-        final List<ListenableFuture<Status>> piggyBackedFuturesList = refresh(queryStateWrapper.objectsState, multiCall);
+        final List<ListenableFuture<Status>> piggyBackedFuturesList = getService(RefreshService.class)
+                .refresh(queryStateWrapper.objectsState, multiCall);
 
         final JmapRequest.Call queryCall = multiCall.call(
                 QueryEmailMethodCall.builder()

@@ -16,9 +16,7 @@
 
 package rs.ltt.jmap.mua.service;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapClient;
@@ -29,12 +27,14 @@ import rs.ltt.jmap.common.method.error.CannotCalculateChangesMethodErrorResponse
 import rs.ltt.jmap.common.method.response.standard.ChangesMethodResponse;
 import rs.ltt.jmap.common.util.Mapper;
 import rs.ltt.jmap.mua.MuaSession;
+import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.ObjectsState;
 import rs.ltt.jmap.mua.util.UpdateUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public abstract class MuaService {
@@ -100,5 +100,17 @@ public abstract class MuaService {
                 }
             }
         }, ioExecutorService);
+    }
+
+    protected static ListenableFuture<Status> transform(List<ListenableFuture<Status>> list) {
+        return Futures.transform(Futures.allAsList(list), statuses -> {
+            if (statuses.contains(Status.HAS_MORE)) {
+                return Status.HAS_MORE;
+            }
+            if (statuses.contains(Status.UPDATED)) {
+                return Status.UPDATED;
+            }
+            return Status.UNCHANGED;
+        }, MoreExecutors.directExecutor());
     }
 }

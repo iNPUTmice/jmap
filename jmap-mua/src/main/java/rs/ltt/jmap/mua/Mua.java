@@ -30,10 +30,7 @@ import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
-import rs.ltt.jmap.mua.service.EmailService;
-import rs.ltt.jmap.mua.service.IdentityService;
-import rs.ltt.jmap.mua.service.MailboxService;
-import rs.ltt.jmap.mua.service.QueryService;
+import rs.ltt.jmap.mua.service.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,7 +49,7 @@ public class Mua extends MuaSession {
     }
 
     public ListenableFuture<Status> refresh() {
-        return getService(QueryService.class).refresh();
+        return getService(RefreshService.class).refresh();
     }
 
     public ListenableFuture<Status> refreshIdentities() {
