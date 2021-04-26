@@ -18,7 +18,10 @@ package rs.ltt.jmap.mua.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapClient;
@@ -41,7 +44,6 @@ import rs.ltt.jmap.common.method.error.AnchorNotFoundMethodErrorResponse;
 import rs.ltt.jmap.common.method.error.CannotCalculateChangesMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.email.QueryChangesEmailMethodResponse;
-import rs.ltt.jmap.common.method.response.email.QueryEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
 import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
@@ -60,6 +62,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 public class QueryService extends MuaService {
@@ -68,6 +71,29 @@ public class QueryService extends MuaService {
 
     public QueryService(MuaSession muaSession) {
         super(muaSession);
+    }
+
+    private static void ensureExecuted(@Nullable ListenableFuture<?> future) throws Exception {
+        if (future == null) {
+            return;
+        }
+        try {
+            future.get();
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            throw cause instanceof Exception ? (Exception) cause : e;
+        }
+    }
+
+    private static boolean evaluateAdditionalCondition(final Callable<Boolean> callable) {
+        if (callable == null) {
+            return true;
+        }
+        try {
+            return Boolean.TRUE.equals(callable.call());
+        } catch (final Exception e) {
+            return true;
+        }
     }
 
     public ListenableFuture<Status> refresh() {
@@ -157,7 +183,6 @@ public class QueryService extends MuaService {
             //a query. This will probably fix itself once the update command has run as well as a subsequent updateQuery() call.
             throw new InconsistentQueryStateException("upToId from QueryState needs to match the supplied afterEmailId");
         }
-        final SettableFuture<Status> settableFuture = SettableFuture.create();
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final ListenableFuture<Status> queryRefreshFuture;
         if (queryStateWrapper.canCalculateChanges) {
@@ -176,6 +201,12 @@ public class QueryService extends MuaService {
                         .build()
         );
         final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
+        registerInvalidateQueryCacheCallback(
+                query,
+                queryResponsesFuture,
+                AnchorNotFoundMethodErrorResponse.class,
+                () -> (queryRefreshFuture == null || Status.unchanged(queryRefreshFuture))
+        );
         final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = multiCall.call(
                 GetEmailMethodCall.builder()
                         .accountId(accountId)
@@ -185,34 +216,16 @@ public class QueryService extends MuaService {
         ).getMethodResponses();
 
         final ListenableFuture<QueryResult> queryResultFuture = QueryResult.of(queryResponsesFuture, getThreadIdsResponsesFuture);
-
-        queryResultFuture.addListener(() -> {
-            try {
-                final QueryResult queryResult = queryResultFuture.get();
-
-                //processing order is:
-                //  1) refresh the existent query (which in our implementation also piggybacks email and thread updates)
-                //  2) store new items
-
-                if (queryRefreshFuture != null) {
-                    queryRefreshFuture.get();
-                }
-
-                addQueryResult(query, afterEmailId, queryResult);
-
-                fetchMissing(query.asHash()).addListener(
-                        () -> settableFuture.set(queryResult.items.length > 0 ? Status.UPDATED : Status.UNCHANGED),
-                        MoreExecutors.directExecutor()
-                );
-            } catch (final ExecutionException exception) {
-                invalidateQueryCache(queryRefreshFuture, query, exception);
-                settableFuture.setException(extractException(exception));
-            } catch (final Exception e) {
-                settableFuture.setException(extractException(e));
-            }
+        final ListenableFuture<Status> result = Futures.transformAsync(queryResultFuture, queryResult -> {
+            //processing order is:
+            //  1) refresh the existent query (which in our implementation also piggybacks email and thread updates)
+            //  2) store new items
+            ensureExecuted(queryRefreshFuture);
+            addQueryResult(query, afterEmailId, queryResult);
+            return fetchMissing(query.asHash());
         }, ioExecutorService);
         multiCall.execute();
-        return settableFuture;
+        return result;
     }
 
     private void addQueryResult(final EmailQuery query, String afterEmailId, final QueryResult queryResult) throws CacheWriteException {
@@ -223,28 +236,6 @@ public class QueryService extends MuaService {
             cache.invalidateQueryResult(query.asHash());
             throw e;
         }
-    }
-
-    private void invalidateQueryCache(final ListenableFuture<Status> queryRefreshFuture,
-                                      final EmailQuery query,
-                                      final ExecutionException exception) {
-        final Throwable cause = exception.getCause();
-        //check if cache needs invalidation pull into separate method
-        //TODO migrate this if condition to MethodErrorResponseException.matches(); but only after we wrote tests
-        if (cause instanceof MethodErrorResponseException) {
-            final MethodErrorResponse methodError = ((MethodErrorResponseException) cause).getMethodErrorResponse();
-            if (methodError instanceof AnchorNotFoundMethodErrorResponse) {
-                if (queryRefreshFuture == null || Status.unchanged(queryRefreshFuture)) {
-                    LOGGER.info("Invalidating query result cache after receiving AnchorNotFound response");
-                    cache.invalidateQueryResult(query.asHash());
-                } else {
-                    LOGGER.info(
-                            "Holding back on invaliding query result cache despite AnchorNotFound response because query refresh had changes"
-                    );
-                }
-            }
-        }
-
     }
 
     private ListenableFuture<Status> refreshQuery(@Nonnull final EmailQuery query, @Nonnull final QueryStateWrapper queryStateWrapper) {
@@ -279,7 +270,7 @@ public class QueryService extends MuaService {
                         .build()
         ).getMethodResponses();
 
-        registerInvalidateQueryCacheCallback(query, queryChangesResponsesFuture);
+        registerInvalidateQueryCacheCallback(query, queryChangesResponsesFuture, CannotCalculateChangesMethodErrorResponse.class);
 
         return Futures.transformAsync(queryChangesResponsesFuture, methodResponses -> {
             QueryChangesEmailMethodResponse queryChangesResponse = methodResponses.getMain(QueryChangesEmailMethodResponse.class);
@@ -309,8 +300,17 @@ public class QueryService extends MuaService {
         }, ioExecutorService);
     }
 
-    private void registerInvalidateQueryCacheCallback(final EmailQuery query, ListenableFuture<MethodResponses> queryChangesResponsesFuture) {
-        Futures.addCallback(queryChangesResponsesFuture, new FutureCallback<MethodResponses>() {
+    private void registerInvalidateQueryCacheCallback(final EmailQuery query,
+                                                      final ListenableFuture<MethodResponses> methodResponsesFuture,
+                                                      final Class<? extends MethodErrorResponse> methodError) {
+        registerInvalidateQueryCacheCallback(query, methodResponsesFuture, methodError, null);
+    }
+
+    private void registerInvalidateQueryCacheCallback(final EmailQuery query,
+                                                      final ListenableFuture<MethodResponses> methodResponsesFuture,
+                                                      final Class<? extends MethodErrorResponse> methodError,
+                                                      final Callable<Boolean> additionalCondition) {
+        Futures.addCallback(methodResponsesFuture, new FutureCallback<MethodResponses>() {
             @Override
             public void onSuccess(@Nullable MethodResponses methodResponses) {
 
@@ -318,8 +318,16 @@ public class QueryService extends MuaService {
 
             @Override
             public void onFailure(@Nonnull Throwable throwable) {
-                if (MethodErrorResponseException.matches(throwable, CannotCalculateChangesMethodErrorResponse.class)) {
-                    cache.invalidateQueryResult(query.asHash());
+                if (MethodErrorResponseException.matches(throwable, methodError)) {
+                    if (evaluateAdditionalCondition(additionalCondition)) {
+                        LOGGER.info("Invalidating query result cache after receiving {} response", methodError);
+                        cache.invalidateQueryResult(query.asHash());
+                    } else {
+                        LOGGER.info(
+                                "Not invalidating QueryCache after {} additional because condition was false",
+                                methodError
+                        );
+                    }
                 }
             }
         }, ioExecutorService);
@@ -353,6 +361,7 @@ public class QueryService extends MuaService {
                         .limit(calculateQueryPageSize(queryStateWrapper, session))
                         .build()
         );
+
         final ListenableFuture<MethodResponses> queryResponsesFuture = queryCall.getMethodResponses();
         final JmapRequest.Call threadIdsCall = multiCall.call(
                 GetEmailMethodCall.builder()
@@ -362,6 +371,8 @@ public class QueryService extends MuaService {
                         .build()
         );
         final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture = threadIdsCall.getMethodResponses();
+
+        final ListenableFuture<QueryResult> queryResultFuture = QueryResult.of(queryResponsesFuture, getThreadIdsResponsesFuture);
 
 
         final ListenableFuture<MethodResponses> getThreadsResponsesFuture;
@@ -387,12 +398,8 @@ public class QueryService extends MuaService {
         }
 
         multiCall.execute();
-        return Futures.transformAsync(queryResponsesFuture, methodResponses -> {
-            QueryEmailMethodResponse queryResponse = methodResponses.getMain(QueryEmailMethodResponse.class);
-            GetEmailMethodResponse getThreadIdsResponse = getThreadIdsResponsesFuture.get().getMain(GetEmailMethodResponse.class);
-
-            final QueryResult queryResult = QueryResult.of(queryResponse, getThreadIdsResponse);
-
+        return Futures.transformAsync(queryResultFuture, queryResult -> {
+            Preconditions.checkNotNull(queryResult);
             //processing order is:
             //  1) update Objects (Email, Threads, and Mailboxes)
             //  2) if getThread or getEmails calls where made process those results

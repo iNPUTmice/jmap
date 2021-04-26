@@ -17,7 +17,6 @@
 package rs.ltt.jmap.mock.server;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
@@ -37,6 +36,7 @@ import rs.ltt.jmap.common.method.call.mailbox.GetMailboxMethodCall;
 import rs.ltt.jmap.common.method.call.mailbox.SetMailboxMethodCall;
 import rs.ltt.jmap.common.method.call.thread.ChangesThreadMethodCall;
 import rs.ltt.jmap.common.method.call.thread.GetThreadMethodCall;
+import rs.ltt.jmap.common.method.error.AnchorNotFoundMethodErrorResponse;
 import rs.ltt.jmap.common.method.error.CannotCalculateChangesMethodErrorResponse;
 import rs.ltt.jmap.common.method.error.InvalidResultReferenceMethodErrorResponse;
 import rs.ltt.jmap.common.method.error.StateMismatchMethodErrorResponse;
@@ -48,7 +48,6 @@ import rs.ltt.jmap.common.method.response.mailbox.SetMailboxMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.ChangesThreadMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
 import rs.ltt.jmap.common.websocket.StateChangeWebSocketMessage;
-import rs.ltt.jmap.gson.GsonUtils;
 import rs.ltt.jmap.mock.server.util.FuzzyRoleParser;
 import rs.ltt.jmap.mua.util.MailboxUtil;
 
@@ -121,28 +120,14 @@ public class MockMailServer extends StubMailServer {
         return email;
     }
 
-
-    private Update getAccumulatedUpdateSince(final String oldVersion) {
-        final ArrayList<Update> updates = new ArrayList<>();
-        for(Map.Entry<String,Update> updateEntry : this.updates.entrySet()) {
-            if (updateEntry.getKey().equals(oldVersion) || updates.size() > 0) {
-                updates.add(updateEntry.getValue());
-            }
-        }
-        if (updates.isEmpty()) {
-            return null;
-        }
-        return Update.merge(updates);
-    }
-
     private void pushUpdate(final String oldVersion, final Update update) {
         this.updates.put(oldVersion, update);
-        final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>,String> changedBuilder = ImmutableMap.builder();
-        changedBuilder.put(Thread.class,update.getNewVersion());
+        final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>, String> changedBuilder = ImmutableMap.builder();
+        changedBuilder.put(Thread.class, update.getNewVersion());
         changedBuilder.put(Email.class, update.getNewVersion());
         changedBuilder.put(Mailbox.class, update.getNewVersion());
         final StateChangeWebSocketMessage stateChange = new StateChangeWebSocketMessage(
-                ImmutableMap.of(getAccountId(),changedBuilder.build()),
+                ImmutableMap.of(getAccountId(), changedBuilder.build()),
                 update.getNewVersion()
         );
         final String message = GSON.toJson(stateChange);
@@ -192,6 +177,19 @@ public class MockMailServer extends StubMailServer {
                 };
             }
         }
+    }
+
+    private Update getAccumulatedUpdateSince(final String oldVersion) {
+        final ArrayList<Update> updates = new ArrayList<>();
+        for (Map.Entry<String, Update> updateEntry : this.updates.entrySet()) {
+            if (updateEntry.getKey().equals(oldVersion) || updates.size() > 0) {
+                updates.add(updateEntry.getValue());
+            }
+        }
+        if (updates.isEmpty()) {
+            return null;
+        }
+        return Update.merge(updates);
     }
 
     @Override
@@ -260,7 +258,7 @@ public class MockMailServer extends StubMailServer {
             final Long anchorOffset = methodCall.getAnchorOffset();
             final int anchorPosition = ids.indexOf(anchor);
             if (anchorPosition == -1) {
-                LOGGER.error("anchor not found");
+                return new MethodResponse[]{new AnchorNotFoundMethodErrorResponse()};
             }
             position = Math.toIntExact(anchorPosition + (anchorOffset == null ? 0 : anchorOffset));
         } else {
