@@ -35,6 +35,7 @@
         <module>jmap-mock-server</module>
         <module>jmap-mua</module>
         <module>jmap-mua-util</module>
+        <module>coverage</module>
     </modules>
 
     <name>Java JMAP library</name>
@@ -74,7 +75,6 @@
         </repository>
     </distributionManagement>
 
-
     <build>
         <plugins>
             <plugin>
@@ -100,6 +100,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <!-- Sets the VM argument line used when unit tests are run. -->
+                    <argLine>${surefireArgLine}</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -133,17 +142,25 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.7</version>
                 <executions>
+                    <!-- set arg line property for surefire -->
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
                     </execution>
+                    <!-- set arg line property for failsafe -->
                     <execution>
-                        <id>report</id>
-                        <phase>test</phase>
+                        <id>prepare-agent-integration</id>
                         <goals>
-                            <goal>report</goal>
+                            <goal>prepare-agent-integration</goal>
                         </goals>
+                        <configuration>
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
