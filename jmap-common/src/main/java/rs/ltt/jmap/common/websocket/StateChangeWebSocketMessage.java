@@ -17,9 +17,7 @@
 package rs.ltt.jmap.common.websocket;
 
 import com.google.common.base.MoreObjects;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.Singular;
 import rs.ltt.jmap.annotation.Type;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.StateChange;

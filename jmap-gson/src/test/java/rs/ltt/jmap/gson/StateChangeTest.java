@@ -21,11 +21,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
-import rs.ltt.jmap.common.entity.Email;
-import rs.ltt.jmap.common.entity.Identity;
-import rs.ltt.jmap.common.entity.StateChange;
 import rs.ltt.jmap.common.entity.Thread;
+import rs.ltt.jmap.common.entity.*;
 
 import java.io.IOException;
 import java.util.Map;

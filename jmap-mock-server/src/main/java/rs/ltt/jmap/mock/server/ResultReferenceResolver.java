@@ -23,7 +23,6 @@ import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.Thread;
 import rs.ltt.jmap.common.method.MethodResponse;
-import rs.ltt.jmap.common.method.call.standard.ChangesMethodCall;
 import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.standard.ChangesMethodResponse;
 import rs.ltt.jmap.common.method.response.standard.QueryChangesMethodResponse;

@@ -34,7 +34,6 @@ import rs.ltt.jmap.common.method.call.vacation.GetVacationResponseMethodCall;
 import rs.ltt.jmap.common.method.call.vacation.SetVacationResponseMethodCall;
 import rs.ltt.jmap.common.method.error.UnknownMethodMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.core.EchoMethodResponse;
-import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
 
 public class StubMailServer extends JmapDispatcher {
 

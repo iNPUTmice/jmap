@@ -18,7 +18,6 @@ package rs.ltt.jmap.gson;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.SessionResource;
 import rs.ltt.jmap.common.entity.Account;

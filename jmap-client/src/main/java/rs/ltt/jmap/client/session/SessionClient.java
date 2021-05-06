@@ -16,12 +16,13 @@
 
 package rs.ltt.jmap.client.session;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import okhttp3.*;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

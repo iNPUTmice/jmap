@@ -16,7 +16,6 @@
 
 package rs.ltt.jmap.mock.server;
 
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -29,7 +28,6 @@ import rs.ltt.jmap.common.method.response.mailbox.SetMailboxMethodResponse;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Update {

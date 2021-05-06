@@ -25,7 +25,10 @@ import rs.ltt.jmap.mua.util.EmailUtil;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class EmailGenerator {
 

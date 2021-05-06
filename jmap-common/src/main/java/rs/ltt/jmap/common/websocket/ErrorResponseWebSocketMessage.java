@@ -18,7 +18,6 @@ package rs.ltt.jmap.common.websocket;
 
 import lombok.Builder;
 import rs.ltt.jmap.common.ErrorResponse;
-import rs.ltt.jmap.common.Response;
 
 public class ErrorResponseWebSocketMessage extends AbstractApiWebSocketMessage {
 

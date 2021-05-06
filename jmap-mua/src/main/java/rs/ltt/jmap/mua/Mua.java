@@ -17,7 +17,6 @@
 package rs.ltt.jmap.mua;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import okhttp3.HttpUrl;
 import org.slf4j.Logger;

@@ -17,7 +17,6 @@
 package rs.ltt.jmap.mua.util;
 
 import rs.ltt.jmap.common.entity.Identifiable;
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 
 import java.util.Collection;

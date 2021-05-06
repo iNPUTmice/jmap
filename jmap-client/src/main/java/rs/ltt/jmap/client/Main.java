@@ -28,10 +28,8 @@ import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.entity.filter.FilterOperator;
 import rs.ltt.jmap.common.method.call.core.EchoMethodCall;
 import rs.ltt.jmap.common.method.call.email.GetEmailMethodCall;
-import rs.ltt.jmap.common.method.call.email.QueryChangesEmailMethodCall;
 import rs.ltt.jmap.common.method.call.email.QueryEmailMethodCall;
 import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
-import rs.ltt.jmap.common.method.response.email.QueryChangesEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.email.QueryEmailMethodResponse;
 
 import java.util.concurrent.Future;

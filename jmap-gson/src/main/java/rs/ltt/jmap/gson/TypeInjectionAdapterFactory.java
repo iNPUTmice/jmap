@@ -24,8 +24,6 @@ import com.google.gson.stream.JsonWriter;
 import rs.ltt.jmap.annotation.Type;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 public class TypeInjectionAdapterFactory implements TypeAdapterFactory {
     @Override

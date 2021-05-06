@@ -35,7 +35,6 @@ import rs.ltt.jmap.mua.util.UpdateUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public abstract class MuaService {
 
