@@ -1,5 +1,8 @@
 # Java JMAP library
-[![Build Status](https://travis-ci.org/inputmice/jmap.svg?branch=master)](https://travis-ci.org/inputmice/jmap) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/329b10e923d74c9881f9e8cf53616735)](https://www.codacy.com/manual/iNPUTmice/jmap?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=iNPUTmice/jmap&amp;utm_campaign=Badge_Grade) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/rs.ltt.jmap/jmap/badge.svg)](https://maven-badges.herokuapp.com/maven-central/rs.ltt.jmap/jmap)
+[![Build Status](https://travis-ci.org/inputmice/jmap.svg?branch=master)](https://travis-ci.org/inputmice/jmap)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/329b10e923d74c9881f9e8cf53616735)](https://www.codacy.com/manual/iNPUTmice/jmap?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=iNPUTmice/jmap&amp;utm_campaign=Badge_Grade)
+[![codecov](https://codecov.io/gh/iNPUTmice/jmap/branch/master/graph/badge.svg?token=W35RI2ASHI)](https://codecov.io/gh/iNPUTmice/jmap)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/rs.ltt.jmap/jmap/badge.svg)](https://maven-badges.herokuapp.com/maven-central/rs.ltt.jmap/jmap)
 
 A library to synchronize data between a client and a server using the JSON Meta Application Protocol. The current focus is on acting as a client library to retrieve emails from a server however it is easily extensible to also synchronize contacts and calendars. It might even be extended to act as a server library.
 
