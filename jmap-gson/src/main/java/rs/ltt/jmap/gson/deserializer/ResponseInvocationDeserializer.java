@@ -43,7 +43,6 @@ public class ResponseInvocationDeserializer implements JsonDeserializer<Response
         if (jsonArray.get(0).isJsonPrimitive()) {
             name = jsonArray.get(0).getAsString();
         } else {
-            System.out.println(jsonElement);
             throw new JsonParseException("Name (index 0 of JsonArray) must be a primitive string");
         }
         final JsonElement parameter = jsonArray.get(1);
@@ -63,9 +62,22 @@ public class ResponseInvocationDeserializer implements JsonDeserializer<Response
             clazz = Mapper.METHOD_RESPONSES.get(name);
         }
         if (clazz == null) {
-            throw new JsonParseException("Unknown method response '" + name + "'");
+            throw new UnknownMethodNameException(name);
         }
         final MethodResponse methodResponse = context.deserialize(parameter, clazz);
         return new Response.Invocation(methodResponse, id);
+    }
+
+    public static class UnknownMethodNameException extends JsonParseException {
+        private final String name;
+
+        public UnknownMethodNameException(final String name) {
+            super(String.format("Unknown method name '%s'", name));
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }

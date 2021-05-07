@@ -40,7 +40,7 @@ public class GenericResponseDeserializer implements JsonDeserializer<GenericResp
             if (jsonObject.has("methodResponses") && !jsonObject.has("type")) {
                 return context.deserialize(jsonObject, Response.class);
             }
-            throw new JsonParseException("Unable to identify response as either error or response");
+            throw new JsonParseException("Unable to identify response as neither error nor response");
         } else {
             throw new JsonParseException("unexpected json type when parsing response");
         }
