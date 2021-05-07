@@ -17,11 +17,18 @@
 package rs.ltt.jmap.gson;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonParseException;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import rs.ltt.jmap.common.ErrorResponse;
+import rs.ltt.jmap.common.GenericResponse;
 import rs.ltt.jmap.common.Request;
+import rs.ltt.jmap.common.entity.ErrorType;
 import rs.ltt.jmap.common.method.call.email.SetEmailMethodCall;
 import rs.ltt.jmap.common.util.Patches;
+import rs.ltt.jmap.common.websocket.ErrorResponseWebSocketMessage;
 import rs.ltt.jmap.common.websocket.RequestWebSocketMessage;
 import rs.ltt.jmap.common.websocket.ResponseWebSocketMessage;
 import rs.ltt.jmap.common.websocket.WebSocketMessage;
@@ -52,6 +59,32 @@ public class WebSocketMessageTest extends AbstractGsonTest {
         Assertions.assertTrue(webSocketMessage instanceof ResponseWebSocketMessage);
         final ResponseWebSocketMessage responseWebSocketMessage = (ResponseWebSocketMessage) webSocketMessage;
         Assertions.assertEquals(2, responseWebSocketMessage.getResponse().getMethodResponses().length);
+    }
+
+    @Test
+    public void deserializeUnknownCapability() throws IOException {
+        final WebSocketMessage webSocketMessage = parseFromResource("websocket/unknown-capability.json", WebSocketMessage.class);
+        MatcherAssert.assertThat(webSocketMessage, CoreMatchers.instanceOf(ErrorResponseWebSocketMessage.class));
+        ErrorResponse errorResponse = ((ErrorResponseWebSocketMessage) webSocketMessage).getPayload();
+        Assertions.assertEquals(errorResponse.getType(), ErrorType.UNKNOWN_CAPABILITY);
+    }
+
+    @Test
+    public void deserializeEmpty() {
+        final JsonParseException jsonParseException = Assertions.assertThrows(
+                JsonParseException.class,
+                ()-> parseFromResource("websocket/empty.json", WebSocketMessage.class)
+        );
+        Assertions.assertEquals("WebSocketMessage had no @type attribute",jsonParseException.getMessage());
+    }
+
+    @Test
+    public void deserializeUnknownType() {
+        final JsonParseException jsonParseException = Assertions.assertThrows(
+                JsonParseException.class,
+                ()-> parseFromResource("websocket/unknown-type.json", WebSocketMessage.class)
+        );
+        Assertions.assertEquals("Unknown WebSocketMessage type unknown",jsonParseException.getMessage());
     }
 
 }

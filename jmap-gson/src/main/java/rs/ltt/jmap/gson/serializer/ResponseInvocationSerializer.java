@@ -40,8 +40,8 @@ public class ResponseInvocationSerializer implements JsonSerializer<Response.Inv
             final String errorType = Mapper.METHOD_ERROR_RESPONSES.inverse().get(methodResponse.getClass());
             if (errorType == null) {
                 throw new JsonIOException(String.format(
-                        "Unable to serialize %s. Did you annotate the Method with @JmapError",
-                        methodResponse.getClass()
+                        "Unable to serialize %s. Did you annotate the Method with @JmapError?",
+                        methodResponse.getClass().getSimpleName()
                 ));
             }
             final JsonObject jsonObject = (JsonObject) context.serialize(methodResponse);
@@ -52,7 +52,7 @@ public class ResponseInvocationSerializer implements JsonSerializer<Response.Inv
             if (name == null) {
                 throw new JsonIOException(String.format(
                         "Unable to serialize %s. Did you annotate the method with @JmapMethod?",
-                        methodResponse.getClass()
+                        methodResponse.getClass().getSimpleName()
                 ));
             }
             jsonArray.add(name);

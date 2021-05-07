@@ -1,0 +1,1 @@
+{"@type":"ErrorResponse","type":"urn:ietf:params:jmap:error:unknownCapability","title":"JMAP request uses unsupported capabilities","status":400}
