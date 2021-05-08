@@ -25,7 +25,6 @@ import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.client.session.InMemorySessionCache;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.common.entity.*;
-import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
@@ -61,10 +60,6 @@ public class Mua extends MuaSession {
 
     public ListenableFuture<Boolean> createMailbox(final Mailbox mailbox) {
         return getService(MailboxService.class).createMailbox(mailbox);
-    }
-
-    public ListenableFuture<Status> query(final Filter<Email> filter) {
-        return getService(QueryService.class).query(filter);
     }
 
     public ListenableFuture<Status> query(@Nonnull final EmailQuery query) {

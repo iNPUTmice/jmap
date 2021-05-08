@@ -32,7 +32,6 @@ import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
-import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.call.email.GetEmailMethodCall;
@@ -92,10 +91,6 @@ public class QueryService extends MuaService {
         } catch (final Exception e) {
             return true;
         }
-    }
-
-    public ListenableFuture<Status> query(Filter<Email> filter) {
-        return query(EmailQuery.of(filter));
     }
 
     public ListenableFuture<Status> query(@Nonnull final EmailQuery query) {
@@ -387,7 +382,7 @@ public class QueryService extends MuaService {
             }
         }, ioExecutorService);
     }
-    
+
     private Long calculateQueryPageSize(final QueryStateWrapper queryStateWrapper, final Session session) {
         final Long configuredQueryPageSize = getQueryPageSize();
         if (queryStateWrapper.upTo != null) {
