@@ -23,10 +23,12 @@ import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
+import rs.ltt.jmap.mua.util.MailboxUtil;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class MailboxRefreshTest {
+public class MailboxServiceTest {
 
     @Test
     public void fetchMailboxesAndRefresh() throws ExecutionException, InterruptedException {
@@ -51,6 +53,32 @@ public class MailboxRefreshTest {
             Assertions.assertEquals(3, inboxAfterModification.getTotalThreads());
             Assertions.assertEquals(4, inboxAfterModification.getTotalEmails());
         }
+    }
+
+    @Test
+    public void createMailbox() throws ExecutionException, InterruptedException {
+        final MockWebServer server = new MockWebServer();
+        final MockMailServer mailServer = new MockMailServer(2);
+        server.setDispatcher(mailServer);
+        final MyInMemoryCache cache = new MyInMemoryCache();
+        try (final Mua mua = Mua.builder()
+                .cache(cache)
+                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                .username(mailServer.getUsername())
+                .password(JmapDispatcher.PASSWORD)
+                .accountId(mailServer.getAccountId())
+                .build()) {
+            mua.refreshMailboxes().get();
+            final List<Mailbox> mailboxes = cache.getMailboxes();
+            Assertions.assertEquals(1, mailboxes.size());
+            Mailbox archive = Mailbox.builder().role(Role.ARCHIVE).name("Archive").build();
+            Assertions.assertEquals(Boolean.TRUE, mua.createMailbox(archive).get());
+            mua.refreshMailboxes().get();
+            final List<Mailbox> mailboxesAfterCreate = cache.getMailboxes();
+            Assertions.assertEquals(2, mailboxesAfterCreate.size());
+            Assertions.assertTrue(mailboxesAfterCreate.stream().map(Mailbox::getName).anyMatch("Archive"::equals));
+        }
+
     }
 
 }

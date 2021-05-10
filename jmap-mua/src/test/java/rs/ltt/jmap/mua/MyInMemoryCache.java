@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.mua;
 
+import com.google.common.collect.ImmutableList;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
@@ -43,7 +44,7 @@ class MyInMemoryCache extends InMemoryCache {
         return (Mailbox) MailboxUtil.find(this.mailboxes.values(), role);
     }
 
-    public Collection<Mailbox> getMailboxes() {
-        return mailboxes.values();
+    public List<Mailbox> getMailboxes() {
+        return ImmutableList.copyOf(mailboxes.values());
     }
 }
