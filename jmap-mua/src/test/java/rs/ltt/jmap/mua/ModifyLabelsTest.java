@@ -232,12 +232,13 @@ public class ModifyLabelsTest {
     @Test
     public void addToExistingJmapLabel() throws ExecutionException, InterruptedException, IOException {
         final MockWebServer server = new MockWebServer();
+        final String jmapMailboxId = UUID.randomUUID().toString();
         final MockMailServer mailServer = new MockMailServer(2) {
             @Override
             protected List<MailboxInfo> generateMailboxes() {
                 return Arrays.asList(
                         new MailboxInfo(UUID.randomUUID().toString(), "Inbox", Role.INBOX),
-                        new MailboxInfo(UUID.randomUUID().toString(), "JMAP", null)
+                        new MailboxInfo(jmapMailboxId, "JMAP", null)
                 );
             }
         };
@@ -257,8 +258,9 @@ public class ModifyLabelsTest {
             Assertions.assertEquals(2, inbox.getUnreadThreads());
             Assertions.assertEquals(3, inbox.getTotalEmails());
 
-            final List<CachedEmail> threadT1 = cache.getEmails("T1");
 
+            //address JMAP mailbox by name
+            final List<CachedEmail> threadT1 = cache.getEmails("T1");
             mua.modifyLabels(threadT1, ImmutableList.of(JMAP, inbox), Collections.emptyList()).get();
 
             Assertions.assertEquals(Status.UPDATED, mua.refresh().get());
@@ -267,6 +269,16 @@ public class ModifyLabelsTest {
             Assertions.assertNotNull(jmap);
 
             Assertions.assertEquals(1, jmap.getTotalThreads());
+
+            final List<CachedEmail> threadT0 = cache.getEmails("T0");
+
+            //address JMAP mailbox by id
+            mua.modifyLabels(threadT0, ImmutableList.of(jmap, inbox), Collections.emptyList()).get();
+
+            Assertions.assertEquals(Status.UPDATED, mua.refresh().get());
+
+            final Mailbox jmapAfterSecondModification = cache.getMailboxes().stream().filter(mailbox -> mailbox.getName().equals("JMAP")).findFirst().orElse(null);
+            Assertions.assertEquals(2, jmapAfterSecondModification.getTotalThreads());
 
 
         } finally {
