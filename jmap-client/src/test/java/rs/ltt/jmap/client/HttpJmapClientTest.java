@@ -27,10 +27,12 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import rs.ltt.jmap.client.api.EndpointNotFoundException;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
 import rs.ltt.jmap.client.api.MethodResponseNotFoundException;
 import rs.ltt.jmap.client.event.CloseAfter;
+import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.client.session.InMemorySessionCache;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.Email;
@@ -41,12 +43,16 @@ import rs.ltt.jmap.common.method.call.mailbox.GetMailboxMethodCall;
 import rs.ltt.jmap.common.method.error.UnknownMethodMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.mailbox.GetMailboxMethodResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpJmapClientTest {
+
+    @TempDir
+    File tempDir;
 
     private static String ACCOUNT_ID = "test@example.com";
     private static String USERNAME = "test@example.com";
@@ -106,6 +112,45 @@ public class HttpJmapClientTest {
 
         server.shutdown();
     }
+
+
+    @Test
+    public void fileSessionCache() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        server.start();
+
+        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        final JmapClient jmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+        jmapClient.setSessionCache(new FileSessionCache(tempDir));
+
+        final ListenableFuture<Session> firstSessionFuture = jmapClient.getSession();
+        final Session firstSession = firstSessionFuture.get();
+        Assertions.assertEquals("/jmap/", firstSession.getApiUrl().encodedPath());
+
+        final JmapClient jmapClient2 = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+        jmapClient2.setSessionCache(new FileSessionCache(tempDir));
+
+        final ListenableFuture<Session> secondSessionFuture = jmapClient2.getSession();
+
+        final Session secondSession = secondSessionFuture.get();
+        Assertions.assertEquals("/jmap/", secondSession.getApiUrl().encodedPath());
+
+        final ListenableFuture<Session> thirdSessionFuture = jmapClient2.getSession();
+        Assertions.assertEquals("/jmap/", thirdSessionFuture.get().getApiUrl().encodedPath());
+
+        server.shutdown();
+    }
+
 
     public static String readResourceAsString(String filename) throws IOException {
         return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8).read().trim();
