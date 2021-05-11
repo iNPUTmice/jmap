@@ -19,7 +19,11 @@ package rs.ltt.jmap.client.util;
 import java.io.Closeable;
 import java.io.IOException;
 
-public class Closeables {
+public final class Closeables {
+
+    private Closeables() {
+
+    }
 
     public static void closeQuietly(final Closeable closeable) {
         try {
