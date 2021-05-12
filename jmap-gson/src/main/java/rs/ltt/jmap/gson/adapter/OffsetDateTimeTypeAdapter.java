@@ -44,6 +44,7 @@ public class OffsetDateTimeTypeAdapter extends TypeAdapter<OffsetDateTime> {
     @Override
     public OffsetDateTime read(final JsonReader jsonReader) throws IOException {
         if (jsonReader.peek() == JsonToken.NULL) {
+            jsonReader.nextNull();
             return null;
         }
         final String asString = jsonReader.nextString();
