@@ -63,11 +63,19 @@ public class Mua extends MuaSession {
     }
 
     public ListenableFuture<Status> query(@Nonnull final EmailQuery query) {
-        return getService(QueryService.class).query(query);
+        return getService(QueryService.class).query(query, null);
+    }
+
+    public ListenableFuture<Status> query(@Nonnull final EmailQuery query, Boolean calculateTotal) {
+        return getService(QueryService.class).query(query, calculateTotal);
     }
 
     public ListenableFuture<Status> query(@Nonnull final EmailQuery query, final String afterEmailId) {
-        return getService(QueryService.class).query(query, afterEmailId);
+        return getService(QueryService.class).query(query, null, afterEmailId);
+    }
+
+    public ListenableFuture<Status> query(@Nonnull final EmailQuery query, Boolean calculateTotal, final String afterEmailId) {
+        return getService(QueryService.class).query(query, calculateTotal, afterEmailId);
     }
 
     /**

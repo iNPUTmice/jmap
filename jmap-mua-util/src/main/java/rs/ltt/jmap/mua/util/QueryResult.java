@@ -42,17 +42,20 @@ public class QueryResult {
     public final TypedState<Email> queryState;
     public final boolean canCalculateChanges;
     public final long position;
+    public final Long total;
     public final TypedState<Email> objectState;
 
     private QueryResult(@Nonnull final QueryResultItem[] items,
                         final TypedState<Email> queryState,
                         final boolean canCalculateChanges,
                         final long position,
+                        final Long total,
                         final TypedState<Email> objectState) {
         this.items = items;
         this.queryState = queryState;
         this.canCalculateChanges = canCalculateChanges;
         this.position = position;
+        this.total = total;
         this.objectState = objectState;
     }
 
@@ -87,6 +90,7 @@ public class QueryResult {
                 queryEmailMethodResponse.getTypedQueryState(),
                 queryEmailMethodResponse.isCanCalculateChanges(),
                 queryEmailMethodResponse.getPosition(),
+                queryEmailMethodResponse.getTotal(),
                 emailMethodResponse.getTypedState()
         );
     }
@@ -121,6 +125,7 @@ public class QueryResult {
                 .add("queryState", queryState)
                 .add("canCalculateChanges", canCalculateChanges)
                 .add("position", position)
+                .add("total", total)
                 .add("objectState", objectState)
                 .toString();
     }

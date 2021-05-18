@@ -93,32 +93,35 @@ public class QueryService extends MuaService {
         }
     }
 
-    public ListenableFuture<Status> query(@Nonnull final EmailQuery query) {
+    public ListenableFuture<Status> query(@Nonnull final EmailQuery query, final Boolean calculateTotal) {
         final ListenableFuture<QueryStateWrapper> queryStateFuture = ioExecutorService.submit(() -> cache.getQueryState(query.asHash()));
 
         return Futures.transformAsync(queryStateFuture, queryStateWrapper -> {
             Preconditions.checkNotNull(queryStateWrapper, "QueryStateWrapper can not be null");
             if (!queryStateWrapper.canCalculateChanges || queryStateWrapper.upTo == null) {
-                return initialQuery(query, queryStateWrapper);
+                return initialQuery(query, calculateTotal, queryStateWrapper);
             } else {
                 Preconditions.checkNotNull(queryStateWrapper.objectsState, "ObjectsState can not be null if queryState was not");
                 Preconditions.checkNotNull(queryStateWrapper.objectsState.emailState, "emailState can not be null if queryState was not");
                 Preconditions.checkNotNull(queryStateWrapper.objectsState.threadState, "threadState can not be null if queryState was not");
-                return refreshQuery(query, queryStateWrapper);
+                return refreshQuery(query, calculateTotal, queryStateWrapper);
             }
         }, MoreExecutors.directExecutor());
     }
 
-    public ListenableFuture<Status> query(@Nonnull final EmailQuery query, final String afterEmailId) {
+    public ListenableFuture<Status> query(@Nonnull final EmailQuery query, final Boolean calculateTotal, final String afterEmailId) {
         final ListenableFuture<QueryStateWrapper> queryStateFuture = ioExecutorService.submit(() -> cache.getQueryState(query.asHash()));
         return Futures.transformAsync(
                 queryStateFuture,
-                queryStateWrapper -> query(query, afterEmailId, queryStateWrapper),
+                queryStateWrapper -> query(query, calculateTotal, afterEmailId, queryStateWrapper),
                 MoreExecutors.directExecutor()
         );
     }
 
-    private ListenableFuture<Status> query(@Nonnull final EmailQuery query, @Nonnull final String afterEmailId, final QueryStateWrapper queryStateWrapper) {
+    private ListenableFuture<Status> query(@Nonnull final EmailQuery query,
+                                           final Boolean calculateTotal,
+                                           @Nonnull final String afterEmailId,
+                                           final QueryStateWrapper queryStateWrapper) {
         Preconditions.checkNotNull(query, "Query can not be null");
         Preconditions.checkNotNull(afterEmailId, "afterEmailId can not be null");
         Preconditions.checkNotNull(queryStateWrapper, "QueryStateWrapper can not be null when paging");
@@ -138,7 +141,7 @@ public class QueryService extends MuaService {
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
         final ListenableFuture<Status> queryRefreshFuture;
         if (queryStateWrapper.canCalculateChanges) {
-            queryRefreshFuture = refreshQuery(query, queryStateWrapper, multiCall);
+            queryRefreshFuture = refreshQuery(query, calculateTotal, queryStateWrapper, multiCall);
         } else {
             LOGGER.debug("Skipping queryChanges because canCalculateChanges was false");
             queryRefreshFuture = null;
@@ -190,14 +193,17 @@ public class QueryService extends MuaService {
         }
     }
 
-    private ListenableFuture<Status> refreshQuery(@Nonnull final EmailQuery query, @Nonnull final QueryStateWrapper queryStateWrapper) {
+    private ListenableFuture<Status> refreshQuery(@Nonnull final EmailQuery query,
+                                                  final Boolean calculateTotal,
+                                                  @Nonnull final QueryStateWrapper queryStateWrapper) {
         final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
-        ListenableFuture<Status> future = refreshQuery(query, queryStateWrapper, multiCall);
+        ListenableFuture<Status> future = refreshQuery(query, calculateTotal, queryStateWrapper, multiCall);
         multiCall.execute();
         return future;
     }
 
     private ListenableFuture<Status> refreshQuery(@Nonnull final EmailQuery query,
+                                                  @Nullable final Boolean calculateTotal,
                                                   @Nonnull final QueryStateWrapper queryStateWrapper,
                                                   final JmapClient.MultiCall multiCall) {
         Preconditions.checkNotNull(queryStateWrapper.queryState, "QueryState can not be null when attempting to refresh query");
@@ -210,6 +216,7 @@ public class QueryService extends MuaService {
                 //TODO do we want to include upTo?
                 QueryChangesEmailMethodCall.builder()
                         .accountId(accountId)
+                        .calculateTotal(calculateTotal)
                         .sinceQueryState(queryStateWrapper.queryState)
                         .query(query)
                         .build()
@@ -286,15 +293,25 @@ public class QueryService extends MuaService {
         }, ioExecutorService);
     }
 
-    private ListenableFuture<Status> initialQuery(@Nonnull final EmailQuery query, @Nonnull final QueryStateWrapper queryStateWrapper) {
+    private ListenableFuture<Status> initialQuery(@Nonnull final EmailQuery query,
+                                                  @Nullable final Boolean calculateTotal,
+                                                  @Nonnull final QueryStateWrapper queryStateWrapper) {
         return Futures.transformAsync(
-                jmapClient.getSession(), session -> initialQuery(query, queryStateWrapper, Preconditions.checkNotNull(session, "Session object must not be null")),
+                jmapClient.getSession(), session -> initialQuery(
+                        query,
+                        calculateTotal,
+                        queryStateWrapper,
+                        Preconditions.checkNotNull(session, "Session object must not be null")
+                ),
                 MoreExecutors.directExecutor()
         );
 
     }
 
-    private ListenableFuture<Status> initialQuery(@Nonnull final EmailQuery query, @Nonnull final QueryStateWrapper queryStateWrapper, @Nonnull Session session) {
+    private ListenableFuture<Status> initialQuery(@Nonnull final EmailQuery query,
+                                                  @Nullable final Boolean calculateTotal,
+                                                  @Nonnull final QueryStateWrapper queryStateWrapper,
+                                                  @Nonnull Session session) {
 
         Preconditions.checkState(
                 !queryStateWrapper.canCalculateChanges || queryStateWrapper.upTo == null,
@@ -311,6 +328,7 @@ public class QueryService extends MuaService {
         final JmapRequest.Call queryCall = multiCall.call(
                 QueryEmailMethodCall.builder()
                         .accountId(accountId)
+                        .calculateTotal(calculateTotal)
                         .query(query)
                         .limit(calculateQueryPageSize(queryStateWrapper, session))
                         .build()

@@ -30,27 +30,40 @@ public class QueryUpdate<T extends AbstractIdentifiableEntity, U> extends Abstra
 
     private final List<AddedItem<U>> added;
 
+    private final Long total;
 
-    private QueryUpdate(TypedState<T> oldState, TypedState<T> newState, String[] removed, List<AddedItem<U>> added) {
+
+    private QueryUpdate(final TypedState<T> oldState,
+                        final TypedState<T> newState,
+                        final String[] removed,
+                        final List<AddedItem<U>> added,
+                        final Long total) {
         super(oldState, newState, false);
         this.removed = removed;
         this.added = added;
+        this.total = total;
     }
 
     public static <T extends AbstractIdentifiableEntity, U> QueryUpdate<T, U> of(QueryChangesMethodResponse<T> queryChangesMethodResponse, List<AddedItem<U>> added) {
-        return new QueryUpdate<>(queryChangesMethodResponse.getOldTypedQueryState(), queryChangesMethodResponse.getNewTypedQueryState(), queryChangesMethodResponse.getRemoved(), added);
-    }
-
-    public static <T extends AbstractIdentifiableEntity> QueryUpdate<T, String> of(QueryChangesMethodResponse<T> queryChangesMethodResponse) {
-        return new QueryUpdate<>(queryChangesMethodResponse.getOldTypedQueryState(), queryChangesMethodResponse.getNewTypedQueryState(), queryChangesMethodResponse.getRemoved(), queryChangesMethodResponse.getAdded());
+        return new QueryUpdate<>(
+                queryChangesMethodResponse.getOldTypedQueryState(),
+                queryChangesMethodResponse.getNewTypedQueryState(),
+                queryChangesMethodResponse.getRemoved(),
+                added,
+                queryChangesMethodResponse.getTotal()
+        );
     }
 
     public String[] getRemoved() {
-        return removed;
+        return this.removed;
     }
 
     public List<AddedItem<U>> getAdded() {
-        return added;
+        return this.added;
+    }
+
+    public Long getTotal() {
+        return this.total;
     }
 
     @Override

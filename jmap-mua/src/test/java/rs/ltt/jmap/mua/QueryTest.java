@@ -23,12 +23,14 @@ import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
+import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class QueryTest {
@@ -70,8 +72,35 @@ public class QueryTest {
             Assertions.assertEquals("T0", threadsAfterRefresh.get(1));
             Assertions.assertEquals("T3", threadsAfterRefresh.get(4));
 
-
         }
+
+        Assertions.assertFalse(myInMemoryCache.hadTotal.get(),"QueryResult had total count");
+
+        server.shutdown();
+    }
+
+    @Test
+    public void queryCalculateTotal() throws IOException, InterruptedException, ExecutionException {
+        final MockMailServer mockMailServer = new MockMailServer(128);
+        final MockWebServer server = new MockWebServer();
+        server.setDispatcher(mockMailServer);
+
+        final MyInMemoryCache myInMemoryCache = new MyInMemoryCache();
+
+        final EmailQuery emailQuery = EmailQuery.unfiltered(true);
+
+        try (final Mua mua = Mua.builder()
+                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                .cache(myInMemoryCache)
+                .username(mockMailServer.getUsername())
+                .password(JmapDispatcher.PASSWORD)
+                .accountId(mockMailServer.getAccountId())
+                .build()) {
+
+            mua.query(emailQuery, true).get();
+        }
+
+        Assertions.assertTrue(myInMemoryCache.hadTotal.get(),"QueryResult did not have total");
 
         server.shutdown();
     }
@@ -114,6 +143,8 @@ public class QueryTest {
                     myInMemoryCache.getThreadIdsInQuery(emailQuery.asHash())
             );
         }
+
+        Assertions.assertFalse(myInMemoryCache.hadTotal.get(),"QueryResult had total count");
 
         server.shutdown();
     }
@@ -215,6 +246,8 @@ public class QueryTest {
 
     private static class MyInMemoryCache extends InMemoryCache {
 
+        private final AtomicBoolean hadTotal = new AtomicBoolean(false);
+
         public List<String> getThreadIdsInQuery(final String queryHash) {
             return getItems(queryHash).stream().map(QueryResultItem::getThreadId).collect(Collectors.toList());
         }
@@ -222,6 +255,12 @@ public class QueryTest {
         public List<QueryResultItem> getItems(final String queryHash) {
             final InMemoryQueryResult queryResult = queryResults.get(queryHash);
             return queryResult.getItems();
+        }
+
+        @Override
+        public void setQueryResult(String query, QueryResult queryResult) {
+            this.hadTotal.compareAndSet(false, queryResult.total != null);
+            super.setQueryResult(query, queryResult);
         }
 
     }

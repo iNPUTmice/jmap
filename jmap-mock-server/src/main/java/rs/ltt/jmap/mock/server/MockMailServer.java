@@ -268,10 +268,12 @@ public class MockMailServer extends StubMailServer {
         final int endPosition = Math.min(position + limit, ids.size());
         final String[] page = ids.subList(position, endPosition).toArray(new String[0]);
         LOGGER.info("query email page between {} and {} (inclusive). Page contains {} items", position, endPosition - 1, page.length);
+        final Long total = Boolean.TRUE.equals(methodCall.getCalculateTotal()) ? (long) ids.size() : null;
         return new MethodResponse[]{
                 QueryEmailMethodResponse.builder()
                         .canCalculateChanges(this.reportCanCalculateQueryChanges)
                         .queryState(getState())
+                        .total(total)
                         .ids(page)
                         .position((long) position)
                         .build()
