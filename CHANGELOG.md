@@ -1,3 +1,7 @@
+### 0.6.3 (2021-05-18)
+
+* jmap-mua: Add API to calculate query result total
+
 ### 0.6.2 (2021-04-20)
 
 * JmapClient.monitorEvents() now doesn’t require listener

@@ -31,11 +31,6 @@
     <name>Code Coverage</name>
     <description>Compute aggregated test code coverage</description>
 
-
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-    </properties>
-
     <dependencies>
 
         <dependency>
