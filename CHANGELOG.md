@@ -1,3 +1,7 @@
+### 0.6.4 (2021-06-22)
+
+* jmap-mua-util: Add more utility methods
+
 ### 0.6.3 (2021-05-18)
 
 * jmap-mua: Add API to calculate query result total
