@@ -49,6 +49,7 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     private final Session session;
     private final HttpAuthentication authentication;
     private final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(this);
+    private final List<OnConnectionStateChangeListener> onConnectionStateListeners = new ArrayList<>();
     private EventSource currentEventSource;
     private Duration pingInterval = Duration.ofSeconds(30);
     private Duration pingIntervalTolerance = Duration.ofSeconds(10);
@@ -56,8 +57,8 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     private int attempt = 0;
     private State state = State.CLOSED;
     private ScheduledFuture<?> reconnectionFuture;
-    private final List<OnConnectionStateChangeListener> onConnectionStateListeners = new ArrayList<>();
 
+    //TODO do we want to pass JmapClient instead to always have access to the session. or an SessionRetriever interface
     public EventSourcePushService(final Session session, final HttpAuthentication authentication) {
         this.session = session;
         this.authentication = authentication;
@@ -76,7 +77,7 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         LOGGER.info("transition to {}", state);
         this.state = state;
         synchronized (this.onConnectionStateListeners) {
-            for(OnConnectionStateChangeListener listener : this.onConnectionStateListeners) {
+            for (OnConnectionStateChangeListener listener : this.onConnectionStateListeners) {
                 listener.onConnectionStateChange(state);
             }
         }
@@ -111,18 +112,28 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         this.attempt++;
         cancelReconnectionFuture();
         transitionTo(State.CONNECTING);
-        //might be 'fun' to put everything below this point into a separate method
+
+        final HttpUrl eventSourceUrl;
+        try {
+            eventSourceUrl = session.getEventSourceUrl(
+                    Collections.emptyList(),
+                    CloseAfter.NO,
+                    pingInterval.getSeconds()
+            );
+        } catch (final Exception e) {
+            LOGGER.warn("Unable to connect to EventSource URL");
+            disconnect(State.FAILED);
+            return;
+        }
+        connectEventSource(eventSourceUrl);
+    }
+
+    private void connectEventSource(final HttpUrl eventSourceUrl) {
         final EventSource.Factory factory = EventSources.createFactory(
                 OK_HTTP_CLIENT.newBuilder()
                         .readTimeout(pingInterval.plus(pingIntervalTolerance))
                         .retryOnConnectionFailure(true)
                         .build()
-        );
-        //TODO catch exception when unable to create URL
-        final HttpUrl eventSourceUrl = session.getEventSourceUrl(
-                Collections.emptyList(),
-                CloseAfter.NO,
-                pingInterval.getSeconds()
         );
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(eventSourceUrl);
