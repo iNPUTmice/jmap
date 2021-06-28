@@ -1,3 +1,7 @@
+### 0.6.5 (2021-06-27)
+
+* jmap-client: fix EventSourcPushService crashing on missing eventUrl 
+
 ### 0.6.4 (2021-06-22)
 
 * jmap-mua-util: Add more utility methods
