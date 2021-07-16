@@ -32,7 +32,7 @@ public class SessionResourceTest {
     public void wrongAccountCapability() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> SessionResource.builder()
                 .apiUrl("/jmap/")
-                .state("initital")
+                .state("initial")
                 .account("user@example.com", Account.builder()
                         .accountCapabilities(ImmutableMap.of(SubmissionAccountCapability.class, MailAccountCapability.builder().build()))
                         .build())
@@ -44,7 +44,7 @@ public class SessionResourceTest {
     public void correctAccountCapability() {
         SessionResource.builder()
                 .apiUrl("/jmap/")
-                .state("initital")
+                .state("initial")
                 .account("user@example.com", Account.builder()
                         .accountCapabilities(ImmutableMap.of(MailAccountCapability.class, MailAccountCapability.builder().build()))
                         .build())
