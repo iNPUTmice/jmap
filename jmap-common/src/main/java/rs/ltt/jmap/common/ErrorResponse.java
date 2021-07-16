@@ -18,6 +18,8 @@ package rs.ltt.jmap.common;
 
 import rs.ltt.jmap.common.entity.ErrorType;
 
+//JSON Problem Details for HTTP APIs (RFC7807)
+//Used by JMAP for Request-Level Errors
 public class ErrorResponse implements GenericResponse {
 
     private ErrorType type;
