@@ -18,10 +18,19 @@ package rs.ltt.jmap.mua.util;
 import com.google.common.base.CharMatcher;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmailBodyUtil {
+
+    public static List<Block> parse(final List<String> textBodies) {
+        return textBodies.stream()
+                .map(EmailBodyUtil::parse)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
 
     public static List<Block> parse(String body) {
         String[] lines = body.split("\\n");
@@ -70,42 +79,6 @@ public class EmailBodyUtil {
             this.lines.add(line);
         }
 
-        private int maxLineLength() {
-            ArrayList<Integer> lineLengths = new ArrayList<>();
-            int max = 0;
-            for (String line : lines) {
-                if (CharMatcher.is(' ').countIn(line) > 1) {
-                    max = Math.max(line.length(), max);
-                    lineLengths.add(line.length());
-                }
-            }
-            Collections.sort(lineLengths);
-            if (lineLengths.size() <= 1) {
-                return max;
-            }
-            //get the top x% of line length
-            List<Integer> topXPercent = lineLengths.subList((int) ((1.0 - X) * lineLengths.size()) - 1, lineLengths.size());
-
-            double sum = 0.0;
-            int top = lineLengths.get(lineLengths.size() - 1);
-            for (int i = 0; i < lineLengths.size() - 1; ++i) {
-                int bottom = lineLengths.get(i);
-                sum += ((float) top / (float) bottom) - 1.0f;
-            }
-            double avg = sum / topXPercent.size();
-
-            if (avg >= VOLATILITY_THRESHOLD) {
-                return Integer.MAX_VALUE;
-            }
-
-            //are those top x% of lines less than n% apart from each other?
-            if (topXPercent.get(topXPercent.size() - 1) - topXPercent.get(0) <= N * topXPercent.get(topXPercent.size() - 1)) {
-                //return median of those top x%
-                return topXPercent.size() % 2 == 1 ? topXPercent.get(topXPercent.size() / 2) : ((topXPercent.get(topXPercent.size() / 2 - 1) + topXPercent.get(topXPercent.size() / 2)) / 2);
-            }
-            return max;
-        }
-
         @Override
         public String toString() {
             int max = maxLineLength();
@@ -152,6 +125,41 @@ public class EmailBodyUtil {
             return stringBuilder.toString();
         }
 
+        private int maxLineLength() {
+            ArrayList<Integer> lineLengths = new ArrayList<>();
+            int max = 0;
+            for (String line : lines) {
+                if (CharMatcher.is(' ').countIn(line) > 1) {
+                    max = Math.max(line.length(), max);
+                    lineLengths.add(line.length());
+                }
+            }
+            Collections.sort(lineLengths);
+            if (lineLengths.size() <= 1) {
+                return max;
+            }
+            //get the top x% of line length
+            List<Integer> topXPercent = lineLengths.subList((int) ((1.0 - X) * lineLengths.size()) - 1, lineLengths.size());
+
+            double sum = 0.0;
+            int top = lineLengths.get(lineLengths.size() - 1);
+            for (int i = 0; i < lineLengths.size() - 1; ++i) {
+                int bottom = lineLengths.get(i);
+                sum += ((float) top / (float) bottom) - 1.0f;
+            }
+            double avg = sum / topXPercent.size();
+
+            if (avg >= VOLATILITY_THRESHOLD) {
+                return Integer.MAX_VALUE;
+            }
+
+            //are those top x% of lines less than n% apart from each other?
+            if (topXPercent.get(topXPercent.size() - 1) - topXPercent.get(0) <= N * topXPercent.get(topXPercent.size() - 1)) {
+                //return median of those top x%
+                return topXPercent.size() % 2 == 1 ? topXPercent.get(topXPercent.size() / 2) : ((topXPercent.get(topXPercent.size() / 2 - 1) + topXPercent.get(topXPercent.size() / 2)) / 2);
+            }
+            return max;
+        }
 
         public int getDepth() {
             return depth;
