@@ -37,6 +37,7 @@ import java.io.EOFException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Closeable {
 
@@ -143,6 +144,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         final Request request = requestBuilder.build();
         final OkHttpClient okHttpClient = Services.OK_HTTP_CLIENT
                 .newBuilder()
+                .callTimeout(30, TimeUnit.SECONDS)
                 .pingInterval(getPingInterval())
                 .build();
         setCurrentWebSocket(okHttpClient.newWebSocket(request, new WebSocketProcessor(this)));
