@@ -24,7 +24,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class EmailBodyPart {
+public class EmailBodyPart implements Downloadable {
 
     private String partId;
     private String blobId;
