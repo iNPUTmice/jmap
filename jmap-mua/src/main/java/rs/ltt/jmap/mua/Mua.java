@@ -22,6 +22,7 @@ import okhttp3.HttpUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapClient;
+import rs.ltt.jmap.client.blob.Download;
 import rs.ltt.jmap.client.session.InMemorySessionCache;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.common.entity.*;
@@ -280,6 +281,27 @@ public class Mua extends MuaSession {
 
     public ListenableFuture<Boolean> setRole(final IdentifiableMailboxWithRole mailbox, final Role role) {
         return getService(MailboxService.class).setRole(mailbox, role);
+    }
+
+    /**
+     * Retrieves (downloads) binary data based on a Downloadable (blobId, type, name)
+     *
+     * @param downloadable An EmailBodyPart or another class that implements Downloadable
+     * @return A Download Future that contains the InputStream, size and the cancelable HTTP Call
+     */
+    public ListenableFuture<Download> download(final Downloadable downloadable) {
+        return jmapClient.download(getAccountId(), downloadable);
+    }
+
+    /**
+     * Resumes the download of binary data based on a Downloadable (blobId, type, name) and the current file size
+     * @param downloadable  An EmailBodyPart or another class that implements Downloadable
+     * @param rangeStart The amount of data (file size) that has previously been downloaded
+     * @return A Download Future that contains the InputStream, size and the cancelable HTTP Call and an indication if resume has been successful
+     */
+    public ListenableFuture<Download> download(final Downloadable downloadable, final long rangeStart) {
+        Preconditions.checkArgument(rangeStart >= 0, "rangeStart must not be smaller than 0");
+        return jmapClient.download(getAccountId(), downloadable, rangeStart);
     }
 
     public static class Builder {

@@ -26,6 +26,8 @@ import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.api.JmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClientFactory;
 import rs.ltt.jmap.client.api.SessionStateListener;
+import rs.ltt.jmap.client.blob.BinaryDataClient;
+import rs.ltt.jmap.client.blob.Download;
 import rs.ltt.jmap.client.event.EventSourcePushService;
 import rs.ltt.jmap.client.event.OnStateChangeListener;
 import rs.ltt.jmap.client.event.PushService;
@@ -35,6 +37,7 @@ import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.client.session.SessionClient;
 import rs.ltt.jmap.client.util.Closeables;
+import rs.ltt.jmap.common.entity.Downloadable;
 import rs.ltt.jmap.common.method.MethodCall;
 
 import javax.annotation.Nonnull;
@@ -44,6 +47,7 @@ import java.io.Closeable;
 public class JmapClient implements Closeable {
 
     private final SessionClient sessionClient;
+    private final BinaryDataClient binaryDataClient;
     private final HttpAuthentication authentication;
     private final SessionStateListener sessionStateListener = new SessionStateListener() {
         @Override
@@ -61,6 +65,7 @@ public class JmapClient implements Closeable {
     public JmapClient(HttpAuthentication httpAuthentication) {
         this.authentication = httpAuthentication;
         this.sessionClient = new SessionClient(httpAuthentication);
+        this.binaryDataClient = new BinaryDataClient(httpAuthentication);
     }
 
 
@@ -71,6 +76,7 @@ public class JmapClient implements Closeable {
     public JmapClient(HttpAuthentication httpAuthentication, HttpUrl sessionResource) {
         this.authentication = httpAuthentication;
         this.sessionClient = new SessionClient(httpAuthentication, sessionResource);
+        this.binaryDataClient = new BinaryDataClient(httpAuthentication);
     }
 
     public String getUsername() {
@@ -178,6 +184,28 @@ public class JmapClient implements Closeable {
             );
         }
         this.useWebSocket = useWebSocket;
+    }
+
+    public ListenableFuture<Download> download(final String accountId, final Downloadable downloadable) {
+        return Futures.transformAsync(
+                getSession(),
+                session -> download(session, accountId, downloadable, 0),
+                MoreExecutors.directExecutor()
+        );
+    }
+
+    public ListenableFuture<Download> download(final String accountId, final Downloadable downloadable, final long rangeStart) {
+        Preconditions.checkArgument(rangeStart >= 0, "rangeStart must not be smaller than 0");
+        return Futures.transformAsync(
+                getSession(),
+                session -> download(session, accountId, downloadable, rangeStart),
+                MoreExecutors.directExecutor()
+        );
+    }
+
+    private ListenableFuture<Download> download(final Session session, final String accountId, final Downloadable downloadable, final long rangeStart) {
+        final HttpUrl httpUrl = session.getDownloadUrl(accountId, downloadable);
+        return this.binaryDataClient.download(httpUrl, rangeStart);
     }
 
     @Override

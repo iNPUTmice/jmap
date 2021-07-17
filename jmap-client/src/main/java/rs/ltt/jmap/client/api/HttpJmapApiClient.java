@@ -73,7 +73,7 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
             }
 
             @Override
-            public void onResponse(@Nonnull Call call, @Nonnull Response response) throws IOException {
+            public void onResponse(@Nonnull Call call, @Nonnull Response response) {
                 final int code = response.code();
                 if (code == 404) {
                     settableInputStreamFuture.setException(

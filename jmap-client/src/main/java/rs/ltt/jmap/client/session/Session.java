@@ -22,10 +22,7 @@ import com.google.common.collect.Maps;
 import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.event.CloseAfter;
 import rs.ltt.jmap.common.SessionResource;
-import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
-import rs.ltt.jmap.common.entity.Account;
-import rs.ltt.jmap.common.entity.AccountCapability;
-import rs.ltt.jmap.common.entity.Capability;
+import rs.ltt.jmap.common.entity.*;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -54,6 +51,10 @@ public class Session {
 
     public HttpUrl getBase() {
         return base;
+    }
+
+    public HttpUrl getDownloadUrl(final String accountId, final Downloadable downloadable) {
+        return getDownloadUrl(accountId, downloadable.getBlobId(), downloadable.getName(), downloadable.getType());
     }
 
     public HttpUrl getDownloadUrl(String accountId, String blobId, String name, String type) {
