@@ -16,6 +16,9 @@
 
 package rs.ltt.jmap.client.blob;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+
 public class ProblemDetails {
 
     private String type;
@@ -37,5 +40,28 @@ public class ProblemDetails {
 
     public String getDetail() {
         return detail;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProblemDetails details = (ProblemDetails) o;
+        return status == details.status && Objects.equal(type, details.type) && Objects.equal(title, details.title) && Objects.equal(detail, details.detail);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(type, title, status, detail);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("type", type)
+                .add("title", title)
+                .add("status", status)
+                .add("detail", detail)
+                .toString();
     }
 }

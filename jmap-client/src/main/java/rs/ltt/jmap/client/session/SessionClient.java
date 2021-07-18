@@ -108,6 +108,7 @@ public class SessionClient {
     }
 
     private ListenableFuture<Session> fetchSession(final HttpUrl sessionResource)  {
+        //TODO replace with settable call future
         final SettableFuture<Session> settableFuture = SettableFuture.create();
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(sessionResource);

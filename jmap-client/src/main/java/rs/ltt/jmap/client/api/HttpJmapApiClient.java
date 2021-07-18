@@ -61,6 +61,7 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
     }
 
     private ListenableFuture<InputStream> send(final String out) {
+        //TODO replace with SettableCallFuture?
         final SettableFuture<InputStream> settableInputStreamFuture = SettableFuture.create();
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(apiUrl);

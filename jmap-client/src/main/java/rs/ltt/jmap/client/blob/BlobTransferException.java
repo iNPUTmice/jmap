@@ -22,9 +22,17 @@ public class BlobTransferException extends Exception {
     private final ProblemDetails problemDetails;
 
     public BlobTransferException(final int code, final ProblemDetails problemDetails) {
-        super(String.format("HTTP Status code %d. %s", code, problemDetails.getTitle()));
+        super(message(code, problemDetails));
         this.code = code;
         this.problemDetails = problemDetails;
+    }
+
+    private static String message(final int code, final ProblemDetails problemDetails) {
+        if (problemDetails == null) {
+            return String.format("HTTP Status code %d", code);
+        } else {
+            return String.format("HTTP Status code %d. %s", code, problemDetails.getTitle());
+        }
     }
 
     public int getCode() {
