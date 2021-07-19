@@ -60,6 +60,33 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
         this(apiUrl, httpAuthentication, null);
     }
 
+    @Override
+    public void execute(final JmapRequest jmapRequest) {
+        final String json;
+        try {
+            json = GSON.toJson(jmapRequest.getRequest());
+        } catch (final Throwable throwable) {
+            jmapRequest.setException(throwable);
+            return;
+        }
+        Futures.addCallback(send(json), new FutureCallback<InputStream>() {
+            @Override
+            public void onSuccess(final InputStream inputStream) {
+                try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
+                    final GenericResponse genericResponse = GSON.fromJson(reader, GenericResponse.class);
+                    processResponse(jmapRequest, genericResponse);
+                } catch (final Exception e) {
+                    jmapRequest.setException(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@Nonnull Throwable throwable) {
+                jmapRequest.setException(throwable);
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
     private ListenableFuture<InputStream> send(final String out) {
         //TODO replace with SettableCallFuture?
         final SettableFuture<InputStream> settableInputStreamFuture = SettableFuture.create();
@@ -101,37 +128,6 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
             }
         });
         return settableInputStreamFuture;
-    }
-
-    @Override
-    public void execute(final JmapRequest jmapRequest) {
-        final String json;
-        try {
-            json = GSON.toJson(jmapRequest.getRequest());
-        } catch (final Throwable throwable) {
-            jmapRequest.setException(throwable);
-            return;
-        }
-        Futures.addCallback(send(json), new FutureCallback<InputStream>() {
-            @Override
-            public void onSuccess(final InputStream inputStream) {
-                try {
-                    processResponse(jmapRequest, inputStream);
-                } catch (final RuntimeException e) {
-                    jmapRequest.setException(e);
-                }
-            }
-
-            @Override
-            public void onFailure(@Nonnull Throwable throwable) {
-                jmapRequest.setException(throwable);
-            }
-        }, MoreExecutors.directExecutor());
-    }
-
-    protected void processResponse(final JmapRequest jmapRequest, final InputStream inputStream) {
-        final GenericResponse genericResponse = GSON.fromJson(new InputStreamReader(inputStream), GenericResponse.class);
-        processResponse(jmapRequest, genericResponse);
     }
 
     @Override

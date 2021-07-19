@@ -140,10 +140,10 @@ public class SessionClient {
             if (body == null) {
                 throw new InvalidSessionResourceException("Unable to fetch session object. Response body was empty.");
             }
-            try (final InputStream inputStream = body.byteStream()) {
+            try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
                 final SessionResource sessionResource;
                 try {
-                    sessionResource = GSON.fromJson(new InputStreamReader(inputStream), SessionResource.class);
+                    sessionResource = GSON.fromJson(reader, SessionResource.class);
                 } catch (JsonIOException | JsonSyntaxException e) {
                     throw new InvalidSessionResourceException(e);
                 }
