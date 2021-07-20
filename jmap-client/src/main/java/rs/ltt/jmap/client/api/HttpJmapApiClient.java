@@ -26,6 +26,7 @@ import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.http.BasicAuthHttpAuthentication;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
+import rs.ltt.jmap.client.util.SettableCallFuture;
 import rs.ltt.jmap.common.GenericResponse;
 
 import javax.annotation.Nonnull;
@@ -88,13 +89,13 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
     }
 
     private ListenableFuture<InputStream> send(final String out) {
-        //TODO replace with SettableCallFuture?
-        final SettableFuture<InputStream> settableInputStreamFuture = SettableFuture.create();
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(apiUrl);
         this.httpAuthentication.authenticate(requestBuilder);
         requestBuilder.post(RequestBody.create(out, MEDIA_TYPE_JSON));
-        OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build()).enqueue(new Callback() {
+        final Call call = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build());
+        final SettableCallFuture<InputStream> settableInputStreamFuture = SettableCallFuture.create(call);
+        call.enqueue(new Callback() {
             @Override
             public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
                 settableInputStreamFuture.setException(e);

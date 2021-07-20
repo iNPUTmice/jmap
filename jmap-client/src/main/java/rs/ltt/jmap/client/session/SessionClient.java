@@ -30,6 +30,7 @@ import rs.ltt.jmap.client.api.EndpointNotFoundException;
 import rs.ltt.jmap.client.api.InvalidSessionResourceException;
 import rs.ltt.jmap.client.api.UnauthorizedException;
 import rs.ltt.jmap.client.http.HttpAuthentication;
+import rs.ltt.jmap.client.util.SettableCallFuture;
 import rs.ltt.jmap.client.util.WellKnownUtil;
 import rs.ltt.jmap.common.SessionResource;
 
@@ -108,13 +109,11 @@ public class SessionClient {
     }
 
     private ListenableFuture<Session> fetchSession(final HttpUrl sessionResource)  {
-        //TODO replace with settable call future
-        final SettableFuture<Session> settableFuture = SettableFuture.create();
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(sessionResource);
         httpAuthentication.authenticate(requestBuilder);
-
         final Call call = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build());
+        final SettableCallFuture<Session> settableFuture = SettableCallFuture.create(call);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
