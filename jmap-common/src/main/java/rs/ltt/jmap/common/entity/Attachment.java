@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Daniel Gultsch
+ * Copyright 2021 Daniel Gultsch
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,32 +16,18 @@
 
 package rs.ltt.jmap.common.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
+import com.google.common.net.MediaType;
+import rs.ltt.jmap.common.util.MediaTypes;
 
-import java.util.List;
+public interface Attachment extends Downloadable {
 
-@Getter
-@Builder
-public class EmailBodyPart implements Attachment {
+    String getName();
 
-    private String partId;
-    private String blobId;
-    private Long size;
-    @Singular
-    private List<EmailHeader> headers;
-    private String name;
-    private String type;
-    private String charset;
-    private String disposition;
-    private String cid;
+    String getCharset();
 
-    @Singular("language")
-    private List<String> language;
-    private String location;
+    default MediaType getMediaType() {
+        return MediaTypes.of(getType(), getCharset());
+    }
 
-    @Singular
-    private List<EmailBodyPart> subParts;
-
+    Long getSize();
 }

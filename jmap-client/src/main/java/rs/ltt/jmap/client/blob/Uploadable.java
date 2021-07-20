@@ -14,16 +14,15 @@
  *
  */
 
-package rs.ltt.jmap.common.entity;
+package rs.ltt.jmap.client.blob;
 
-//TODO move blobId, type, size to BinaryData
-public interface Downloadable {
 
-    String getBlobId();
+import com.google.common.net.MediaType;
 
-    String getType();
+import java.io.InputStream;
 
-    String getName();
-
-    Long getSize();
+public interface Uploadable {
+    InputStream getInputStream();
+    MediaType getMediaType();
+    long getContentLength();
 }

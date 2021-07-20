@@ -23,6 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.client.blob.Download;
+import rs.ltt.jmap.client.blob.Progress;
+import rs.ltt.jmap.client.blob.Upload;
+import rs.ltt.jmap.client.blob.Uploadable;
 import rs.ltt.jmap.client.session.InMemorySessionCache;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.common.entity.*;
@@ -302,6 +305,10 @@ public class Mua extends MuaSession {
     public ListenableFuture<Download> download(final Downloadable downloadable, final long rangeStart) {
         Preconditions.checkArgument(rangeStart >= 0, "rangeStart must not be smaller than 0");
         return jmapClient.download(getAccountId(), downloadable, rangeStart);
+    }
+
+    public ListenableFuture<Upload> upload(final Uploadable uploadable, final Progress progress) {
+        return jmapClient.upload(getAccountId(), uploadable, progress);
     }
 
     public static class Builder {

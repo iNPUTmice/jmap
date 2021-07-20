@@ -37,7 +37,7 @@ public final class Download {
         if (indeterminate()) {
             return 0;
         }
-        return (int) Math.round((double) Math.min(contentLength, done) / contentLength * 100);
+        return Progress.progress(done, contentLength);
     }
 
     public boolean indeterminate() {

@@ -26,8 +26,7 @@ import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.api.JmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClientFactory;
 import rs.ltt.jmap.client.api.SessionStateListener;
-import rs.ltt.jmap.client.blob.BinaryDataClient;
-import rs.ltt.jmap.client.blob.Download;
+import rs.ltt.jmap.client.blob.*;
 import rs.ltt.jmap.client.event.EventSourcePushService;
 import rs.ltt.jmap.client.event.OnStateChangeListener;
 import rs.ltt.jmap.client.event.PushService;
@@ -206,6 +205,19 @@ public class JmapClient implements Closeable {
     private ListenableFuture<Download> download(final Session session, final String accountId, final Downloadable downloadable, final long rangeStart) {
         final HttpUrl httpUrl = session.getDownloadUrl(accountId, downloadable);
         return this.binaryDataClient.download(httpUrl, rangeStart);
+    }
+
+    public ListenableFuture<Upload> upload(final String accountId, final Uploadable uploadable, final Progress progress) {
+        return Futures.transformAsync(
+                getSession(),
+                session -> upload(session, accountId, uploadable, progress),
+                MoreExecutors.directExecutor()
+        );
+    }
+
+    private ListenableFuture<Upload> upload(final Session session, final String accountId, final Uploadable uploadable, final Progress progress) {
+        final HttpUrl httpUrl = session.getUploadUrl(accountId);
+        return this.binaryDataClient.upload(httpUrl, uploadable, progress);
     }
 
     @Override

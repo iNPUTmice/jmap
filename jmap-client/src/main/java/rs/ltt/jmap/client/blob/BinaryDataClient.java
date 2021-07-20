@@ -19,7 +19,6 @@ package rs.ltt.jmap.client.blob;
 import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -99,25 +98,59 @@ public class BinaryDataClient {
                             ))
                     );
                 }
-                download = new Download(
-                        call,
-                        true,
-                        contentRange.getEnd(),
-                        body.byteStream()
-                );
+                download = new Download(call, true, contentRange.getEnd(), body.byteStream());
             } else {
-                download = new Download(
-                        call,
-                        false,
-                        contentLength == null ? 0 : contentLength,
-                        body.byteStream()
-                );
+                final long length = contentLength == null ? 0 : contentLength;
+                download = new Download(call, false, length, body.byteStream());
             }
             return Futures.immediateFuture(download);
         }
         final ProblemDetails details;
-        try {
-            details = Services.GSON.fromJson(new InputStreamReader(body.byteStream()), ProblemDetails.class);
+        try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
+            details = Services.GSON.fromJson(reader, ProblemDetails.class);
+        } catch (final Exception e) {
+            return Futures.immediateFailedFuture(e);
+        }
+        return Futures.immediateFailedFuture(new BlobTransferException(response.code(), details));
+    }
+
+    public ListenableFuture<Upload> upload(final HttpUrl httpUrl, final Uploadable uploadable, final Progress progress) {
+        final RequestBody requestBody = RequestBodies.of(uploadable, progress);
+        final Request.Builder requestBuilder = new Request.Builder();
+        requestBuilder.url(httpUrl);
+        httpAuthentication.authenticate(requestBuilder);
+        requestBuilder.post(requestBody);
+        final Call call = Services.OK_HTTP_CLIENT.newCall(requestBuilder.build());
+        final SettableCallFuture<Upload> settableFuture = SettableCallFuture.create(call);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                settableFuture.setException(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                settableFuture.setFuture(onUploadResponse(call, response));
+            }
+        });
+        return settableFuture;
+    }
+
+    private ListenableFuture<Upload> onUploadResponse(@NotNull Call call, @NotNull Response response) {
+        final ResponseBody body = response.body();
+        if (body == null) {
+            return Futures.immediateFailedFuture(new IllegalStateException("response body was empty"));
+        }
+        if (response.isSuccessful()) {
+            try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
+                return Futures.immediateFuture(Services.GSON.fromJson(reader, Upload.class));
+            } catch (final Exception e) {
+                return Futures.immediateFailedFuture(e);
+            }
+        }
+        final ProblemDetails details;
+        try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
+            details = Services.GSON.fromJson(reader, ProblemDetails.class);
         } catch (final Exception e) {
             return Futures.immediateFailedFuture(e);
         }

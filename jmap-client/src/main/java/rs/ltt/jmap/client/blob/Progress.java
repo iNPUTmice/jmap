@@ -14,16 +14,13 @@
  *
  */
 
-package rs.ltt.jmap.common.entity;
+package rs.ltt.jmap.client.blob;
 
-//TODO move blobId, type, size to BinaryData
-public interface Downloadable {
+public interface Progress {
 
-    String getBlobId();
+    void onProgress(int progress);
 
-    String getType();
-
-    String getName();
-
-    Long getSize();
+    static int progress(final long done, final long total) {
+        return (int) Math.round((double) Math.min(total, done) / total * 100);
+    }
 }
