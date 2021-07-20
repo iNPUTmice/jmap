@@ -1,3 +1,7 @@
+## 0.7.0 (2021-07-20)
+
+* Add ability to upload and download Blobs
+
 ### 0.6.5 (2021-06-27)
 
 * jmap-client: fix EventSourcPushService crashing on missing eventUrl 
