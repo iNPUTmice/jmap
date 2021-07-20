@@ -20,9 +20,11 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonParseException;
+import okhttp3.Dispatcher;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
@@ -47,17 +49,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpJmapClientTest {
 
+    public static final String WELL_KNOWN_PATH = ".well-known/jmap";
+    private static final String ACCOUNT_ID = "test@example.com";
+    private static final String USERNAME = "test@example.com";
+    private static final String PASSWORD = "secret";
     @TempDir
     File tempDir;
-
-    private static String ACCOUNT_ID = "test@example.com";
-    private static String USERNAME = "test@example.com";
-    private static String PASSWORD = "secret";
-    public static String WELL_KNOWN_PATH = ".well-known/jmap";
 
     @Test
     public void fetchMailboxes() throws Exception {
@@ -83,6 +85,10 @@ public class HttpJmapClientTest {
         Assertions.assertEquals(7, mailboxResponse.getList().length);
 
         server.shutdown();
+    }
+
+    public static String readResourceAsString(String filename) throws IOException {
+        return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8).read().trim();
     }
 
     @Test
@@ -112,7 +118,6 @@ public class HttpJmapClientTest {
 
         server.shutdown();
     }
-
 
     @Test
     public void fileSessionCache() throws Exception {
@@ -149,11 +154,6 @@ public class HttpJmapClientTest {
         Assertions.assertEquals("/jmap/", thirdSessionFuture.get().getApiUrl().encodedPath());
 
         server.shutdown();
-    }
-
-
-    public static String readResourceAsString(String filename) throws IOException {
-        return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8).read().trim();
     }
 
     @Test
@@ -393,7 +393,7 @@ public class HttpJmapClientTest {
         );
 
         final Session session = jmapClient.getSession().get();
-        Assertions.assertThrows(IllegalStateException.class, ()-> session.getUploadUrl(USERNAME));
+        Assertions.assertThrows(IllegalStateException.class, () -> session.getUploadUrl(USERNAME));
         server.shutdown();
     }
 
@@ -429,12 +429,80 @@ public class HttpJmapClientTest {
 
         final ExecutionException executionException = Assertions.assertThrows(
                 ExecutionException.class,
-                ()-> future.get().getMain(GetMailboxMethodResponse.class)
+                () -> future.get().getMain(GetMailboxMethodResponse.class)
         );
 
         MatcherAssert.assertThat(executionException.getCause(), CoreMatchers.instanceOf(JsonParseException.class));
 
         server.shutdown();
 
+    }
+
+    @Test
+    public void callIsCancelableSession() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse()
+                .setBody(readResourceAsString("fetch-mailboxes/01-session.json"))
+                .setSocketPolicy(SocketPolicy.STALL_SOCKET_AT_START)
+        );
+        server.start();
+
+        final JmapClient jmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+
+
+        final ListenableFuture<MethodResponses> future = jmapClient.call(
+                GetMailboxMethodCall.builder().accountId(ACCOUNT_ID).build()
+        );
+
+
+        final Dispatcher dispatcher = Services.OK_HTTP_CLIENT.dispatcher();
+
+        Assertions.assertEquals(1, dispatcher.runningCallsCount() + dispatcher.queuedCallsCount());
+        future.cancel(true);
+        Thread.sleep(500); //wait for cancel to propagate
+        Assertions.assertEquals(
+                0, dispatcher.runningCallsCount() + dispatcher.queuedCallsCount(), "Call has not been cancelled"
+        );
+        server.shutdown();
+    }
+
+    @Test
+    public void callIsCancelableRequest() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse()
+                .setBody(readResourceAsString("fetch-mailboxes/01-session.json"))
+        );
+        server.enqueue(new MockResponse()
+                .setBody(readResourceAsString("fetch-mailboxes/02-mailboxes.json"))
+                .throttleBody(1, 1, TimeUnit.SECONDS)
+        );
+        server.start();
+
+        final JmapClient jmapClient = new JmapClient(
+                USERNAME,
+                PASSWORD,
+                server.url(WELL_KNOWN_PATH)
+        );
+
+        final ListenableFuture<MethodResponses> future = jmapClient.call(
+                GetMailboxMethodCall.builder().accountId(ACCOUNT_ID).build()
+        );
+
+        final Dispatcher dispatcher = Services.OK_HTTP_CLIENT.dispatcher();
+
+        Thread.sleep(1000);
+
+        Assertions.assertEquals(1, dispatcher.runningCallsCount() + dispatcher.queuedCallsCount());
+        future.cancel(true);
+        Thread.sleep(1000); //wait for cancel to propagate
+        Assertions.assertEquals(
+                0,
+                dispatcher.runningCallsCount() + dispatcher.queuedCallsCount(),
+                "Call has not been cancelled"
+        );
     }
 }

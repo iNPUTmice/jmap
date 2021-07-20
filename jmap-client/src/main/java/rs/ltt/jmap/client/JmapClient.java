@@ -92,7 +92,9 @@ public class JmapClient implements Closeable {
     }
 
     private void execute(final JmapRequest request) {
-        Futures.addCallback(getSession(), new FutureCallback<Session>() {
+        final ListenableFuture<Session> sessionFuture = getSession();
+        request.addDependentFuture(sessionFuture);
+        Futures.addCallback(sessionFuture, new FutureCallback<Session>() {
             @Override
             public void onSuccess(@Nullable Session session) {
                 execute(request, session);

@@ -17,18 +17,23 @@
 package rs.ltt.jmap.client;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.method.MethodCall;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public class JmapRequest {
 
     private final ImmutableMap<Request.Invocation, SettableFuture<MethodResponses>> invocationFutureImmutableMap;
     private final Request request;
+    private final ArrayList<Future<?>> dependentFutures = new ArrayList<>();
 
     private JmapRequest(Map<Request.Invocation, SettableFuture<MethodResponses>> map) {
         final Request.Builder requestBuilder = new Request.Builder();
@@ -37,8 +42,17 @@ public class JmapRequest {
         }
         this.request = requestBuilder.build();
         this.invocationFutureImmutableMap = ImmutableMap.copyOf(map);
+        Futures.whenAllComplete(this.invocationFutureImmutableMap.values()).call(() -> {
+            if (invocationFutureImmutableMap.values().stream().allMatch(future -> future.isCancelled())) {
+                dependentFutures.forEach(f -> f.cancel(true));
+            }
+            return null;
+        }, MoreExecutors.directExecutor());
     }
 
+    public void addDependentFuture(final Future<?> future) {
+        this.dependentFutures.add(future);
+    }
 
     public ImmutableMap<Request.Invocation, SettableFuture<MethodResponses>> getInvocationFutureImmutableMap() {
         return invocationFutureImmutableMap;

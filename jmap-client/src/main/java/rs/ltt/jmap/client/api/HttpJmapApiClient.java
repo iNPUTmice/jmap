@@ -70,7 +70,9 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
             jmapRequest.setException(throwable);
             return;
         }
-        Futures.addCallback(send(json), new FutureCallback<InputStream>() {
+        final ListenableFuture<InputStream> inputStreamFuture = send(json);
+        jmapRequest.addDependentFuture(inputStreamFuture);
+        Futures.addCallback(inputStreamFuture, new FutureCallback<InputStream>() {
             @Override
             public void onSuccess(final InputStream inputStream) {
                 try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
