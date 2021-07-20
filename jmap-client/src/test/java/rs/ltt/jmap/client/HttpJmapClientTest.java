@@ -453,17 +453,14 @@ public class HttpJmapClientTest {
                 server.url(WELL_KNOWN_PATH)
         );
 
-
         final ListenableFuture<MethodResponses> future = jmapClient.call(
                 GetMailboxMethodCall.builder().accountId(ACCOUNT_ID).build()
         );
 
 
         final Dispatcher dispatcher = Services.OK_HTTP_CLIENT.dispatcher();
-
-        Assertions.assertEquals(1, dispatcher.runningCallsCount() + dispatcher.queuedCallsCount());
         future.cancel(true);
-        Thread.sleep(500); //wait for cancel to propagate
+        Thread.sleep(1000); //wait for cancel to propagate.
         Assertions.assertEquals(
                 0, dispatcher.runningCallsCount() + dispatcher.queuedCallsCount(), "Call has not been cancelled"
         );
@@ -495,10 +492,10 @@ public class HttpJmapClientTest {
         final Dispatcher dispatcher = Services.OK_HTTP_CLIENT.dispatcher();
 
         Thread.sleep(1000);
-
-        Assertions.assertEquals(1, dispatcher.runningCallsCount() + dispatcher.queuedCallsCount());
         future.cancel(true);
         Thread.sleep(1000); //wait for cancel to propagate
+
+
         Assertions.assertEquals(
                 0,
                 dispatcher.runningCallsCount() + dispatcher.queuedCallsCount(),
