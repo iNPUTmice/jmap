@@ -16,15 +16,10 @@
 
 package rs.ltt.jmap.mua;
 
-import com.google.common.collect.Iterables;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import rs.ltt.jmap.client.blob.FileUpload;
 import rs.ltt.jmap.client.blob.Upload;
-import rs.ltt.jmap.common.entity.Mailbox;
-import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
@@ -58,7 +53,7 @@ public class FileUploadTest {
                 .accountId(mailServer.getAccountId())
                 .build();
 
-        try(final FileUpload fileUpload = FileUpload.of(textFileLocation)) {
+        try (final FileUpload fileUpload = FileUpload.of(textFileLocation)) {
             final Upload upload = mua.upload(fileUpload, null).get();
         }
     }
