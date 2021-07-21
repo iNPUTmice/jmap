@@ -130,13 +130,13 @@ public class BinaryDataClient {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
-                settableFuture.setFuture(onUploadResponse(call, response));
+                settableFuture.setFuture(onUploadResponse(response));
             }
         });
         return settableFuture;
     }
 
-    private ListenableFuture<Upload> onUploadResponse(@NotNull Call call, @NotNull Response response) {
+    private ListenableFuture<Upload> onUploadResponse(@NotNull Response response) {
         final ResponseBody body = response.body();
         if (body == null) {
             return Futures.immediateFailedFuture(new IllegalStateException("response body was empty"));

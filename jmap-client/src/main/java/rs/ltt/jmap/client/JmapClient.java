@@ -37,6 +37,7 @@ import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.client.session.SessionClient;
 import rs.ltt.jmap.client.util.Closeables;
 import rs.ltt.jmap.common.entity.Downloadable;
+import rs.ltt.jmap.common.entity.capability.CoreCapability;
 import rs.ltt.jmap.common.method.MethodCall;
 
 import javax.annotation.Nonnull;
@@ -195,6 +196,11 @@ public class JmapClient implements Closeable {
         );
     }
 
+    private ListenableFuture<Download> download(final Session session, final String accountId, final Downloadable downloadable, final long rangeStart) {
+        final HttpUrl httpUrl = session.getDownloadUrl(accountId, downloadable);
+        return this.binaryDataClient.download(httpUrl, rangeStart);
+    }
+
     public ListenableFuture<Download> download(final String accountId, final Downloadable downloadable, final long rangeStart) {
         Preconditions.checkArgument(rangeStart >= 0, "rangeStart must not be smaller than 0");
         return Futures.transformAsync(
@@ -204,12 +210,11 @@ public class JmapClient implements Closeable {
         );
     }
 
-    private ListenableFuture<Download> download(final Session session, final String accountId, final Downloadable downloadable, final long rangeStart) {
-        final HttpUrl httpUrl = session.getDownloadUrl(accountId, downloadable);
-        return this.binaryDataClient.download(httpUrl, rangeStart);
-    }
-
-    public ListenableFuture<Upload> upload(final String accountId, final Uploadable uploadable, final Progress progress) {
+    public ListenableFuture<Upload> upload(@Nonnull final String accountId,
+                                           @Nonnull final Uploadable uploadable,
+                                           final Progress progress) {
+        Preconditions.checkArgument(accountId != null, "accountId must not be null");
+        Preconditions.checkArgument(uploadable != null, "Uploadable must not be null");
         return Futures.transformAsync(
                 getSession(),
                 session -> upload(session, accountId, uploadable, progress),
@@ -217,8 +222,18 @@ public class JmapClient implements Closeable {
         );
     }
 
-    private ListenableFuture<Upload> upload(final Session session, final String accountId, final Uploadable uploadable, final Progress progress) {
+    private ListenableFuture<Upload> upload(final Session session,
+                                            final String accountId,
+                                            final Uploadable uploadable,
+                                            final Progress progress) {
         final HttpUrl httpUrl = session.getUploadUrl(accountId);
+        final CoreCapability coreCapability = session.getCapability(CoreCapability.class);
+        final Long maxUploadSize = coreCapability == null ? null : coreCapability.getMaxSizeUpload();
+        if (maxUploadSize != null && uploadable.getContentLength() > maxUploadSize) {
+            return Futures.immediateFailedFuture(
+                    new MaxUploadSizeExceededException(uploadable.getContentLength(), maxUploadSize)
+            );
+        }
         return this.binaryDataClient.upload(httpUrl, uploadable, progress);
     }
 
