@@ -17,7 +17,9 @@
 package rs.ltt.jmap.mua;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import okhttp3.HttpUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,7 @@ import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
 import rs.ltt.jmap.mua.service.*;
+import rs.ltt.jmap.mua.util.AttachmentUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -298,8 +301,9 @@ public class Mua extends MuaSession {
 
     /**
      * Resumes the download of binary data based on a Downloadable (blobId, type, name) and the current file size
-     * @param downloadable  An EmailBodyPart or another class that implements Downloadable
-     * @param rangeStart The amount of data (file size) that has previously been downloaded
+     *
+     * @param downloadable An EmailBodyPart or another class that implements Downloadable
+     * @param rangeStart   The amount of data (file size) that has previously been downloaded
      * @return A Download Future that contains the InputStream, size and the cancelable HTTP Call and an indication if resume has been successful
      */
     public ListenableFuture<Download> download(final Downloadable downloadable, final long rangeStart) {
@@ -309,6 +313,13 @@ public class Mua extends MuaSession {
 
     public ListenableFuture<Upload> upload(final Uploadable uploadable, final Progress progress) {
         return jmapClient.upload(getAccountId(), uploadable, progress);
+    }
+
+    public ListenableFuture<Void> verifyAttachmentsDoNotExceedLimit(final Collection<? extends Attachment> attachments) {
+        return Futures.transform(getJmapClient().getSession(), session -> {
+            AttachmentUtil.verifyAttachmentsDoNotExceedLimit(session, getAccountId(), attachments);
+            return null;
+        }, MoreExecutors.directExecutor());
     }
 
     public static class Builder {

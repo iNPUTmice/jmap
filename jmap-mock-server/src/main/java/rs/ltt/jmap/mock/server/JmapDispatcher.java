@@ -57,6 +57,7 @@ public abstract class JmapDispatcher extends Dispatcher {
     protected static final Gson GSON;
     public static final String WELL_KNOWN_PATH = "/.well-known/jmap";
     private static final String API_PATH = "/jmap/";
+    private static final String UPLOAD_PATH = "/upload/";
     private static final String WEB_SOCKET_PATH = "/jmap/ws";
 
 
@@ -220,7 +221,10 @@ public abstract class JmapDispatcher extends Dispatcher {
 
     private MockResponse session() {
         ImmutableMap.Builder<Class<? extends Capability>, Capability> capabilityBuilder = ImmutableMap.builder();
-        capabilityBuilder.put(CoreCapability.class, CoreCapability.builder().maxObjectsInGet(maxObjectsInGet).build());
+        capabilityBuilder.put(CoreCapability.class, CoreCapability.builder()
+                .maxSizeUpload(100 * 1024 * 1024L) //100MiB
+                .maxObjectsInGet(maxObjectsInGet)
+                .build());
         if (this.advertiseWebSocket) {
             capabilityBuilder.put(WebSocketCapability.class, WebSocketCapability.builder()
                     .url(WEB_SOCKET_PATH)
@@ -230,11 +234,14 @@ public abstract class JmapDispatcher extends Dispatcher {
         final String id = getAccountId();
         final SessionResource sessionResource = SessionResource.builder()
                 .apiUrl(API_PATH)
+                .uploadUrl(UPLOAD_PATH)
                 .state(getSessionState())
                 .account(id, Account.builder()
                         .accountCapabilities(ImmutableMap.of(
                                 MailAccountCapability.class,
-                                MailAccountCapability.builder().build()
+                                MailAccountCapability.builder()
+                                        .maxSizeAttachmentsPerEmail(50 * 1024 * 1024L) //50MiB
+                                        .build()
                         ))
                         .name(account.getEmail())
                         .build())

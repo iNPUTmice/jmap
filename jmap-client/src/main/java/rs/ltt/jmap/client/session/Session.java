@@ -111,4 +111,9 @@ public class Session {
     public <T extends Capability> T getCapability(Class<T> clazz) {
         return sessionResource.getCapability(clazz);
     }
+
+    public <T extends AccountCapability> T getAccountCapability(final String accountId, final Class<T> clazz) {
+        final Account account = sessionResource.getAccounts().get(accountId);
+        return account == null ? null : account.getCapability(clazz);
+    }
 }

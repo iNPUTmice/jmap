@@ -20,14 +20,10 @@ import com.google.common.net.MediaType;
 import rs.ltt.jmap.common.util.MediaTypes;
 
 public interface Attachment extends Downloadable {
-
-    String getName();
-
+    
     String getCharset();
 
     default MediaType getMediaType() {
         return MediaTypes.of(getType(), getCharset());
     }
-
-    Long getSize();
 }
