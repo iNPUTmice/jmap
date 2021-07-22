@@ -1,4 +1,8 @@
-## 0.7.0 (2021-07-20)
+### 0.7.1 (2021-07-22)
+
+* Check for upload and attachment size limits
+
+### 0.7.0 (2021-07-20)
 
 * Add ability to upload and download Blobs
 
