@@ -19,6 +19,7 @@ package rs.ltt.jmap.client.api;
 import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.MethodResponse;
+import rs.ltt.jmap.common.method.error.InvalidArgumentsMethodErrorResponse;
 import rs.ltt.jmap.common.util.Mapper;
 
 public class MethodErrorResponseException extends JmapApiException {
@@ -28,7 +29,12 @@ public class MethodErrorResponseException extends JmapApiException {
     private final MethodCall methodCall;
 
     MethodErrorResponseException(MethodErrorResponse methodErrorResponse, MethodResponse[] additional, MethodCall methodCall) {
-        super(methodErrorResponse.getType() + ((additional != null && additional.length > 0) ? " + " + additional.length : "") + " in response to " + Mapper.METHOD_CALLS.inverse().get(methodCall.getClass()));
+        super(
+            methodErrorResponse.getType() +
+            ((additional != null && additional.length > 0) ? " + " + additional.length : "") + " in response to " +
+            Mapper.METHOD_CALLS.inverse().get(methodCall.getClass()) +
+            (methodErrorResponse instanceof InvalidArgumentsMethodErrorResponse ? " - " + ((InvalidArgumentsMethodErrorResponse) methodErrorResponse).getDescription() : "")
+        );
         this.methodErrorResponse = methodErrorResponse;
         this.additional = additional;
         this.methodCall = methodCall;
