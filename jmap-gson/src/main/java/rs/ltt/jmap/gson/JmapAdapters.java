@@ -42,8 +42,9 @@ public final class JmapAdapters {
         CapabilitiesDeserializer.register(builder);
         FilterDeserializer.register(builder);
         AccountCapabilitiesDeserializer.register(builder);
-        PrimaryAccountsDeserializer.register(builder);
         GenericResponseDeserializer.register(builder);
+        PrimaryAccountsDeserializer.register(builder);
+        PushMessageDeserializer.register(builder);
         ResponseInvocationDeserializer.register(builder);
         WebSocketMessageDeserializer.register(builder);
 

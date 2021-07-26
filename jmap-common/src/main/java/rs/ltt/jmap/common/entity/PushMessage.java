@@ -16,16 +16,5 @@
 
 package rs.ltt.jmap.common.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import rs.ltt.jmap.annotation.Type;
-
-@Type
-@Getter
-@Builder
-public class PushVerification implements PushMessage {
-
-    private String pushSubscriptionId;
-    private String verificationCode;
-
+public interface PushMessage {
 }

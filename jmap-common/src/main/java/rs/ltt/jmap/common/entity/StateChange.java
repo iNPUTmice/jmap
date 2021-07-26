@@ -26,7 +26,7 @@ import java.util.Map;
 
 @Getter
 @Type
-public class StateChange {
+public class StateChange implements PushMessage {
 
     protected Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed;
 
