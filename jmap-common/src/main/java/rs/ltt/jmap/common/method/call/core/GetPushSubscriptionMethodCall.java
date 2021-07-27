@@ -16,17 +16,31 @@
 
 package rs.ltt.jmap.common.method.call.core;
 
+import com.google.common.base.Preconditions;
+import com.google.gson.annotations.SerializedName;
 import lombok.Builder;
+import lombok.NonNull;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.PushSubscription;
+import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.method.call.standard.GetMethodCall;
 
 @JmapMethod("PushSubscription/get")
-public class GetPushSubscriptionMethodCall extends GetMethodCall<PushSubscription> {
+public class GetPushSubscriptionMethodCall implements MethodCall {
+
+    private String[] ids;
+
+    protected String[] properties;
+
+    @SerializedName("#ids")
+    private Request.Invocation.ResultReference idsReference;
 
     @Builder
-    public GetPushSubscriptionMethodCall(String accountId, String[] ids, String[] properties, Request.Invocation.ResultReference idsReference) {
-        super(accountId, ids, properties, idsReference);
+    public GetPushSubscriptionMethodCall(String[] ids, String[] properties, Request.Invocation.ResultReference idsReference) {
+        Preconditions.checkArgument(ids == null || idsReference == null, "Can't set both 'ids' and 'idsReference'");
+        this.ids = ids;
+        this.properties = properties;
+        this.idsReference = idsReference;
     }
 }

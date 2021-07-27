@@ -17,15 +17,31 @@
 package rs.ltt.jmap.common.method.response.core;
 
 import lombok.Builder;
+import lombok.Getter;
+import lombok.Singular;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.entity.PushSubscription;
-import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
+import rs.ltt.jmap.common.entity.SetError;
+import rs.ltt.jmap.common.method.MethodResponse;
+
+import java.util.Map;
 
 @JmapMethod("PushSubscription/set")
-public class SetPushSubscriptionMethodResponse extends GetMethodResponse<PushSubscription> {
+@Getter
+@Builder
+public class SetPushSubscriptionMethodResponse implements MethodResponse {
 
-    @Builder
-    public SetPushSubscriptionMethodResponse(String accountId, String state, String[] notFound, PushSubscription[] list) {
-        super(accountId, state, notFound, list);
-    }
+    private String oldState;
+    private String newState;
+    @Singular("created")
+    private Map<String, PushSubscription> created;
+
+    @Singular("updated")
+    private Map<String, PushSubscription> updated;
+    private String[] destroyed;
+    private Map<String, SetError> notCreated;
+    @Singular("notUpdated")
+    private Map<String, SetError> notUpdated;
+    private Map<String, SetError> notDestroyed;
+
 }

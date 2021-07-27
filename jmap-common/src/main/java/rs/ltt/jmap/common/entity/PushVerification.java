@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.common.entity;
 
+import com.google.common.base.MoreObjects;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.annotation.Type;
@@ -28,4 +29,11 @@ public class PushVerification implements PushMessage {
     private String pushSubscriptionId;
     private String verificationCode;
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("pushSubscriptionId", pushSubscriptionId)
+                .add("verificationCode", verificationCode)
+                .toString();
+    }
 }

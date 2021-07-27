@@ -20,6 +20,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import okhttp3.HttpUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.common.Request;
@@ -29,6 +30,8 @@ import rs.ltt.jmap.common.entity.*;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.method.MethodResponse;
+import rs.ltt.jmap.common.method.call.core.GetPushSubscriptionMethodCall;
+import rs.ltt.jmap.common.method.call.core.SetPushSubscriptionMethodCall;
 import rs.ltt.jmap.common.method.call.email.*;
 import rs.ltt.jmap.common.method.call.identity.GetIdentityMethodCall;
 import rs.ltt.jmap.common.method.call.mailbox.ChangesMailboxMethodCall;
@@ -36,10 +39,8 @@ import rs.ltt.jmap.common.method.call.mailbox.GetMailboxMethodCall;
 import rs.ltt.jmap.common.method.call.mailbox.SetMailboxMethodCall;
 import rs.ltt.jmap.common.method.call.thread.ChangesThreadMethodCall;
 import rs.ltt.jmap.common.method.call.thread.GetThreadMethodCall;
-import rs.ltt.jmap.common.method.error.AnchorNotFoundMethodErrorResponse;
-import rs.ltt.jmap.common.method.error.CannotCalculateChangesMethodErrorResponse;
-import rs.ltt.jmap.common.method.error.InvalidResultReferenceMethodErrorResponse;
-import rs.ltt.jmap.common.method.error.StateMismatchMethodErrorResponse;
+import rs.ltt.jmap.common.method.error.*;
+import rs.ltt.jmap.common.method.response.core.SetPushSubscriptionMethodResponse;
 import rs.ltt.jmap.common.method.response.email.*;
 import rs.ltt.jmap.common.method.response.identity.GetIdentityMethodResponse;
 import rs.ltt.jmap.common.method.response.mailbox.ChangesMailboxMethodResponse;
@@ -61,10 +62,13 @@ import java.util.stream.Stream;
 
 public class MockMailServer extends StubMailServer {
 
+    private static final String VERIFICATION_CODE = "stub-verification-code";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MockMailServer.class);
 
     protected final Map<String, Email> emails = new HashMap<>();
     protected final Map<String, MailboxInfo> mailboxes = new HashMap<>();
+    protected final Map<String, PushSubscription> pushSubscriptions = new HashMap<>();
 
     protected final LinkedHashMap<String, Update> updates = new LinkedHashMap<>();
 
@@ -130,6 +134,11 @@ public class MockMailServer extends StubMailServer {
                 ImmutableMap.of(getAccountId(), changedBuilder.build()),
                 update.getNewVersion()
         );
+        final StateChange stateChangeMessage = StateChange.builder().changed(getAccountId(), changedBuilder.build()).build();
+        pushSubscriptions.values().stream()
+                .filter(ps->VERIFICATION_CODE.equals(ps.getVerificationCode()))
+                .map(PushSubscription::getUrl)
+                .forEach(url -> Pusher.push(HttpUrl.get(url), stateChangeMessage));
         final String message = GSON.toJson(stateChange);
         pushEnabledWebSockets.forEach(webSocket -> webSocket.send(message));
     }
@@ -144,6 +153,89 @@ public class MockMailServer extends StubMailServer {
 
     public void setReportCanCalculateQueryChanges(final boolean reportCanCalculateQueryChanges) {
         this.reportCanCalculateQueryChanges = reportCanCalculateQueryChanges;
+    }
+
+    @Override
+    protected MethodResponse[] execute(SetPushSubscriptionMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
+        final SetPushSubscriptionMethodResponse.SetPushSubscriptionMethodResponseBuilder responseBuilder = SetPushSubscriptionMethodResponse.builder();
+        final Map<String, PushSubscription> create = methodCall.getCreate();
+        final Map<String, Map<String, Object>> update = methodCall.getUpdate();
+        final String[] destroy = methodCall.getDestroy();
+        if (destroy != null && destroy.length > 0) {
+            throw new IllegalStateException("MockServer does not know how to destroy PushSubscriptions");
+        }
+        if (create != null && create.size() > 0) {
+            processCreatePushSubscription(create, responseBuilder);
+        }
+        if (update != null && update.size() > 0) {
+            processUpdatePushSubscription(update, responseBuilder);
+        }
+        return new MethodResponse[]{
+                responseBuilder.build()
+        };
+    }
+
+    private void processUpdatePushSubscription(Map<String, Map<String, Object>> update, SetPushSubscriptionMethodResponse.SetPushSubscriptionMethodResponseBuilder responseBuilder) {
+        for (final Map.Entry<String, Map<String, Object>> entry : update.entrySet()) {
+            final String id = entry.getKey();
+            Map<String, Object> patch = entry.getValue();
+            try {
+                final PushSubscription modifiedPushSubscription = patchPushSubscription(id, patch);
+                responseBuilder.updated(id, modifiedPushSubscription);
+                this.pushSubscriptions.put(modifiedPushSubscription.getId(), modifiedPushSubscription);
+            } catch (final IllegalArgumentException e) {
+                responseBuilder.notUpdated(id, new SetError(SetErrorType.INVALID_PROPERTIES, e.getMessage()));
+            }
+        }
+    }
+
+    private PushSubscription patchPushSubscription(final String id, final Map<String, Object> patches) {
+        final PushSubscription current = this.pushSubscriptions.get(id);
+        if (current == null) {
+            throw new IllegalArgumentException(String.format("No PushSubscription found with id %s", id));
+        }
+        for (final Map.Entry<String, Object> patch : patches.entrySet()) {
+            final String fullPath = patch.getKey();
+            final Object modification = patch.getValue();
+            if ("verificationCode".equals(fullPath)) {
+                if (modification instanceof String) {
+                    final String code = (String) modification;
+                    return current.toBuilder().verificationCode(code).build();
+                } else {
+                    throw new IllegalArgumentException("verificationCode is not the correct type");
+                }
+            } else {
+                throw new IllegalArgumentException("Unable to patch " + fullPath);
+            }
+        }
+        return current;
+    }
+
+    private void processCreatePushSubscription(Map<String, PushSubscription> create, SetPushSubscriptionMethodResponse.SetPushSubscriptionMethodResponseBuilder responseBuilder) {
+        for (final Map.Entry<String, PushSubscription> entry : create.entrySet()) {
+            final String createId = entry.getKey();
+            final String id = UUID.randomUUID().toString();
+            final PushSubscription pushSubscription = entry.getValue().toBuilder().id(id).build();
+            this.pushSubscriptions.put(id, pushSubscription);
+            final String url = pushSubscription.getUrl();
+            PushVerification pushVerification = PushVerification.builder()
+                    .pushSubscriptionId(id)
+                    .verificationCode(VERIFICATION_CODE)
+                    .build();
+            final HttpUrl httpUrl = url == null ? null : HttpUrl.get(url);
+            LOGGER.info("Sending PushVerification to {}", httpUrl);
+            if (httpUrl != null) {
+                if (!Pusher.push(httpUrl, pushVerification)) {
+                    LOGGER.info("Failed to send Push Verification");
+                }
+            }
+            responseBuilder.created(createId, pushSubscription);
+        }
+    }
+
+    @Override
+    protected MethodResponse[] execute(GetPushSubscriptionMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
+        return new MethodResponse[]{new UnknownMethodMethodErrorResponse()};
     }
 
     @Override

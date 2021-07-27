@@ -21,6 +21,8 @@ import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.method.MethodResponse;
 import rs.ltt.jmap.common.method.call.core.EchoMethodCall;
+import rs.ltt.jmap.common.method.call.core.GetPushSubscriptionMethodCall;
+import rs.ltt.jmap.common.method.call.core.SetPushSubscriptionMethodCall;
 import rs.ltt.jmap.common.method.call.email.*;
 import rs.ltt.jmap.common.method.call.identity.ChangesIdentityMethodCall;
 import rs.ltt.jmap.common.method.call.identity.GetIdentityMethodCall;
@@ -52,6 +54,12 @@ public class StubMailServer extends JmapDispatcher {
          */
         if (methodCall instanceof EchoMethodCall) {
             return execute((EchoMethodCall) methodCall, previousResponses);
+        }
+        if (methodCall instanceof GetPushSubscriptionMethodCall) {
+            return execute((GetPushSubscriptionMethodCall) methodCall, previousResponses);
+        }
+        if (methodCall instanceof SetPushSubscriptionMethodCall) {
+            return execute((SetPushSubscriptionMethodCall) methodCall, previousResponses);
         }
 
         /**
@@ -165,6 +173,14 @@ public class StubMailServer extends JmapDispatcher {
 
     protected MethodResponse[] execute(EchoMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
         return new MethodResponse[]{EchoMethodResponse.builder().libraryName(methodCall.getLibraryName()).build()};
+    }
+
+    protected MethodResponse[] execute(SetPushSubscriptionMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
+        return new MethodResponse[]{new UnknownMethodMethodErrorResponse()};
+    }
+
+    protected MethodResponse[] execute(GetPushSubscriptionMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {
+        return new MethodResponse[]{new UnknownMethodMethodErrorResponse()};
     }
 
     protected MethodResponse[] execute(ChangesEmailMethodCall methodCall, ListMultimap<String, Response.Invocation> previousResponses) {

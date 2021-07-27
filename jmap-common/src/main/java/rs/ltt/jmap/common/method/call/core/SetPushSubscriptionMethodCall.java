@@ -17,20 +17,23 @@
 package rs.ltt.jmap.common.method.call.core;
 
 import lombok.Builder;
+import lombok.Getter;
 import rs.ltt.jmap.annotation.JmapMethod;
-import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.PushSubscription;
-import rs.ltt.jmap.common.method.call.standard.SetMethodCall;
+import rs.ltt.jmap.common.method.MethodCall;
 
 import java.util.Map;
 
 @JmapMethod("PushSubscription/set")
-public class SetPushSubscriptionMethodCall extends SetMethodCall<PushSubscription> {
+@Builder
+@Getter
+public class SetPushSubscriptionMethodCall implements MethodCall {
 
-    @Builder
-    public SetPushSubscriptionMethodCall(String accountId, String ifInState, Map<String, PushSubscription> create,
-                                         Map<String, Map<String, Object>> update, String[] destroy,
-                                         Request.Invocation.ResultReference destroyReference) {
-        super(accountId, ifInState, create, update, destroy, destroyReference);
-    }
+    private String ifInState;
+
+    private Map<String, PushSubscription> create;
+
+    private Map<String, Map<String, Object>> update;
+
+    private String[] destroy;
 }
