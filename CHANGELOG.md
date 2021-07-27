@@ -1,3 +1,12 @@
+### 0.7.3 (2021-07-27)
+
+* SetPushSubscription and GetPushSubscription doesn’t have an accountId
+* Add PushSubscription support to MockMailServer
+
+### 0.7.2 (2021-07-26)
+
+* Common interface for PushVerification and StateChange (PushMessage)
+
 ### 0.7.1 (2021-07-22)
 
 * Check for upload and attachment size limits
