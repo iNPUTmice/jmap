@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapRequest;
 import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.event.State;
+import rs.ltt.jmap.client.http.Headers;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.GenericResponse;
@@ -42,12 +43,12 @@ import java.util.concurrent.TimeUnit;
 public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Closeable {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(WebSocketJmapApiClient.class);
-
+    private static final String JMAP = "jmap";
+    protected final List<Long> connectionDurations = new ArrayList<>();
     private final HttpUrl webSocketUrl;
     private final HttpAuthentication authentication;
     private final ArrayList<JmapRequest> requestQueue = new ArrayList<>();
     private final HashMap<String, JmapRequest> inFlightRequests = new HashMap<>();
-    protected final List<Long> connectionDurations = new ArrayList<>();
     protected int attempt = 0;
     protected State state = State.CLOSED;
     protected ScheduledFuture<?> reconnectionFuture;
@@ -141,6 +142,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(this.webSocketUrl);
         authentication.authenticate(requestBuilder);
+        requestBuilder.header(Headers.SEC_WEB_SOCKET_PROTOCOL, JMAP);
         final Request request = requestBuilder.build();
         final OkHttpClient okHttpClient = Services.OK_HTTP_CLIENT
                 .newBuilder()
@@ -267,7 +269,8 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         @Override
         public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
             super.onClosing(webSocket, code, reason);
-            client.onClosing(webSocket, code, reason);;
+            client.onClosing(webSocket, code, reason);
+            ;
         }
 
         @Override
