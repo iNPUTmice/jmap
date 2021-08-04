@@ -22,6 +22,7 @@ import lombok.Getter;
 import rs.ltt.jmap.common.util.Property;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 @Builder
@@ -47,16 +48,16 @@ public class Account {
     }
 
     public Collection<AccountCapability> getCapabilities() {
-        return accountCapabilities.values();
+        return accountCapabilities == null ? Collections.emptyList() : accountCapabilities.values();
     }
 
     public boolean hasCapability(Class<? extends AccountCapability> clazz) {
-        return accountCapabilities.containsKey(clazz);
+        return accountCapabilities != null && accountCapabilities.containsKey(clazz);
     }
 
     public static class AccountBuilder {
         public AccountBuilder accountCapabilities(Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilities) {
-            for (Map.Entry<Class<? extends AccountCapability>, AccountCapability> entry : accountCapabilities.entrySet()) {
+            for (final Map.Entry<Class<? extends AccountCapability>, AccountCapability> entry : accountCapabilities.entrySet()) {
                 final Class<? extends AccountCapability> key = entry.getKey();
                 final AccountCapability value = entry.getValue();
                 if (key != value.getClass()) {
