@@ -19,6 +19,7 @@ package rs.ltt.jmap.client.http;
 public final class Headers {
 
     public static final String SEC_WEB_SOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+    public static final String ACCEPT_ENCODING = "Accept-Encoding";
 
     private Headers() {
         throw new IllegalStateException("Do not instantiate me");

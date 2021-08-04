@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.Services;
+import rs.ltt.jmap.client.http.Headers;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.StateChange;
@@ -138,6 +139,10 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(eventSourceUrl);
         authentication.authenticate(requestBuilder);
+        //Something in the Cyrus-Nginx-OkHttp pipeline doesn't support compression
+        //Since curl can handle it fine it might be OkHttp
+        //Okio.GzipSource throws in checkEqual
+        requestBuilder.addHeader(Headers.ACCEPT_ENCODING,"identity");
         final Request request = requestBuilder.build();
         LOGGER.info("Using event source url {}", eventSourceUrl);
         setCurrentEventSource(factory.newEventSource(request, new EventSourceProcessor()));
