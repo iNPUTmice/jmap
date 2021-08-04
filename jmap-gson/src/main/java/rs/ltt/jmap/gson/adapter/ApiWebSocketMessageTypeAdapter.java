@@ -53,9 +53,12 @@ public class ApiWebSocketMessageTypeAdapter extends TypeAdapter<AbstractApiWebSo
         jsonWriter.name("@type");
         jsonWriter.value(MESSAGE_MAP.inverse().get(message.getClass()));
 
-        jsonWriter.name("requestId");
+        if (message instanceof RequestWebSocketMessage) {
+            jsonWriter.name("id");
+        } else {
+            jsonWriter.name("requestId");
+        }
         jsonWriter.value(message.getRequestId());
-
         final JsonElement payload = REGULAR_GSON.toJsonTree(message.getPayload());
         if (payload.isJsonObject()) {
             for (Map.Entry<String, JsonElement> entry : payload.getAsJsonObject().entrySet()) {

@@ -25,6 +25,7 @@ import rs.ltt.jmap.common.Response;
 public class ResponseWebSocketMessage extends AbstractApiWebSocketMessage {
 
     private Response response;
+    private String requestId;
 
     @Builder
     public ResponseWebSocketMessage(final String requestId, Response response) {

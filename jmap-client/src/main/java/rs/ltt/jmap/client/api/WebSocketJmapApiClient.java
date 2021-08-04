@@ -80,7 +80,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
         final String requestId = UUID.randomUUID().toString();
         this.inFlightRequests.put(requestId, jmapRequest);
         final RequestWebSocketMessage message = RequestWebSocketMessage.builder()
-                .requestId(requestId)
+                .id(requestId)
                 .request(jmapRequest.getRequest())
                 .build();
         if (send(message)) {
@@ -177,8 +177,7 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
             //a status code of 1007 (Invalid frame payload data),
 
             //we rather fail our pending requests instead of missing a response and never calling the future
-            disconnect(State.FAILED);
-            failPendingRequests(e);
+            policyViolation(e);
             return;
         }
         onWebSocketMessage(message);
@@ -193,7 +192,20 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
 
     protected boolean onApiMessage(final AbstractApiWebSocketMessage apiMessage) {
         final String requestId = apiMessage.getRequestId();
+        if (requestId == null) {
+            //all our Requests have an id set. We expect the server to do the same
+            policyViolation(new IllegalStateException(
+                    String.format("Server sent %s w/o requestId", apiMessage.getClass().getSimpleName())
+            ));
+            return false;
+        }
         final JmapRequest jmapRequest = inFlightRequests.remove(requestId);
+        if (jmapRequest == null) {
+            policyViolation(new IllegalStateException(
+                    String.format("Could not find in flight request with id %s", requestId)
+            ));
+            return false;
+        }
         final Object payload = apiMessage.getPayload();
         if (payload instanceof GenericResponse) {
             processResponse(jmapRequest, (GenericResponse) payload);
@@ -209,6 +221,11 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
             this.currentWebSocket = null;
             transitionTo(state);
         }
+    }
+
+    private void policyViolation(final Throwable throwable) {
+        disconnect(State.FAILED);
+        failPendingRequests(throwable);
     }
 
     private void failPendingRequests(final Throwable throwable) {
@@ -237,9 +254,12 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     }
 
     private synchronized void onFailure(final Throwable throwable, final Response response) {
+        final boolean showFailure = state != State.FAILED;
         final boolean wasConnected = state == State.CONNECTED;
         disconnect(State.FAILED);
-        LOGGER.info("Unable to connect to WebSocket URL", throwable);
+        if (showFailure) {
+            LOGGER.info("Unable to connect to WebSocket URL", throwable);
+        }
         if (throwable instanceof EOFException && wasConnected) {
             this.connectionDurations.add(System.nanoTime() - lastFrameReceived);
         }

@@ -47,7 +47,7 @@ public class WebSocketMessageTest extends AbstractGsonTest {
                         .build()
         ).build();
         RequestWebSocketMessage message = RequestWebSocketMessage.builder()
-                .requestId("my-id")
+                .id("my-id")
                 .request(request)
                 .build();
         Assertions.assertEquals(readResourceAsString("websocket/request.json"), getGson().toJson(message));

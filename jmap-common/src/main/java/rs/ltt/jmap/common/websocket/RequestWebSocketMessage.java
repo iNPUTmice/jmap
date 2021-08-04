@@ -25,10 +25,11 @@ import rs.ltt.jmap.common.Request;
 public class RequestWebSocketMessage extends AbstractApiWebSocketMessage {
 
     private Request request;
+    private String id;
 
     @Builder
-    public RequestWebSocketMessage(final String requestId, final Request request) {
-        this.requestId = requestId;
+    public RequestWebSocketMessage(final String id, final Request request) {
+        this.id = id;
         this.request = request;
     }
 
@@ -39,9 +40,14 @@ public class RequestWebSocketMessage extends AbstractApiWebSocketMessage {
     }
 
     @Override
+    public String getRequestId() {
+        return this.id;
+    }
+
+    @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("requestId", requestId)
+                .add("id", id)
                 .add("request", request)
                 .toString();
     }

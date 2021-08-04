@@ -21,8 +21,8 @@ import lombok.Getter;
 @Getter
 public abstract class AbstractApiWebSocketMessage implements WebSocketMessage {
 
-    protected String requestId;
-
     public abstract Object getPayload();
+
+    public abstract String getRequestId();
 
 }

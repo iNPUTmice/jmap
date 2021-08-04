@@ -22,11 +22,16 @@ import rs.ltt.jmap.common.ErrorResponse;
 public class ErrorResponseWebSocketMessage extends AbstractApiWebSocketMessage {
 
     private ErrorResponse response;
+    private String requestId;
 
     @Builder
     public ErrorResponseWebSocketMessage(String requestId, final ErrorResponse response) {
         this.requestId = requestId;
         this.response = response;
+    }
+
+    public String getRequestId() {
+        return this.requestId;
     }
 
     @Override

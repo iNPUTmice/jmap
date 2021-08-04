@@ -42,12 +42,8 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
             throw new JsonParseException("WebSocketMessage had no @type attribute");
         }
         final String messageType = jsonObject.get("@type").getAsString();
-        final String requestId;
-        if (jsonObject.has("requestId")) {
-            requestId = jsonObject.get("requestId").getAsString();
-        } else {
-            requestId = null;
-        }
+        final String requestId = getAsString(jsonObject, "requestId");
+        final String id = getAsString(jsonObject, "id");
         if ("Response".equals(messageType)) {
             final Response response = context.deserialize(jsonElement, Response.class);
             return ResponseWebSocketMessage.builder()
@@ -68,7 +64,7 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
         if ("Request".equals(messageType)) {
             final Request request = context.deserialize(jsonElement, Request.class);
             return RequestWebSocketMessage.builder()
-                    .requestId(requestId)
+                    .id(id)
                     .request(request)
                     .build();
         }
@@ -79,5 +75,14 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
             return context.deserialize(jsonElement, PushDisableWebSocketMessage.class);
         }
         throw new JsonParseException(String.format("Unknown WebSocketMessage type %s", messageType));
+    }
+
+    private static String getAsString(final JsonObject jsonObject, final String name) {
+        if (jsonObject.has(name)) {
+            final JsonElement element = jsonObject.get(name);
+            return element.isJsonNull() ? null : jsonObject.get(name).getAsString();
+        } else {
+            return null;
+        }
     }
 }
