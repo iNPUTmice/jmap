@@ -35,6 +35,15 @@ public class WebSocketUtilTest {
     }
 
     @Test
+    public void regularWssEmptyPath() {
+        final String input = "wss:";
+        Assertions.assertEquals(
+                "https://example.com:8080/",
+                WebSocketUtil.normalizeUrl(BASE, input).toString()
+        );
+    }
+
+    @Test
     public void regularWs() {
         final String input = "ws://localhost/path";
         Assertions.assertEquals(
@@ -55,6 +64,24 @@ public class WebSocketUtilTest {
         final String input = "/path";
         Assertions.assertEquals(
                 "http://example.com:8080/path",
+                WebSocketUtil.normalizeUrl(BASE, input).toString()
+        );
+    }
+
+    @Test
+    public void schemeAndPath() {
+        final String input = "wss:/jmap/ws/";
+        Assertions.assertEquals(
+                "https://example.com:8080/jmap/ws/",
+                WebSocketUtil.normalizeUrl(BASE, input).toString()
+        );
+    }
+
+    @Test
+    public void wsAndPath() {
+        final String input = "ws:/jmap/ws/";
+        Assertions.assertEquals(
+                "http://example.com:8080/jmap/ws/",
                 WebSocketUtil.normalizeUrl(BASE, input).toString()
         );
     }

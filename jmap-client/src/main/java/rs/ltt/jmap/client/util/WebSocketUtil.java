@@ -24,14 +24,14 @@ import java.util.Locale;
 
 public final class WebSocketUtil {
 
-    private WebSocketUtil() {
-
-    }
-
     private static final ImmutableBiMap<String, String> SCHEME_MAP = new ImmutableBiMap.Builder<String, String>()
             .put("ws", "http")
             .put("wss", "https")
             .build();
+
+    private WebSocketUtil() {
+
+    }
 
     public static HttpUrl normalizeUrl(final HttpUrl base, final String url) {
         final int schemeEndIndex = url.indexOf(":");
@@ -39,14 +39,25 @@ public final class WebSocketUtil {
             final HttpUrl.Builder builder = base.newBuilder(url);
             Preconditions.checkState(
                     builder != null,
-                    String.format("Unable to assemble final WebSocket URL from base=%s and downloadUrl=%s", base, url)
+                    String.format("Unable to assemble final WebSocket URL from base=%s and url=%s", base, url)
             );
             return builder.build();
         }
         final String scheme = url.substring(0, schemeEndIndex).toLowerCase(Locale.ENGLISH);
         if (SCHEME_MAP.containsKey(scheme)) {
             final String normalizedScheme = SCHEME_MAP.get(scheme);
-            return HttpUrl.get(normalizedScheme + url.substring(scheme.length()));
+            final String authority = url.substring(scheme.length() + 1);
+            if (authority.startsWith("//")) {
+                return HttpUrl.get(String.format("%s:%s", normalizedScheme, authority));
+            } else {
+                final HttpUrl.Builder builder = base.newBuilder(authority);
+                Preconditions.checkState(
+                        builder != null,
+                        String.format("Unable to assemble final WebSocket URL from base=%s and url=%s", base, url)
+                );
+                builder.scheme(normalizedScheme);
+                return builder.build();
+            }
         }
         return HttpUrl.get(url);
     }
