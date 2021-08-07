@@ -22,5 +22,6 @@ import okhttp3.HttpUrl;
 public interface SessionCache {
 
     void store(String username, HttpUrl sessionResource, Session session);
+
     ListenableFuture<Session> load(String username, HttpUrl sessionResource);
 }

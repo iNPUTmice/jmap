@@ -31,7 +31,7 @@ public enum State {
     }
 
     public static State reduce(Collection<State> states) {
-        for(final State state : State.values()) {
+        for (final State state : State.values()) {
             if (states.contains(state)) {
                 return state;
             }

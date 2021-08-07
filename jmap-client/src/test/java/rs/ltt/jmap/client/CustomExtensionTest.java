@@ -77,15 +77,15 @@ public class CustomExtensionTest {
                 PASSWORD,
                 server.url(WELL_KNOWN_PATH)
         );
-        final ExecutionException executionException = Assertions.assertThrows(ExecutionException.class, ()->{
-           client.call(new SetDummyMethodCall(
-                   ACCOUNT_ID,
-                   null,
-                   null,
-                   null,
-                   null,
-                   null
-           )).get();
+        final ExecutionException executionException = Assertions.assertThrows(ExecutionException.class, () -> {
+            client.call(new SetDummyMethodCall(
+                    ACCOUNT_ID,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            )).get();
         });
         MatcherAssert.assertThat(executionException.getCause(), CoreMatchers.instanceOf(JsonIOException.class));
     }

@@ -31,8 +31,8 @@ public class WellKnownUtilTest {
     }
 
     @Test
-    public void noUsername()  {
-        Assertions.assertThrows(WellKnownUtil.MalformedUsernameException.class, ()->
+    public void noUsername() {
+        Assertions.assertThrows(WellKnownUtil.MalformedUsernameException.class, () ->
                 WellKnownUtil.fromUsername("example.com")
         );
     }

@@ -53,7 +53,6 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     private final List<OnConnectionStateChangeListener> onConnectionStateListeners = new ArrayList<>();
     private EventSource currentEventSource;
     private Duration pingInterval = Duration.ofSeconds(30);
-    private Duration pingIntervalTolerance = Duration.ofSeconds(10);
     private ReconnectionStrategy reconnectionStrategy = ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
     private int attempt = 0;
     private State state = State.CLOSED;
@@ -132,7 +131,7 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     private void connectEventSource(final HttpUrl eventSourceUrl) {
         final EventSource.Factory factory = EventSources.createFactory(
                 OK_HTTP_CLIENT.newBuilder()
-                        .readTimeout(pingInterval.plus(pingIntervalTolerance))
+                        .readTimeout(pingInterval.plus(PING_INTERVAL_TOLERANCE))
                         .retryOnConnectionFailure(true)
                         .build()
         );
@@ -142,7 +141,7 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         //Something in the Cyrus-Nginx-OkHttp pipeline doesn't support compression
         //Since curl can handle it fine it might be OkHttp
         //Okio.GzipSource throws in checkEqual
-        requestBuilder.addHeader(Headers.ACCEPT_ENCODING,"identity");
+        requestBuilder.addHeader(Headers.ACCEPT_ENCODING, "identity");
         final Request request = requestBuilder.build();
         LOGGER.info("Using event source url {}", eventSourceUrl);
         setCurrentEventSource(factory.newEventSource(request, new EventSourceProcessor()));
@@ -155,12 +154,9 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         this.currentEventSource = eventSource;
     }
 
+    @Override
     public void setPingInterval(final Duration pingInterval) {
         this.pingInterval = pingInterval;
-    }
-
-    public void setPingIntervalTolerance(final Duration pingIntervalTolerance) {
-        this.pingIntervalTolerance = pingIntervalTolerance;
     }
 
     public void setReconnectionStrategy(final ReconnectionStrategy reconnectionStrategy) {

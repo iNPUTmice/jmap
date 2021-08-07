@@ -19,7 +19,6 @@ package rs.ltt.jmap.client.session;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import okhttp3.*;
@@ -35,7 +34,6 @@ import rs.ltt.jmap.client.util.WellKnownUtil;
 import rs.ltt.jmap.common.SessionResource;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import static rs.ltt.jmap.client.Services.GSON;
@@ -108,7 +106,7 @@ public class SessionClient {
         }, MoreExecutors.directExecutor());
     }
 
-    private ListenableFuture<Session> fetchSession(final HttpUrl sessionResource)  {
+    private ListenableFuture<Session> fetchSession(final HttpUrl sessionResource) {
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(sessionResource);
         httpAuthentication.authenticate(requestBuilder);

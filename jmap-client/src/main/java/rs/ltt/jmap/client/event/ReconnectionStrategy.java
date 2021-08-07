@@ -34,7 +34,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * Alternatively you can use some of the predefined strategies which you can retrieve by one of the static methods.
  * </p>
  * E.g. {@link #alwaysAfter(Duration)} always tries to reconnect after a fix amount of time.
- *
  */
 @FunctionalInterface
 public interface ReconnectionStrategy {

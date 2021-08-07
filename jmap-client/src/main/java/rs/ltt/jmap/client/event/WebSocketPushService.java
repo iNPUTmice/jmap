@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.client.event;
 
+import com.google.common.base.Preconditions;
 import com.google.common.math.Quantiles;
 import okhttp3.HttpUrl;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +24,7 @@ import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.api.SessionStateListener;
 import rs.ltt.jmap.client.api.WebSocketJmapApiClient;
 import rs.ltt.jmap.client.http.HttpAuthentication;
+import rs.ltt.jmap.client.util.Durations;
 import rs.ltt.jmap.common.websocket.PushDisableWebSocketMessage;
 import rs.ltt.jmap.common.websocket.PushEnableWebSocketMessage;
 import rs.ltt.jmap.common.websocket.StateChangeWebSocketMessage;
@@ -37,12 +39,10 @@ import java.util.concurrent.TimeUnit;
 public class WebSocketPushService extends WebSocketJmapApiClient implements PushService, OnStateChangeListenerManager.Callback {
 
     private final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(this);
-    private ReconnectionStrategy reconnectionStrategy = ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
-
-    private Duration pingInterval = null;
-    private Duration pingIntervalTolerance = Duration.ofSeconds(10);
-    private String pushState = null;
     private final List<OnConnectionStateChangeListener> onConnectionStateListeners = new ArrayList<>();
+    private ReconnectionStrategy reconnectionStrategy = ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
+    private Duration pingInterval = null;
+    private String pushState = null;
 
     public WebSocketPushService(HttpUrl webSocketUrl, HttpAuthentication httpAuthentication, @Nullable SessionStateListener sessionStateListener) {
         super(webSocketUrl, httpAuthentication, sessionStateListener);
@@ -111,7 +111,7 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
     protected void transitionTo(final State state) {
         super.transitionTo(state);
         synchronized (this.onConnectionStateListeners) {
-            for(OnConnectionStateChangeListener listener : this.onConnectionStateListeners) {
+            for (OnConnectionStateChangeListener listener : this.onConnectionStateListeners) {
                 listener.onConnectionStateChange(state);
             }
         }
@@ -125,13 +125,13 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
         final Duration duration;
         if (onStateChangeListenerManager.isPushNotificationsEnabled()) {
             if (this.pingInterval != null) {
-                duration = this.pingInterval.minus(pingIntervalTolerance);
+                duration = this.pingInterval;
                 LOGGER.info("Using configured ping interval of {}", duration);
             } else {
                 final int count = this.connectionDurations.size();
                 if (count >= 5) {
                     final Duration median = Duration.ofNanos(Math.round(Quantiles.median().compute(this.connectionDurations)));
-                    duration = median.minus(pingIntervalTolerance);
+                    duration = Durations.max(median.minus(PING_INTERVAL_TOLERANCE), PING_INTERVAL_TOLERANCE);
                     LOGGER.info("Using automatically adjusted ping interval of {}", duration);
                 } else {
                     duration = Duration.ZERO;
@@ -148,10 +148,15 @@ public class WebSocketPushService extends WebSocketJmapApiClient implements Push
      * Set to null to use automatic adjustment based on the time between receiving the last frame
      * and receiving an EOF.
      *
-     * @param pingInterval Set to null to use automatic adjustment
+     * @param interval Set to null to use automatic adjustment
      */
-    public void setPingInterval(final Duration pingInterval) {
-        this.pingInterval = pingInterval;
+    @Override
+    public void setPingInterval(final Duration interval) {
+        Preconditions.checkArgument(
+                interval == null || interval.isZero() || Durations.isPositive(interval),
+                "PingInterval can not be negative"
+        );
+        this.pingInterval = interval;
     }
 
     @Override

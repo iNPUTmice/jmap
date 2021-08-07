@@ -23,6 +23,8 @@ import java.io.InputStream;
 
 public interface Uploadable {
     InputStream getInputStream();
+
     MediaType getMediaType();
+
     long getContentLength();
 }

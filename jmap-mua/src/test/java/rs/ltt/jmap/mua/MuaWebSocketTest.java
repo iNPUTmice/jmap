@@ -39,6 +39,7 @@ import rs.ltt.jmap.mock.server.MockMailServer;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -177,6 +178,8 @@ public class MuaWebSocketTest {
 
             mailServer.setFailureTrigger(JmapDispatcher.FailureTrigger.NONE);
 
+            Thread.sleep(1000);
+
             mua.query(query).get(5, TimeUnit.SECONDS);
 
             final List<CachedEmail> threadT1 = cache.getEmails("T1");
@@ -242,6 +245,30 @@ public class MuaWebSocketTest {
         }
 
         server.shutdown();
+    }
+
+    @Test
+    public void setPingInterval() throws ExecutionException, InterruptedException, IOException {
+        final MyInMemoryCache cache = new MyInMemoryCache();
+        final MockWebServer server = new MockWebServer();
+        final MockMailServer mailServer = new MockMailServer(2);
+        server.setDispatcher(mailServer);
+        try (final Mua mua = Mua.builder()
+                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                .username(mailServer.getUsername())
+                .password(JmapDispatcher.PASSWORD)
+                .cache(cache)
+                .useWebSocket(true)
+                .accountId(mailServer.getAccountId())
+                .build()) {
+            final PushService pushService = mua.getJmapClient().monitorEvents().get();
+            MatcherAssert.assertThat(pushService, CoreMatchers.instanceOf(WebSocketPushService.class));
+            Assertions.assertThrows(
+                    IllegalArgumentException.class,
+                    () -> pushService.setPingInterval(Duration.ofMinutes(-1))
+            );
+            pushService.setPingInterval(Duration.ofSeconds(10));
+        }
     }
 
 }

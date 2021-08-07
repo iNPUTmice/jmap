@@ -40,7 +40,7 @@ public class ContentRangeTest {
 
     @Test
     public void invalid() {
-        Assertions.assertThrows(IllegalArgumentException.class, ()-> BinaryDataClient.ContentRange.of("invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BinaryDataClient.ContentRange.of("invalid"));
     }
 
     @Test

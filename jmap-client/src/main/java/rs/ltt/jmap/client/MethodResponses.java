@@ -30,7 +30,7 @@ public class MethodResponses {
         this.additional = new MethodResponse[0];
     }
 
-    public MethodResponses(MethodResponse main, MethodResponse[ ] additional) {
+    public MethodResponses(MethodResponse main, MethodResponse[] additional) {
         this.main = main;
         this.additional = additional;
     }

@@ -45,7 +45,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * behaves equally to the fifth attempt.</p>
  *
  * <p>This "truncated binary exponential backoff" is the <a href="https://xmpp.org/rfcs/rfc6120.html#tcp-reconnect">recommended reconnection strategy by the XMPP specification</a>.</p>
- * 
+ *
  * <p>This class is immutable.</p>
  *
  * @author Christian Schudt

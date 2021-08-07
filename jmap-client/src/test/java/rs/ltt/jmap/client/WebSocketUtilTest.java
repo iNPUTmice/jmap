@@ -54,8 +54,8 @@ public class WebSocketUtilTest {
 
     @Test
     public void unknownScheme() {
-        Assertions.assertThrows(IllegalArgumentException.class,() ->{
-           WebSocketUtil.normalizeUrl(BASE, "unknown://localhost/path");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            WebSocketUtil.normalizeUrl(BASE, "unknown://localhost/path");
         });
     }
 

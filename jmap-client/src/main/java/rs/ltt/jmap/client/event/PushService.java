@@ -16,7 +16,11 @@
 
 package rs.ltt.jmap.client.event;
 
+import java.time.Duration;
+
 public interface PushService {
+
+    Duration PING_INTERVAL_TOLERANCE = Duration.ofSeconds(10);
 
     void addOnStateChangeListener(OnStateChangeListener onStateChangeListener);
 
@@ -27,5 +31,7 @@ public interface PushService {
     void removeOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener);
 
     State getConnectionState();
+
+    void setPingInterval(Duration pingInterval);
 
 }
