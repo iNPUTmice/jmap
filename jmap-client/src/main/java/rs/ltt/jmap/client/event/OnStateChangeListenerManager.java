@@ -33,32 +33,36 @@ public class OnStateChangeListenerManager {
     }
 
     public void addOnStateChangeListener(final OnStateChangeListener onStateChangeListener) {
+        final boolean empty;
         synchronized (this.onStateChangeListeners) {
-            final boolean empty = this.onStateChangeListeners.isEmpty();
+            empty = this.onStateChangeListeners.isEmpty();
             this.onStateChangeListeners.add(onStateChangeListener);
-            if (empty) {
-                callback.enable();
-            }
+        }
+        if (empty) {
+            callback.enable();
         }
     }
 
     public void removeOnStateChangeListener(OnStateChangeListener onStateChangeListener) {
+        final boolean removed;
+        final boolean empty;
         synchronized (this.onStateChangeListeners) {
-            final boolean removed = this.onStateChangeListeners.remove(onStateChangeListener);
-            final boolean empty = this.onStateChangeListeners.isEmpty();
-            if (removed && empty) {
-                callback.disable();
-            }
+            removed = this.onStateChangeListeners.remove(onStateChangeListener);
+            empty = this.onStateChangeListeners.isEmpty();
+        }
+        if (removed && empty) {
+            callback.disable();
         }
     }
 
     public void removeAllListeners() {
+        final boolean nonEmpty;
         synchronized (this.onStateChangeListeners) {
-            final boolean nonEmpty = !this.onStateChangeListeners.isEmpty();
+            nonEmpty = !this.onStateChangeListeners.isEmpty();
             this.onStateChangeListeners.clear();
-            if (nonEmpty) {
-                callback.disable();
-            }
+        }
+        if (nonEmpty) {
+            callback.disable();
         }
     }
 
