@@ -1,3 +1,7 @@
+### 0.7.4 (2021-08-08)
+
+* Fixed bugs in WebSocket implementation
+
 ### 0.7.3 (2021-07-27)
 
 * SetPushSubscription and GetPushSubscription doesn’t have an accountId
