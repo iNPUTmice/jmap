@@ -38,6 +38,8 @@ public final class JmapAdapters {
         ResultReferenceTypeAdapter.register(builder);
         PatchObjectNullTypeAdapter.register(builder);
         TypeStateMapAdapter.register(builder);
+        DurationTypeAdapter.register(builder);
+        LocalDateTimeAdapter.register(builder);
 
         CapabilitiesDeserializer.register(builder);
         FilterDeserializer.register(builder);
