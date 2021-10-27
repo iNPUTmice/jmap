@@ -20,5 +20,4 @@ import rs.ltt.jmap.annotation.JmapError;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 
 @JmapError("requestTooLarge")
-public class RequestTooLargeMethodErrorResponse extends MethodErrorResponse {
-}
+public class RequestTooLargeMethodErrorResponse extends MethodErrorResponse {}

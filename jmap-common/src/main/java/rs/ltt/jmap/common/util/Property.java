@@ -20,14 +20,16 @@ public class Property {
 
     public static long expected(final Long property) {
         if (property == null) {
-            throw new IllegalStateException("Missing property. Required property was unexpectedly set to null");
+            throw new IllegalStateException(
+                    "Missing property. Required property was unexpectedly set to null");
         }
         return property;
     }
 
     public static boolean expected(Boolean property) {
         if (property == null) {
-            throw new IllegalStateException("Missing property. Required property was unexpectedly set to null");
+            throw new IllegalStateException(
+                    "Missing property. Required property was unexpectedly set to null");
         }
         return property;
     }

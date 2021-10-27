@@ -16,13 +16,12 @@
 
 package rs.ltt.jmap.common.method.call.core;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.entity.PushSubscription;
 import rs.ltt.jmap.common.method.MethodCall;
-
-import java.util.Map;
 
 @JmapMethod("PushSubscription/set")
 @Builder

@@ -16,24 +16,28 @@
 
 package rs.ltt.jmap.mua.service.exception;
 
+import java.util.Map;
 import rs.ltt.jmap.common.entity.SetError;
 import rs.ltt.jmap.common.method.response.submission.SetEmailSubmissionMethodResponse;
 
-import java.util.Map;
-
 public class SetEmailSubmissionException extends SetException {
 
-    private SetEmailSubmissionException(Map<String, SetError> notCreated, Map<String, SetError> notUpdated, Map<String, SetError> notDestroyed) {
+    private SetEmailSubmissionException(
+            Map<String, SetError> notCreated,
+            Map<String, SetError> notUpdated,
+            Map<String, SetError> notDestroyed) {
         super(notCreated, notUpdated, notDestroyed);
     }
 
-    public static void throwIfFailed(SetEmailSubmissionMethodResponse response) throws SetEmailSubmissionException {
+    public static void throwIfFailed(SetEmailSubmissionMethodResponse response)
+            throws SetEmailSubmissionException {
         Map<String, SetError> notCreated = response.getNotCreated();
         Map<String, SetError> notUpdated = response.getNotUpdated();
         Map<String, SetError> notDestroyed = response.getNotDestroyed();
-        if ((notCreated != null && notCreated.size() > 0) || (notUpdated != null && notUpdated.size() > 0) || (notDestroyed != null && notDestroyed.size() > 0)) {
+        if ((notCreated != null && notCreated.size() > 0)
+                || (notUpdated != null && notUpdated.size() > 0)
+                || (notDestroyed != null && notDestroyed.size() > 0)) {
             throw new SetEmailSubmissionException(notCreated, notUpdated, notDestroyed);
         }
-
     }
 }

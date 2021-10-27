@@ -26,22 +26,20 @@ import rs.ltt.jmap.common.method.MethodCall;
 
 @AllArgsConstructor
 @Getter
-public abstract class QueryChangesMethodCall<T extends AbstractIdentifiableEntity> implements MethodCall {
+public abstract class QueryChangesMethodCall<T extends AbstractIdentifiableEntity>
+        implements MethodCall {
 
-    @NonNull
-    private String accountId;
+    @NonNull private String accountId;
 
     private Filter<T> filter;
 
     private Comparator[] sort;
 
-    @NonNull
-    private String sinceQueryState;
+    @NonNull private String sinceQueryState;
 
     private Long maxChanges;
 
     private String upToId;
 
     private Boolean calculateTotal;
-
 }

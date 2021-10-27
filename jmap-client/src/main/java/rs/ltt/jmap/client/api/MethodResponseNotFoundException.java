@@ -21,7 +21,10 @@ import rs.ltt.jmap.common.Request;
 public class MethodResponseNotFoundException extends JmapApiException {
 
     MethodResponseNotFoundException(Request.Invocation invocation) {
-        super(String.format("MethodResponse for invocation of %s with id=%s not found in server response", invocation.getMethodCall().getClass().getName(), invocation.getId()));
+        super(
+                String.format(
+                        "MethodResponse for invocation of %s with id=%s not found in server"
+                                + " response",
+                        invocation.getMethodCall().getClass().getName(), invocation.getId()));
     }
-
 }

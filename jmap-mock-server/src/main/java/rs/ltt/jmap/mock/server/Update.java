@@ -20,15 +20,14 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Thread;
 import rs.ltt.jmap.common.method.response.mailbox.SetMailboxMethodResponse;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
 public class Update {
 
@@ -36,54 +35,70 @@ public class Update {
 
     private final String newVersion;
 
-
-    private Update(Map<Class<? extends AbstractIdentifiableEntity>, Changes> changes, String newVersion) {
+    private Update(
+            Map<Class<? extends AbstractIdentifiableEntity>, Changes> changes, String newVersion) {
         this.changes = changes;
         this.newVersion = newVersion;
     }
 
-    public static Update of(SetMailboxMethodResponse setMailboxMethodResponse, final String newVersion) {
+    public static Update of(
+            SetMailboxMethodResponse setMailboxMethodResponse, final String newVersion) {
         return new Update(
                 ImmutableMap.of(
                         Mailbox.class,
                         new Changes(
-                                nullToEmpty(setMailboxMethodResponse.getUpdated()).keySet().toArray(new String[0]),
-                                nullToEmpty(setMailboxMethodResponse.getCreated()).values().stream().map(Mailbox::getId).toArray(String[]::new))
-                ),
-                newVersion
-        );
+                                nullToEmpty(setMailboxMethodResponse.getUpdated())
+                                        .keySet()
+                                        .toArray(new String[0]),
+                                nullToEmpty(setMailboxMethodResponse.getCreated()).values().stream()
+                                        .map(Mailbox::getId)
+                                        .toArray(String[]::new))),
+                newVersion);
     }
 
     public static Update merge(final Collection<Update> updates) {
-        final ImmutableMultimap.Builder<Class<? extends AbstractIdentifiableEntity>, Changes> changesBuilder = ImmutableMultimap.builder();
+        final ImmutableMultimap.Builder<Class<? extends AbstractIdentifiableEntity>, Changes>
+                changesBuilder = ImmutableMultimap.builder();
         String newVersion = null;
-        for(final Update update : updates) {
-            for(Map.Entry<Class<? extends AbstractIdentifiableEntity>, Changes> entityChanges : update.changes.entrySet()) {
+        for (final Update update : updates) {
+            for (Map.Entry<Class<? extends AbstractIdentifiableEntity>, Changes> entityChanges :
+                    update.changes.entrySet()) {
                 changesBuilder.put(entityChanges.getKey(), entityChanges.getValue());
             }
             newVersion = update.newVersion;
         }
-        ImmutableMap<Class<? extends AbstractIdentifiableEntity>, Collection<Changes>> multiMap = changesBuilder.build().asMap();
-        Map<Class<? extends AbstractIdentifiableEntity>, Changes> changes = Maps.transformValues(multiMap, Changes::merge);
+        ImmutableMap<Class<? extends AbstractIdentifiableEntity>, Collection<Changes>> multiMap =
+                changesBuilder.build().asMap();
+        Map<Class<? extends AbstractIdentifiableEntity>, Changes> changes =
+                Maps.transformValues(multiMap, Changes::merge);
 
         return new Update(changes, newVersion);
     }
 
-    private static <T extends AbstractIdentifiableEntity> Map<String, T> nullToEmpty(Map<String, T> value) {
+    private static <T extends AbstractIdentifiableEntity> Map<String, T> nullToEmpty(
+            Map<String, T> value) {
         return value == null ? Collections.emptyMap() : value;
     }
 
     public static Update created(Email email, String newVersion) {
-        final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>, Changes> builder = new ImmutableMap.Builder<>();
-        builder.put(Email.class, new Changes(new String[0], new String[]{email.getId()}));
-        builder.put(Thread.class, new Changes(new String[0], new String[]{email.getThreadId()}));
-        builder.put(Mailbox.class, new Changes(email.getMailboxIds().keySet().toArray(new String[0]), new String[0]));
+        final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>, Changes> builder =
+                new ImmutableMap.Builder<>();
+        builder.put(Email.class, new Changes(new String[0], new String[] {email.getId()}));
+        builder.put(Thread.class, new Changes(new String[0], new String[] {email.getThreadId()}));
+        builder.put(
+                Mailbox.class,
+                new Changes(email.getMailboxIds().keySet().toArray(new String[0]), new String[0]));
         return new Update(builder.build(), newVersion);
     }
 
-    public static Update updated(final Collection<Email> emails, final Collection<String> mailboxes, String newVersion) {
-        final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>, Changes> builder = new ImmutableMap.Builder<>();
-        builder.put(Email.class, new Changes(emails.stream().map(Email::getId).toArray(String[]::new), new String[0]));
+    public static Update updated(
+            final Collection<Email> emails, final Collection<String> mailboxes, String newVersion) {
+        final ImmutableMap.Builder<Class<? extends AbstractIdentifiableEntity>, Changes> builder =
+                new ImmutableMap.Builder<>();
+        builder.put(
+                Email.class,
+                new Changes(
+                        emails.stream().map(Email::getId).toArray(String[]::new), new String[0]));
         builder.put(Thread.class, new Changes(new String[0], new String[0]));
         builder.put(Mailbox.class, new Changes(mailboxes.toArray(new String[0]), new String[0]));
         return new Update(builder.build(), newVersion);

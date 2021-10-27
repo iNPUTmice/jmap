@@ -25,7 +25,14 @@ import rs.ltt.jmap.common.method.response.standard.ChangesMethodResponse;
 public class ChangesEmailMethodResponse extends ChangesMethodResponse<Email> {
 
     @Builder
-    public ChangesEmailMethodResponse(String accountId, String oldState, String newState, boolean hasMoreChanges, String[] created, String[] updated, String[] destroyed) {
+    public ChangesEmailMethodResponse(
+            String accountId,
+            String oldState,
+            String newState,
+            boolean hasMoreChanges,
+            String[] created,
+            String[] updated,
+            String[] destroyed) {
         super(accountId, oldState, newState, hasMoreChanges, created, updated, destroyed);
     }
 }

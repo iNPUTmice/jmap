@@ -17,5 +17,6 @@
 package rs.ltt.jmap.client.event;
 
 public enum CloseAfter {
-    STATE, NO
+    STATE,
+    NO
 }

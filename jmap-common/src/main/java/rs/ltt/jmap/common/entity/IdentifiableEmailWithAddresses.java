@@ -31,5 +31,4 @@ public interface IdentifiableEmailWithAddresses extends Identifiable {
     Collection<EmailAddress> getBcc();
 
     Collection<EmailAddress> getReplyTo();
-
 }

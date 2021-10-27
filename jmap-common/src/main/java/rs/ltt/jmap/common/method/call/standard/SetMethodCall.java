@@ -18,19 +18,17 @@ package rs.ltt.jmap.common.method.call.standard;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.annotations.SerializedName;
+import java.util.Map;
 import lombok.Getter;
 import lombok.NonNull;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.method.MethodCall;
 
-import java.util.Map;
-
 @Getter
 public abstract class SetMethodCall<T extends AbstractIdentifiableEntity> implements MethodCall {
 
-    @NonNull
-    private String accountId;
+    @NonNull private String accountId;
 
     private String ifInState;
 
@@ -43,13 +41,16 @@ public abstract class SetMethodCall<T extends AbstractIdentifiableEntity> implem
     @SerializedName("#destroy")
     private Request.Invocation.ResultReference destroyReference;
 
-    public SetMethodCall(@NonNull String accountId, String ifInState, Map<String, T> create,
-                         Map<String, Map<String, Object>> update, String[] destroy,
-                         Request.Invocation.ResultReference destroyReference) {
+    public SetMethodCall(
+            @NonNull String accountId,
+            String ifInState,
+            Map<String, T> create,
+            Map<String, Map<String, Object>> update,
+            String[] destroy,
+            Request.Invocation.ResultReference destroyReference) {
         Preconditions.checkArgument(
                 destroy == null || destroyReference == null,
-                "Can't set both 'destroy' and 'destroyReference'"
-        );
+                "Can't set both 'destroy' and 'destroyReference'");
         this.accountId = accountId;
         this.ifInState = ifInState;
         this.create = create;

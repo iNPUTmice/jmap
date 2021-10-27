@@ -20,6 +20,12 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonParseException;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import okhttp3.Dispatcher;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -45,13 +51,6 @@ import rs.ltt.jmap.common.method.call.mailbox.GetMailboxMethodCall;
 import rs.ltt.jmap.common.method.error.InvalidArgumentsMethodErrorResponse;
 import rs.ltt.jmap.common.method.error.UnknownMethodMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.mailbox.GetMailboxMethodResponse;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpJmapClientTest {
 

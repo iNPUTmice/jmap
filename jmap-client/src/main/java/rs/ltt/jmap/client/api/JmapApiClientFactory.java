@@ -28,35 +28,25 @@ public class JmapApiClientFactory {
     private final HttpAuthentication httpAuthentication;
     private final SessionStateListener sessionStateListener;
 
-    public JmapApiClientFactory(HttpAuthentication httpAuthentication, SessionStateListener sessionStateListener) {
+    public JmapApiClientFactory(
+            HttpAuthentication httpAuthentication, SessionStateListener sessionStateListener) {
         this.httpAuthentication = httpAuthentication;
         this.sessionStateListener = sessionStateListener;
     }
 
-
     public JmapApiClient getJmapApiClient(final Session session, final boolean useWebSocket) {
-        final WebSocketCapability webSocketCapability = session.getCapability(WebSocketCapability.class);
+        final WebSocketCapability webSocketCapability =
+                session.getCapability(WebSocketCapability.class);
         if (validWebSocketCapability(webSocketCapability) && useWebSocket) {
-            final HttpUrl url = WebSocketUtil.normalizeUrl(session.getBase(), webSocketCapability.getUrl());
+            final HttpUrl url =
+                    WebSocketUtil.normalizeUrl(session.getBase(), webSocketCapability.getUrl());
             if (Boolean.TRUE.equals(webSocketCapability.getSupportsPush())) {
-                return new WebSocketPushService(
-                        url,
-                        httpAuthentication,
-                        sessionStateListener
-                );
+                return new WebSocketPushService(url, httpAuthentication, sessionStateListener);
             } else {
-                return new WebSocketJmapApiClient(
-                        url,
-                        httpAuthentication,
-                        sessionStateListener
-                );
+                return new WebSocketJmapApiClient(url, httpAuthentication, sessionStateListener);
             }
         }
-        return new HttpJmapApiClient(
-                session.getApiUrl(),
-                httpAuthentication,
-                sessionStateListener
-        );
+        return new HttpJmapApiClient(session.getApiUrl(), httpAuthentication, sessionStateListener);
     }
 
     private static boolean validWebSocketCapability(final WebSocketCapability capability) {

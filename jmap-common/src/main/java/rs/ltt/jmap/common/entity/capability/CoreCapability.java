@@ -16,7 +16,6 @@
 
 package rs.ltt.jmap.common.entity.capability;
 
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -38,7 +37,6 @@ public class CoreCapability implements Capability {
     private Long maxObjectsInSet;
     private String[] collationAlgorithms;
 
-
     public long maxSizeUpload() {
         return Property.expected(maxSizeUpload);
     }
@@ -58,5 +56,4 @@ public class CoreCapability implements Capability {
     public long maxObjectsInSet() {
         return Property.expected(maxObjectsInSet);
     }
-
 }

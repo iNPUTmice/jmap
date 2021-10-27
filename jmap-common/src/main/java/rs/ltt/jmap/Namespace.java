@@ -18,7 +18,6 @@ package rs.ltt.jmap;
 
 public final class Namespace {
 
-
     public static final String CORE = "urn:ietf:params:jmap:core";
     public static final String MAIL = "urn:ietf:params:jmap:mail";
     public static final String SUBMISSION = "urn:ietf:params:jmap:submission";
@@ -27,7 +26,5 @@ public final class Namespace {
     public static final String CALENDARS = "urn:ietf:params:jmap:calendars";
     public static final String WEB_SOCKET = "urn:ietf:params:jmap:websocket";
 
-    private Namespace() {
-
-    }
+    private Namespace() {}
 }

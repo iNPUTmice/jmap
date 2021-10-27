@@ -16,12 +16,11 @@
 
 package rs.ltt.jmap.mua;
 
+import java.util.Collections;
+import java.util.Map;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
-
-import java.util.Collections;
-import java.util.Map;
 
 class CachedEmail implements IdentifiableEmailWithKeywords, IdentifiableEmailWithMailboxIds {
 

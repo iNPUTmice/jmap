@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.client.blob;
 
+import java.io.IOException;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
@@ -23,8 +24,6 @@ import okio.Okio;
 import okio.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
 
 public class RequestBodies {
 
@@ -53,7 +52,8 @@ public class RequestBodies {
                         done += read;
                         if (progress != null) {
                             bufferedSink.flush();
-                            progress.onProgress(Progress.progress(done, uploadable.getContentLength()));
+                            progress.onProgress(
+                                    Progress.progress(done, uploadable.getContentLength()));
                         }
                     }
                 }

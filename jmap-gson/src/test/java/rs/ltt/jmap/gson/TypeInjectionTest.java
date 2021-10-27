@@ -25,31 +25,26 @@ public class TypeInjectionTest extends AbstractGsonTest {
 
     @Test
     public void serializeTypeWithDefaultName() {
-        final PushVerification pushVerification = PushVerification.builder()
-                .pushSubscriptionId("my-id")
-                .verificationCode("very-secret")
-                .build();
+        final PushVerification pushVerification =
+                PushVerification.builder()
+                        .pushSubscriptionId("my-id")
+                        .verificationCode("very-secret")
+                        .build();
         final String json = getGson().toJson(pushVerification);
         Assertions.assertEquals(
                 "{\"@type\":\"PushVerification\",\"pushSubscriptionId\":\"my-id\",\"verificationCode\":\"very-secret\"}",
-                json
-        );
+                json);
     }
 
     @Test
     public void serializeTypeWithProvidedName() {
         final MyOwnType myOwnType = new MyOwnType();
         final String json = getGson().toJson(myOwnType);
-        Assertions.assertEquals(
-                "{\"@type\":\"aType\",\"foo\":\"bar\"}",
-                json
-        );
+        Assertions.assertEquals("{\"@type\":\"aType\",\"foo\":\"bar\"}", json);
     }
-
 
     @Type("aType")
     public static class MyOwnType {
         private String foo = "bar";
     }
-
 }

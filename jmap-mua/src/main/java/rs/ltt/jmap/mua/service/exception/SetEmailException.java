@@ -16,14 +16,16 @@
 
 package rs.ltt.jmap.mua.service.exception;
 
+import java.util.Map;
 import rs.ltt.jmap.common.entity.SetError;
 import rs.ltt.jmap.common.method.response.email.SetEmailMethodResponse;
 
-import java.util.Map;
-
 public class SetEmailException extends SetException {
 
-    private SetEmailException(Map<String, SetError> notCreated, Map<String, SetError> notUpdated, Map<String, SetError> notDestroyed) {
+    private SetEmailException(
+            Map<String, SetError> notCreated,
+            Map<String, SetError> notUpdated,
+            Map<String, SetError> notDestroyed) {
         super(notCreated, notUpdated, notDestroyed);
     }
 
@@ -31,9 +33,10 @@ public class SetEmailException extends SetException {
         Map<String, SetError> notCreated = response.getNotCreated();
         Map<String, SetError> notUpdated = response.getNotUpdated();
         Map<String, SetError> notDestroyed = response.getNotDestroyed();
-        if ((notCreated != null && notCreated.size() > 0) || (notUpdated != null && notUpdated.size() > 0) || (notDestroyed != null && notDestroyed.size() > 0)) {
+        if ((notCreated != null && notCreated.size() > 0)
+                || (notUpdated != null && notUpdated.size() > 0)
+                || (notDestroyed != null && notDestroyed.size() > 0)) {
             throw new SetEmailException(notCreated, notUpdated, notDestroyed);
         }
-
     }
 }

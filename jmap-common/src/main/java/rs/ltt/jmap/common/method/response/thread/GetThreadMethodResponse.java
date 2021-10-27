@@ -25,7 +25,8 @@ import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
 public class GetThreadMethodResponse extends GetMethodResponse<Thread> {
 
     @Builder
-    public GetThreadMethodResponse(String accountId, String state, String[] notFound, Thread[] list) {
+    public GetThreadMethodResponse(
+            String accountId, String state, String[] notFound, Thread[] list) {
         super(accountId, state, notFound, list);
     }
 }

@@ -21,5 +21,4 @@ public class EndpointNotFoundException extends JmapApiException {
     public EndpointNotFoundException(String message) {
         super(message);
     }
-
 }

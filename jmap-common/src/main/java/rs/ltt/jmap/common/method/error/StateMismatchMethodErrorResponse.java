@@ -20,5 +20,4 @@ import rs.ltt.jmap.annotation.JmapError;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 
 @JmapError("stateMismatch")
-public class StateMismatchMethodErrorResponse extends MethodErrorResponse {
-}
+public class StateMismatchMethodErrorResponse extends MethodErrorResponse {}

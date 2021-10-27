@@ -26,47 +26,27 @@ public class EmailUtilTest {
     public void firstResponseSubject() {
         Assertions.assertEquals(
                 "Re: Hello",
-                EmailUtil.getResponseSubject(
-                        Email.builder()
-                                .subject("Hello")
-                                .build()
-                )
-        );
+                EmailUtil.getResponseSubject(Email.builder().subject("Hello").build()));
     }
 
     @Test
     public void secondResponseSubject() {
         Assertions.assertEquals(
                 "Re: Hello",
-                EmailUtil.getResponseSubject(
-                        Email.builder()
-                                .subject("RE: Hello")
-                                .build()
-                )
-        );
+                EmailUtil.getResponseSubject(Email.builder().subject("RE: Hello").build()));
     }
 
     @Test
     public void secondResponseSubjectExcessWhitespace() {
         Assertions.assertEquals(
                 "Re: Hello",
-                EmailUtil.getResponseSubject(
-                        Email.builder()
-                                .subject("RE:    Hello  ")
-                                .build()
-                )
-        );
+                EmailUtil.getResponseSubject(Email.builder().subject("RE:    Hello  ").build()));
     }
 
     @Test
     public void secondResponseSubjectGerman() {
         Assertions.assertEquals(
                 "Re: Hello",
-                EmailUtil.getResponseSubject(
-                        Email.builder()
-                                .subject("Aw: Hello")
-                                .build()
-                )
-        );
+                EmailUtil.getResponseSubject(Email.builder().subject("Aw: Hello").build()));
     }
 }

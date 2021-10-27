@@ -19,9 +19,8 @@ package rs.ltt.jmap.mua.util;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import rs.ltt.jmap.common.entity.Role;
-
 import java.io.Serializable;
+import rs.ltt.jmap.common.entity.Role;
 
 public class KeywordLabel implements LabelWithCount, Serializable {
 
@@ -63,8 +62,7 @@ public class KeywordLabel implements LabelWithCount, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         KeywordLabel that = (KeywordLabel) o;
-        return Objects.equal(keyword, that.keyword) &&
-                role == that.role;
+        return Objects.equal(keyword, that.keyword) && role == that.role;
     }
 
     @Override

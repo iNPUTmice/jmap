@@ -17,16 +17,16 @@
 package rs.ltt.jmap.common.method.response.standard;
 
 import com.google.common.base.MoreObjects;
+import java.util.List;
 import lombok.Getter;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.MethodResponse;
 
-import java.util.List;
-
 @Getter
-public abstract class QueryChangesMethodResponse<T extends AbstractIdentifiableEntity> implements MethodResponse {
+public abstract class QueryChangesMethodResponse<T extends AbstractIdentifiableEntity>
+        implements MethodResponse {
 
     private String accountId;
     private String oldQueryState;
@@ -35,7 +35,13 @@ public abstract class QueryChangesMethodResponse<T extends AbstractIdentifiableE
     private String[] removed;
     private List<AddedItem<String>> added;
 
-    public QueryChangesMethodResponse(String accountId, String oldQueryState, String newQueryState, long total, String[] removed, List<AddedItem<String>> added) {
+    public QueryChangesMethodResponse(
+            String accountId,
+            String oldQueryState,
+            String newQueryState,
+            long total,
+            String[] removed,
+            List<AddedItem<String>> added) {
         this.accountId = accountId;
         this.oldQueryState = oldQueryState;
         this.newQueryState = newQueryState;
@@ -43,7 +49,6 @@ public abstract class QueryChangesMethodResponse<T extends AbstractIdentifiableE
         this.removed = removed;
         this.added = added;
     }
-
 
     public TypedState<T> getOldTypedQueryState() {
         return TypedState.of(oldQueryState);

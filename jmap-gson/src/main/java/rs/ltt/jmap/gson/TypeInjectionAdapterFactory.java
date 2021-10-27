@@ -21,9 +21,8 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import rs.ltt.jmap.annotation.Type;
-
 import java.io.IOException;
+import rs.ltt.jmap.annotation.Type;
 
 public class TypeInjectionAdapterFactory implements TypeAdapterFactory {
     @Override
@@ -33,7 +32,10 @@ public class TypeInjectionAdapterFactory implements TypeAdapterFactory {
         if (annotation == null) {
             return null;
         }
-        final String type = Strings.isNullOrEmpty(annotation.value()) ? clazz.getSimpleName() : annotation.value();
+        final String type =
+                Strings.isNullOrEmpty(annotation.value())
+                        ? clazz.getSimpleName()
+                        : annotation.value();
         final TypeAdapter<T> delegateAdapter = gson.getDelegateAdapter(this, typeToken);
         return new TypeAdapter<T>() {
             @Override

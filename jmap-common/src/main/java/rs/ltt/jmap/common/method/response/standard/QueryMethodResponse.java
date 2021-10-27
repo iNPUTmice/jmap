@@ -23,7 +23,8 @@ import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.MethodResponse;
 
 @Getter
-public abstract class QueryMethodResponse<T extends AbstractIdentifiableEntity> implements MethodResponse {
+public abstract class QueryMethodResponse<T extends AbstractIdentifiableEntity>
+        implements MethodResponse {
     private String accountId;
     private String queryState;
     private boolean canCalculateChanges;
@@ -32,7 +33,14 @@ public abstract class QueryMethodResponse<T extends AbstractIdentifiableEntity> 
     private Long total;
     private Long limit;
 
-    public QueryMethodResponse(String accountId, String queryState, boolean canCalculateChanges, Long position, String[] ids, Long total, Long limit) {
+    public QueryMethodResponse(
+            String accountId,
+            String queryState,
+            boolean canCalculateChanges,
+            Long position,
+            String[] ids,
+            Long total,
+            Long limit) {
         this.accountId = accountId;
         this.queryState = queryState;
         this.canCalculateChanges = canCalculateChanges;

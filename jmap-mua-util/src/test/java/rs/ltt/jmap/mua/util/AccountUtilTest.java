@@ -65,5 +65,4 @@ public class AccountUtilTest {
     public void singleSeparatorUsername() {
         Assertions.assertEquals(".@example.com", AccountUtil.printableName(".@example.com"));
     }
-
 }

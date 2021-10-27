@@ -39,12 +39,14 @@ public class GetSearchSnippetsMethodCall implements MethodCall {
     private Request.Invocation.ResultReference emailIdsReference;
 
     @Builder
-    public GetSearchSnippetsMethodCall(@NonNull String accountId, String[] emailIds, Filter<Email> filter,
-                                       Request.Invocation.ResultReference emailIdsReference) {
+    public GetSearchSnippetsMethodCall(
+            @NonNull String accountId,
+            String[] emailIds,
+            Filter<Email> filter,
+            Request.Invocation.ResultReference emailIdsReference) {
         Preconditions.checkArgument(
                 emailIds == null ^ emailIdsReference == null,
-                "Must set one, and only one, of emailIds or emailIdsReference"
-        );
+                "Must set one, and only one, of emailIds or emailIdsReference");
         this.accountId = accountId;
         this.emailIds = emailIds;
         this.filter = filter;

@@ -16,13 +16,12 @@
 
 package rs.ltt.jmap.client;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.client.event.OnStateChangeListener;
 import rs.ltt.jmap.client.event.OnStateChangeListenerManager;
 import rs.ltt.jmap.common.entity.StateChange;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class OnStateChangeListenerManagerTest {
 
@@ -30,31 +29,29 @@ public class OnStateChangeListenerManagerTest {
     public void andAndRemoveListeners() {
         final AtomicInteger disableCount = new AtomicInteger();
         final AtomicInteger enableCount = new AtomicInteger();
-        final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(
-                new OnStateChangeListenerManager.Callback() {
-                    @Override
-                    public void disable() {
-                        disableCount.incrementAndGet();
-                    }
+        final OnStateChangeListenerManager onStateChangeListenerManager =
+                new OnStateChangeListenerManager(
+                        new OnStateChangeListenerManager.Callback() {
+                            @Override
+                            public void disable() {
+                                disableCount.incrementAndGet();
+                            }
 
-                    @Override
-                    public void enable() {
-                        enableCount.incrementAndGet();
-                    }
-                }
-        );
+                            @Override
+                            public void enable() {
+                                enableCount.incrementAndGet();
+                            }
+                        });
         final OnStateChangeListener a = stateChange -> false;
         final OnStateChangeListener b = stateChange -> false;
         Assertions.assertFalse(
                 onStateChangeListenerManager.isPushNotificationsEnabled(),
-                "Push Notifications are enabled"
-        );
+                "Push Notifications are enabled");
         onStateChangeListenerManager.addOnStateChangeListener(a);
         onStateChangeListenerManager.addOnStateChangeListener(b);
         Assertions.assertTrue(
                 onStateChangeListenerManager.isPushNotificationsEnabled(),
-                "Push Notifications are disable"
-        );
+                "Push Notifications are disable");
         Assertions.assertEquals(1, enableCount.get());
         Assertions.assertEquals(0, disableCount.get());
 
@@ -62,8 +59,7 @@ public class OnStateChangeListenerManagerTest {
 
         Assertions.assertTrue(
                 onStateChangeListenerManager.isPushNotificationsEnabled(),
-                "Push Notifications are disable"
-        );
+                "Push Notifications are disable");
         Assertions.assertEquals(1, enableCount.get());
         Assertions.assertEquals(0, disableCount.get());
 
@@ -74,71 +70,65 @@ public class OnStateChangeListenerManagerTest {
 
         Assertions.assertFalse(
                 onStateChangeListenerManager.isPushNotificationsEnabled(),
-                "Push Notifications are enabled"
-        );
-
+                "Push Notifications are enabled");
     }
 
     @Test
     public void andAndRemoveAll() {
         final AtomicInteger disableCount = new AtomicInteger();
         final AtomicInteger enableCount = new AtomicInteger();
-        final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(
-                new OnStateChangeListenerManager.Callback() {
-                    @Override
-                    public void disable() {
-                        disableCount.incrementAndGet();
-                    }
+        final OnStateChangeListenerManager onStateChangeListenerManager =
+                new OnStateChangeListenerManager(
+                        new OnStateChangeListenerManager.Callback() {
+                            @Override
+                            public void disable() {
+                                disableCount.incrementAndGet();
+                            }
 
-                    @Override
-                    public void enable() {
-                        enableCount.incrementAndGet();
-                    }
-                }
-        );
+                            @Override
+                            public void enable() {
+                                enableCount.incrementAndGet();
+                            }
+                        });
         final OnStateChangeListener a = stateChange -> false;
         final OnStateChangeListener b = stateChange -> false;
         Assertions.assertFalse(
                 onStateChangeListenerManager.isPushNotificationsEnabled(),
-                "Push Notifications are enabled"
-        );
+                "Push Notifications are enabled");
         onStateChangeListenerManager.addOnStateChangeListener(a);
         onStateChangeListenerManager.addOnStateChangeListener(b);
 
         Assertions.assertTrue(
                 onStateChangeListenerManager.isPushNotificationsEnabled(),
-                "Push Notifications are disable"
-        );
+                "Push Notifications are disable");
 
         onStateChangeListenerManager.removeAllListeners();
 
         Assertions.assertFalse(
                 onStateChangeListenerManager.isPushNotificationsEnabled(),
-                "Push Notifications are enabled"
-        );
+                "Push Notifications are enabled");
 
         Assertions.assertEquals(1, enableCount.get(), "Enable count is wrong");
         Assertions.assertEquals(1, disableCount.get(), "Disable count is wrong");
-
     }
 
     @Test
     public void unnecessaryRemove() {
         final AtomicInteger disableCount = new AtomicInteger();
         final AtomicInteger enableCount = new AtomicInteger();
-        final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(
-                new OnStateChangeListenerManager.Callback() {
-                    @Override
-                    public void disable() {
-                        disableCount.incrementAndGet();
-                    }
+        final OnStateChangeListenerManager onStateChangeListenerManager =
+                new OnStateChangeListenerManager(
+                        new OnStateChangeListenerManager.Callback() {
+                            @Override
+                            public void disable() {
+                                disableCount.incrementAndGet();
+                            }
 
-                    @Override
-                    public void enable() {
-                        enableCount.incrementAndGet();
-                    }
-                }
-        );
+                            @Override
+                            public void enable() {
+                                enableCount.incrementAndGet();
+                            }
+                        });
         final OnStateChangeListener a = stateChange -> false;
 
         onStateChangeListenerManager.addOnStateChangeListener(a);
@@ -148,47 +138,48 @@ public class OnStateChangeListenerManagerTest {
 
         Assertions.assertEquals(1, enableCount.get(), "Enable count is wrong");
         Assertions.assertEquals(1, disableCount.get(), "Disable count is wrong");
-
     }
 
     @Test
     public void oneListenerReturnsTrue() {
-        final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(
-                new OnStateChangeListenerManager.Callback() {
-                    @Override
-                    public void disable() {
-                        //ignored
-                    }
+        final OnStateChangeListenerManager onStateChangeListenerManager =
+                new OnStateChangeListenerManager(
+                        new OnStateChangeListenerManager.Callback() {
+                            @Override
+                            public void disable() {
+                                // ignored
+                            }
 
-                    @Override
-                    public void enable() {
-                        //ignored
-                    }
-                }
-        );
+                            @Override
+                            public void enable() {
+                                // ignored
+                            }
+                        });
         onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
         onStateChangeListenerManager.addOnStateChangeListener(stateChange -> true);
         onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
-        Assertions.assertTrue(onStateChangeListenerManager.onStateChange(StateChange.builder().build()));
+        Assertions.assertTrue(
+                onStateChangeListenerManager.onStateChange(StateChange.builder().build()));
     }
 
     @Test
     public void twoListenerReturnFalse() {
-        final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(
-                new OnStateChangeListenerManager.Callback() {
-                    @Override
-                    public void disable() {
-                        //ignored
-                    }
+        final OnStateChangeListenerManager onStateChangeListenerManager =
+                new OnStateChangeListenerManager(
+                        new OnStateChangeListenerManager.Callback() {
+                            @Override
+                            public void disable() {
+                                // ignored
+                            }
 
-                    @Override
-                    public void enable() {
-                        //ignored
-                    }
-                }
-        );
+                            @Override
+                            public void enable() {
+                                // ignored
+                            }
+                        });
         onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
         onStateChangeListenerManager.addOnStateChangeListener(stateChange -> false);
-        Assertions.assertFalse(onStateChangeListenerManager.onStateChange(StateChange.builder().build()));
+        Assertions.assertFalse(
+                onStateChangeListenerManager.onStateChange(StateChange.builder().build()));
     }
 }

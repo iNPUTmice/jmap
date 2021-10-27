@@ -14,7 +14,7 @@
  *
  */
 
-//TODO probably better belongs into util?
+// TODO probably better belongs into util?
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.base.MoreObjects;
@@ -24,6 +24,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nonnull;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
@@ -31,10 +34,6 @@ import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.email.QueryChangesEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.email.QueryEmailMethodResponse;
-
-import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.List;
 
 public class QueryResult {
 
@@ -45,12 +44,13 @@ public class QueryResult {
     public final Long total;
     public final TypedState<Email> objectState;
 
-    private QueryResult(@Nonnull final QueryResultItem[] items,
-                        final TypedState<Email> queryState,
-                        final boolean canCalculateChanges,
-                        final long position,
-                        final Long total,
-                        final TypedState<Email> objectState) {
+    private QueryResult(
+            @Nonnull final QueryResultItem[] items,
+            final TypedState<Email> queryState,
+            final boolean canCalculateChanges,
+            final long position,
+            final Long total,
+            final TypedState<Email> objectState) {
         this.items = items;
         this.queryState = queryState;
         this.canCalculateChanges = canCalculateChanges;
@@ -60,25 +60,29 @@ public class QueryResult {
     }
 
     @Nonnull
-    public static ListenableFuture<QueryResult> of(final ListenableFuture<MethodResponses> queryResponsesFuture,
-                                                   final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture) {
+    public static ListenableFuture<QueryResult> of(
+            final ListenableFuture<MethodResponses> queryResponsesFuture,
+            final ListenableFuture<MethodResponses> getThreadIdsResponsesFuture) {
         return Futures.transform(
                 Futures.allAsList(queryResponsesFuture, getThreadIdsResponsesFuture),
                 methodResponses -> {
                     Preconditions.checkState(
                             methodResponses != null && methodResponses.size() == 2,
-                            "Unable to create QueryResult. Invalid number of input method responses"
-                    );
-                    final QueryEmailMethodResponse queryResponse = methodResponses.get(0).getMain(QueryEmailMethodResponse.class);
-                    final GetEmailMethodResponse getThreadIdsResponse = methodResponses.get(1).getMain(GetEmailMethodResponse.class);
+                            "Unable to create QueryResult. Invalid number of input method"
+                                    + " responses");
+                    final QueryEmailMethodResponse queryResponse =
+                            methodResponses.get(0).getMain(QueryEmailMethodResponse.class);
+                    final GetEmailMethodResponse getThreadIdsResponse =
+                            methodResponses.get(1).getMain(GetEmailMethodResponse.class);
 
                     return QueryResult.of(queryResponse, getThreadIdsResponse);
                 },
-                MoreExecutors.directExecutor()
-        );
+                MoreExecutors.directExecutor());
     }
 
-    public static QueryResult of(QueryEmailMethodResponse queryEmailMethodResponse, GetEmailMethodResponse emailMethodResponse) {
+    public static QueryResult of(
+            QueryEmailMethodResponse queryEmailMethodResponse,
+            GetEmailMethodResponse emailMethodResponse) {
         final String[] emailIds = queryEmailMethodResponse.getIds();
         final QueryResultItem[] resultItems = new QueryResultItem[emailIds.length];
         final ImmutableMap<String, String> emailIdToThreadIdMap = map(emailMethodResponse);
@@ -86,13 +90,13 @@ public class QueryResult {
             final String emailId = emailIds[i];
             resultItems[i] = QueryResultItem.of(emailId, emailIdToThreadIdMap.get(emailId));
         }
-        return new QueryResult(resultItems,
+        return new QueryResult(
+                resultItems,
                 queryEmailMethodResponse.getTypedQueryState(),
                 queryEmailMethodResponse.isCanCalculateChanges(),
                 queryEmailMethodResponse.getPosition(),
                 queryEmailMethodResponse.getTotal(),
-                emailMethodResponse.getTypedState()
-        );
+                emailMethodResponse.getTypedState());
     }
 
     private static ImmutableMap<String, String> map(GetEmailMethodResponse emailMethodResponse) {
@@ -103,18 +107,24 @@ public class QueryResult {
         return builder.build();
     }
 
-    public static List<AddedItem<QueryResultItem>> of(QueryChangesEmailMethodResponse queryChangesEmailMethodResponse, GetEmailMethodResponse emailMethodResponse) {
-        final List<AddedItem<String>> addedEmailIdItems = nullToEmpty(queryChangesEmailMethodResponse.getAdded());
+    public static List<AddedItem<QueryResultItem>> of(
+            QueryChangesEmailMethodResponse queryChangesEmailMethodResponse,
+            GetEmailMethodResponse emailMethodResponse) {
+        final List<AddedItem<String>> addedEmailIdItems =
+                nullToEmpty(queryChangesEmailMethodResponse.getAdded());
         ImmutableList.Builder<AddedItem<QueryResultItem>> builder = new ImmutableList.Builder<>();
         final ImmutableMap<String, String> emailIdToThreadIdMap = map(emailMethodResponse);
         for (AddedItem<String> addedItem : addedEmailIdItems) {
             String emailId = addedItem.getItem();
-            builder.add(AddedItem.of(QueryResultItem.of(emailId, emailIdToThreadIdMap.get(emailId)), addedItem.getIndex()));
+            builder.add(
+                    AddedItem.of(
+                            QueryResultItem.of(emailId, emailIdToThreadIdMap.get(emailId)),
+                            addedItem.getIndex()));
         }
         return builder.build();
     }
 
-    private static<T> List<AddedItem<T>> nullToEmpty(final List<AddedItem<T>> value) {
+    private static <T> List<AddedItem<T>> nullToEmpty(final List<AddedItem<T>> value) {
         return value == null ? Collections.emptyList() : value;
     }
 

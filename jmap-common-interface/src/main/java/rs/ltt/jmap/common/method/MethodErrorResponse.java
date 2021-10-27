@@ -16,12 +16,11 @@
 
 package rs.ltt.jmap.common.method;
 
-public class MethodErrorResponse implements MethodResponse{
+public class MethodErrorResponse implements MethodResponse {
 
     private String type;
 
     public String getType() {
         return type;
     }
-
 }

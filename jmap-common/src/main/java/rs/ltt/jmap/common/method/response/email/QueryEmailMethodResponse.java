@@ -25,7 +25,14 @@ import rs.ltt.jmap.common.method.response.standard.QueryMethodResponse;
 public class QueryEmailMethodResponse extends QueryMethodResponse<Email> {
 
     @Builder
-    public QueryEmailMethodResponse(String accountId, String queryState, boolean canCalculateChanges, Long position, String[] ids, Long total, Long limit) {
+    public QueryEmailMethodResponse(
+            String accountId,
+            String queryState,
+            boolean canCalculateChanges,
+            Long position,
+            String[] ids,
+            Long total,
+            Long limit) {
         super(accountId, queryState, canCalculateChanges, position, ids, total, limit);
     }
 }

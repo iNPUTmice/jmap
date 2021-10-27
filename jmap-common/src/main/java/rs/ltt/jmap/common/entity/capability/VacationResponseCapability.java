@@ -21,5 +21,4 @@ import rs.ltt.jmap.annotation.JmapCapability;
 import rs.ltt.jmap.common.entity.Capability;
 
 @JmapCapability(namespace = Namespace.VACATION_RESPONSE)
-public class VacationResponseCapability implements Capability {
-}
+public class VacationResponseCapability implements Capability {}

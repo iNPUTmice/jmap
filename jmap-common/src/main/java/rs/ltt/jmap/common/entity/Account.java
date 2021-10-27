@@ -16,14 +16,13 @@
 
 package rs.ltt.jmap.common.entity;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.common.util.Property;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
 @Builder
 @Getter
@@ -31,7 +30,7 @@ public class Account {
     private String name;
     private Boolean isPersonal;
     private Boolean isReadOnly;
-    //TODO @Singular annotation doesn’t seem to compile. Maybe report with lombok?
+    // TODO @Singular annotation doesn’t seem to compile. Maybe report with lombok?
     @Getter(AccessLevel.NONE)
     private Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilities;
 
@@ -56,12 +55,16 @@ public class Account {
     }
 
     public static class AccountBuilder {
-        public AccountBuilder accountCapabilities(Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilities) {
-            for (final Map.Entry<Class<? extends AccountCapability>, AccountCapability> entry : accountCapabilities.entrySet()) {
+        public AccountBuilder accountCapabilities(
+                Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilities) {
+            for (final Map.Entry<Class<? extends AccountCapability>, AccountCapability> entry :
+                    accountCapabilities.entrySet()) {
                 final Class<? extends AccountCapability> key = entry.getKey();
                 final AccountCapability value = entry.getValue();
                 if (key != value.getClass()) {
-                    throw new IllegalArgumentException(String.format("key %s does not match value type %s", key, value.getClass()));
+                    throw new IllegalArgumentException(
+                            String.format(
+                                    "key %s does not match value type %s", key, value.getClass()));
                 }
             }
             this.accountCapabilities = accountCapabilities;

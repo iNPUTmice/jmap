@@ -17,30 +17,30 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.base.CaseFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class MailboxUtil {
 
     /**
-     * when auto creating mailboxes we pick a 'human readable' version of the role as the name. Since mailbox
-     * names have to be unique it is not advisable (although not prohibited by the standard) to use those names
-     * when creating 'labels'
+     * when auto creating mailboxes we pick a 'human readable' version of the role as the name.
+     * Since mailbox names have to be unique it is not advisable (although not prohibited by the
+     * standard) to use those names when creating 'labels'
      */
-    public static List<String> RESERVED_MAILBOX_NAMES = Arrays.stream(Role.values())
-            .map(MailboxUtil::humanReadable)
-            .collect(Collectors.toList());
+    public static List<String> RESERVED_MAILBOX_NAMES =
+            Arrays.stream(Role.values())
+                    .map(MailboxUtil::humanReadable)
+                    .collect(Collectors.toList());
 
-    public static @Nullable
-    IdentifiableMailboxWithRole find(Collection<? extends IdentifiableMailboxWithRole> mailboxes, Role role) {
+    public static @Nullable IdentifiableMailboxWithRole find(
+            Collection<? extends IdentifiableMailboxWithRole> mailboxes, Role role) {
         for (IdentifiableMailboxWithRole mailbox : mailboxes) {
             if (mailbox.getRole() == role) {
                 return mailbox;
@@ -49,8 +49,9 @@ public class MailboxUtil {
         return null;
     }
 
-    public static boolean anyWithRole(Collection<? extends IdentifiableMailboxWithRole> mailboxes, Role role) {
-        for(final IdentifiableMailboxWithRole mailbox : mailboxes) {
+    public static boolean anyWithRole(
+            Collection<? extends IdentifiableMailboxWithRole> mailboxes, Role role) {
+        for (final IdentifiableMailboxWithRole mailbox : mailboxes) {
             if (mailbox.getRole() == role) {
                 return true;
             }
@@ -66,8 +67,9 @@ public class MailboxUtil {
         return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, role.toString());
     }
 
-    public static boolean anyIn(Collection<? extends IdentifiableEmailWithMailboxIds> emails, String mailboxId) {
-        for(IdentifiableEmailWithMailboxIds email : emails) {
+    public static boolean anyIn(
+            Collection<? extends IdentifiableEmailWithMailboxIds> emails, String mailboxId) {
+        for (IdentifiableEmailWithMailboxIds email : emails) {
             if (email.getMailboxIds().containsKey(mailboxId)) {
                 return true;
             }

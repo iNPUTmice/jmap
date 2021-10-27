@@ -16,19 +16,24 @@
 
 package rs.ltt.jmap.common.method.response.email;
 
+import java.util.List;
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.method.response.standard.QueryChangesMethodResponse;
 
-import java.util.List;
-
 @JmapMethod("Email/queryChanges")
 public class QueryChangesEmailMethodResponse extends QueryChangesMethodResponse<Email> {
 
     @Builder
-    public QueryChangesEmailMethodResponse(String accountId, String oldQueryState, String newQueryState, long total, String[] removed, List<AddedItem<String>> added) {
+    public QueryChangesEmailMethodResponse(
+            String accountId,
+            String oldQueryState,
+            String newQueryState,
+            long total,
+            String[] removed,
+            List<AddedItem<String>> added) {
         super(accountId, oldQueryState, newQueryState, total, removed, added);
     }
 }

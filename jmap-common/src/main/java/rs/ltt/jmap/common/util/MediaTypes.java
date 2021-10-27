@@ -17,15 +17,12 @@
 package rs.ltt.jmap.common.util;
 
 import com.google.common.net.MediaType;
-
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 
 public final class MediaTypes {
 
-    private MediaTypes() {
-
-    }
+    private MediaTypes() {}
 
     public static MediaType of(final String type, final String charsetName) {
         final MediaType mediaType = type == null ? null : MediaType.parse(type);

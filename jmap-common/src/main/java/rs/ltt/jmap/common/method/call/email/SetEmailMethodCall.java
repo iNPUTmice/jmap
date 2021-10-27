@@ -16,21 +16,24 @@
 
 package rs.ltt.jmap.common.method.call.email;
 
+import java.util.Map;
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.method.call.standard.SetMethodCall;
 
-import java.util.Map;
-
 @JmapMethod("Email/set")
 public class SetEmailMethodCall extends SetMethodCall<Email> {
 
     @Builder
-    public SetEmailMethodCall(String accountId, String ifInState, Map<String, Email> create,
-                              Map<String, Map<String, Object>> update, String[] destroy,
-                              Request.Invocation.ResultReference destroyReference) {
+    public SetEmailMethodCall(
+            String accountId,
+            String ifInState,
+            Map<String, Email> create,
+            Map<String, Map<String, Object>> update,
+            String[] destroy,
+            Request.Invocation.ResultReference destroyReference) {
         super(accountId, ifInState, create, update, destroy, destroyReference);
     }
 }

@@ -44,7 +44,8 @@ public class EmailSubmissionQuery extends Query<EmailSubmission> {
         return new EmailSubmissionQuery(filter, null);
     }
 
-    public static EmailSubmissionQuery of(final Filter<EmailSubmission> filter, final Comparator[] sort) {
+    public static EmailSubmissionQuery of(
+            final Filter<EmailSubmission> filter, final Comparator[] sort) {
         return new EmailSubmissionQuery(filter, sort);
     }
 }

@@ -26,7 +26,11 @@ import rs.ltt.jmap.common.method.call.standard.GetMethodCall;
 public class GetVacationResponseMethodCall extends GetMethodCall<VacationResponse> {
 
     @Builder
-    public GetVacationResponseMethodCall(String accountId, String[] ids, String[] properties, Request.Invocation.ResultReference idsReference) {
+    public GetVacationResponseMethodCall(
+            String accountId,
+            String[] ids,
+            String[] properties,
+            Request.Invocation.ResultReference idsReference) {
         super(accountId, ids, properties, idsReference);
     }
 }

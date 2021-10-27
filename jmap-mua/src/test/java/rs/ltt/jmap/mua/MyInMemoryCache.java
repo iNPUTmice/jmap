@@ -17,14 +17,13 @@
 package rs.ltt.jmap.mua;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
 import rs.ltt.jmap.mua.util.MailboxUtil;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 class MyInMemoryCache extends InMemoryCache {
     public Collection<String> getEmailIds() {
@@ -37,7 +36,9 @@ class MyInMemoryCache extends InMemoryCache {
 
     public List<CachedEmail> getEmails(final String threadId) {
         List<String> emailIds = this.threads.get(threadId).getEmailIds();
-        return emailIds.stream().map(id -> new CachedEmail(emails.get(id))).collect(Collectors.toList());
+        return emailIds.stream()
+                .map(id -> new CachedEmail(emails.get(id)))
+                .collect(Collectors.toList());
     }
 
     public Mailbox getMailbox(final Role role) {

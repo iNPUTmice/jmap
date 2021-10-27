@@ -19,9 +19,12 @@ package rs.ltt.jmap.common.entity;
 import com.google.gson.annotations.SerializedName;
 
 public enum ErrorType {
-
-    @SerializedName("urn:ietf:params:jmap:error:unknownCapability") UNKNOWN_CAPABILITY,
-    @SerializedName("urn:ietf:params:jmap:error:notJSON") NOT_JSON,
-    @SerializedName("urn:ietf:params:jmap:error:notRequest") NOT_REQUEST,
-    @SerializedName("urn:ietf:params:jmap:error:limit") LIMIT
+    @SerializedName("urn:ietf:params:jmap:error:unknownCapability")
+    UNKNOWN_CAPABILITY,
+    @SerializedName("urn:ietf:params:jmap:error:notJSON")
+    NOT_JSON,
+    @SerializedName("urn:ietf:params:jmap:error:notRequest")
+    NOT_REQUEST,
+    @SerializedName("urn:ietf:params:jmap:error:limit")
+    LIMIT
 }

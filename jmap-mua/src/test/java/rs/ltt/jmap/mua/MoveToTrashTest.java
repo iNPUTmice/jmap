@@ -19,12 +19,11 @@ package rs.ltt.jmap.mua;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
 
 public class MoveToTrashTest {
 
@@ -39,30 +38,38 @@ public class MoveToTrashTest {
         final MockWebServer server = new MockWebServer();
 
         server.enqueue(new MockResponse().setBody(readResourceAsString("common/01-session.json")));
-        server.enqueue(new MockResponse().setBody(readResourceAsString("common/02-mailboxes.json")));
+        server.enqueue(
+                new MockResponse().setBody(readResourceAsString("common/02-mailboxes.json")));
 
-        try (final Mua mua = Mua.builder()
-                .sessionResource(server.url(WELL_KNOWN_PATH))
-                .username(USERNAME)
-                .password(PASSWORD)
-                .accountId(ACCOUNT_ID)
-                .build()) {
+        try (final Mua mua =
+                Mua.builder()
+                        .sessionResource(server.url(WELL_KNOWN_PATH))
+                        .username(USERNAME)
+                        .password(PASSWORD)
+                        .accountId(ACCOUNT_ID)
+                        .build()) {
             mua.refreshMailboxes().get();
 
-            Assertions.assertFalse(mua.moveToTrash(ImmutableSet.of(
-                    new MyIdentifiableEmailWithMailboxes("e0", "mb4")
-            )).get());
+            Assertions.assertFalse(
+                    mua.moveToTrash(
+                                    ImmutableSet.of(
+                                            new MyIdentifiableEmailWithMailboxes("e0", "mb4")))
+                            .get());
 
-            Assertions.assertFalse(mua.moveToTrash(ImmutableSet.of(
-                    new MyIdentifiableEmailWithMailboxes("e0", "mb4"),
-                    new MyIdentifiableEmailWithMailboxes("e1", "mb4")
-            )).get());
+            Assertions.assertFalse(
+                    mua.moveToTrash(
+                                    ImmutableSet.of(
+                                            new MyIdentifiableEmailWithMailboxes("e0", "mb4"),
+                                            new MyIdentifiableEmailWithMailboxes("e1", "mb4")))
+                            .get());
         }
 
         server.shutdown();
     }
 
     private static String readResourceAsString(String filename) throws IOException {
-        return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8).read().trim();
+        return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8)
+                .read()
+                .trim();
     }
 }

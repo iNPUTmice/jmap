@@ -16,11 +16,10 @@
 
 package rs.ltt.jmap.common.entity;
 
+import java.time.Instant;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.annotation.JmapEntity;
-
-import java.time.Instant;
 
 @Getter
 @Builder(toBuilder = true)

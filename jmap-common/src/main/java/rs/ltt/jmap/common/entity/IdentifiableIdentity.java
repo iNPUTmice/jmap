@@ -16,5 +16,4 @@
 
 package rs.ltt.jmap.common.entity;
 
-public interface IdentifiableIdentity extends Identifiable {
-}
+public interface IdentifiableIdentity extends Identifiable {}

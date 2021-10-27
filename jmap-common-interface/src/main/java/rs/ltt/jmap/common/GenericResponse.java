@@ -16,5 +16,4 @@
 
 package rs.ltt.jmap.common;
 
-public interface GenericResponse {
-}
+public interface GenericResponse {}

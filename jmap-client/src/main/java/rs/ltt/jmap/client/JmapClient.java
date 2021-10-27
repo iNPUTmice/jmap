@@ -16,12 +16,14 @@
 
 package rs.ltt.jmap.client;
 
-
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.Closeable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import okhttp3.HttpUrl;
 import rs.ltt.jmap.client.api.JmapApiClient;
 import rs.ltt.jmap.client.api.JmapApiClientFactory;
@@ -40,21 +42,18 @@ import rs.ltt.jmap.common.entity.Downloadable;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
 import rs.ltt.jmap.common.method.MethodCall;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.Closeable;
-
 public class JmapClient implements Closeable {
 
     private final SessionClient sessionClient;
     private final BinaryDataClient binaryDataClient;
     private final HttpAuthentication authentication;
-    private final SessionStateListener sessionStateListener = new SessionStateListener() {
-        @Override
-        public void onSessionStateRetrieved(String sessionState) {
-            sessionClient.setLatestSessionState(sessionState);
-        }
-    };
+    private final SessionStateListener sessionStateListener =
+            new SessionStateListener() {
+                @Override
+                public void onSessionStateRetrieved(String sessionState) {
+                    sessionClient.setLatestSessionState(sessionState);
+                }
+            };
     private JmapApiClient jmapApiClient;
     private boolean useWebSocket = false;
 
@@ -67,7 +66,6 @@ public class JmapClient implements Closeable {
         this.sessionClient = new SessionClient(httpAuthentication);
         this.binaryDataClient = new BinaryDataClient(httpAuthentication);
     }
-
 
     public JmapClient(String username, String password, HttpUrl base) {
         this(new BasicAuthHttpAuthentication(username, password), base);
@@ -84,10 +82,12 @@ public class JmapClient implements Closeable {
     }
 
     public ListenableFuture<MethodResponses> call(MethodCall methodCall) {
-        //TODO check if JmapApiClient has been closed
-        //Preconditions.checkState(!isShutdown(), "Unable to call method. JmapClient has been closed already");
+        // TODO check if JmapApiClient has been closed
+        // Preconditions.checkState(!isShutdown(), "Unable to call method. JmapClient has been
+        // closed already");
         final JmapRequest.Builder jmapRequestBuilder = new JmapRequest.Builder();
-        final ListenableFuture<MethodResponses> methodResponsesFuture = jmapRequestBuilder.call(methodCall).getMethodResponses();
+        final ListenableFuture<MethodResponses> methodResponsesFuture =
+                jmapRequestBuilder.call(methodCall).getMethodResponses();
         this.execute(jmapRequestBuilder.build());
         return methodResponsesFuture;
     }
@@ -95,17 +95,20 @@ public class JmapClient implements Closeable {
     private void execute(final JmapRequest request) {
         final ListenableFuture<Session> sessionFuture = getSession();
         request.addDependentFuture(sessionFuture);
-        Futures.addCallback(sessionFuture, new FutureCallback<Session>() {
-            @Override
-            public void onSuccess(@Nullable Session session) {
-                execute(request, session);
-            }
+        Futures.addCallback(
+                sessionFuture,
+                new FutureCallback<Session>() {
+                    @Override
+                    public void onSuccess(@Nullable Session session) {
+                        execute(request, session);
+                    }
 
-            @Override
-            public void onFailure(@Nonnull Throwable throwable) {
-                request.setException(throwable);
-            }
-        }, MoreExecutors.directExecutor());
+                    @Override
+                    public void onFailure(@Nonnull Throwable throwable) {
+                        request.setException(throwable);
+                    }
+                },
+                MoreExecutors.directExecutor());
     }
 
     private void execute(final JmapRequest request, final Session session) {
@@ -127,11 +130,9 @@ public class JmapClient implements Closeable {
             if (this.jmapApiClient != null && this.jmapApiClient.isValidFor(session)) {
                 return this.jmapApiClient;
             }
-            //TODO remember to stop/close invalid clients
-            final JmapApiClientFactory factory = new JmapApiClientFactory(
-                    authentication,
-                    sessionStateListener
-            );
+            // TODO remember to stop/close invalid clients
+            final JmapApiClientFactory factory =
+                    new JmapApiClientFactory(authentication, sessionStateListener);
             this.jmapApiClient = factory.getJmapApiClient(session, this.useWebSocket);
             return jmapApiClient;
         }
@@ -145,24 +146,22 @@ public class JmapClient implements Closeable {
         return monitorEvents(null);
     }
 
-    public ListenableFuture<PushService> monitorEvents(@Nullable final OnStateChangeListener onStateChangeListener) {
+    public ListenableFuture<PushService> monitorEvents(
+            @Nullable final OnStateChangeListener onStateChangeListener) {
         return Futures.transform(
                 getSession(),
                 session -> monitorEvents(session, onStateChangeListener),
-                MoreExecutors.directExecutor()
-        );
+                MoreExecutors.directExecutor());
     }
 
-    private PushService monitorEvents(final Session session, @Nullable final OnStateChangeListener onStateChangeListener) {
+    private PushService monitorEvents(
+            final Session session, @Nullable final OnStateChangeListener onStateChangeListener) {
         final JmapApiClient jmapApiClient = getApiClient(session);
         final PushService pushService;
         if (jmapApiClient instanceof PushService) {
             pushService = (PushService) jmapApiClient;
         } else {
-            pushService = new EventSourcePushService(
-                    session,
-                    authentication
-            );
+            pushService = new EventSourcePushService(session, authentication);
         }
         if (onStateChangeListener != null) {
             pushService.addOnStateChangeListener(onStateChangeListener);
@@ -182,57 +181,62 @@ public class JmapClient implements Closeable {
         synchronized (this) {
             Preconditions.checkState(
                     this.jmapApiClient == null,
-                    "WebSocket preference needs to be set before making the first API call"
-            );
+                    "WebSocket preference needs to be set before making the first API call");
         }
         this.useWebSocket = useWebSocket;
     }
 
-    public ListenableFuture<Download> download(final String accountId, final Downloadable downloadable) {
+    public ListenableFuture<Download> download(
+            final String accountId, final Downloadable downloadable) {
         return Futures.transformAsync(
                 getSession(),
                 session -> download(session, accountId, downloadable, 0),
-                MoreExecutors.directExecutor()
-        );
+                MoreExecutors.directExecutor());
     }
 
-    private ListenableFuture<Download> download(final Session session, final String accountId, final Downloadable downloadable, final long rangeStart) {
+    private ListenableFuture<Download> download(
+            final Session session,
+            final String accountId,
+            final Downloadable downloadable,
+            final long rangeStart) {
         final HttpUrl httpUrl = session.getDownloadUrl(accountId, downloadable);
         return this.binaryDataClient.download(httpUrl, rangeStart);
     }
 
-    public ListenableFuture<Download> download(final String accountId, final Downloadable downloadable, final long rangeStart) {
+    public ListenableFuture<Download> download(
+            final String accountId, final Downloadable downloadable, final long rangeStart) {
         Preconditions.checkArgument(rangeStart >= 0, "rangeStart must not be smaller than 0");
         return Futures.transformAsync(
                 getSession(),
                 session -> download(session, accountId, downloadable, rangeStart),
-                MoreExecutors.directExecutor()
-        );
+                MoreExecutors.directExecutor());
     }
 
-    public ListenableFuture<Upload> upload(@Nonnull final String accountId,
-                                           @Nonnull final Uploadable uploadable,
-                                           final Progress progress) {
+    public ListenableFuture<Upload> upload(
+            @Nonnull final String accountId,
+            @Nonnull final Uploadable uploadable,
+            final Progress progress) {
         Preconditions.checkArgument(accountId != null, "accountId must not be null");
         Preconditions.checkArgument(uploadable != null, "Uploadable must not be null");
         return Futures.transformAsync(
                 getSession(),
                 session -> upload(session, accountId, uploadable, progress),
-                MoreExecutors.directExecutor()
-        );
+                MoreExecutors.directExecutor());
     }
 
-    private ListenableFuture<Upload> upload(final Session session,
-                                            final String accountId,
-                                            final Uploadable uploadable,
-                                            final Progress progress) {
+    private ListenableFuture<Upload> upload(
+            final Session session,
+            final String accountId,
+            final Uploadable uploadable,
+            final Progress progress) {
         final HttpUrl httpUrl = session.getUploadUrl(accountId);
         final CoreCapability coreCapability = session.getCapability(CoreCapability.class);
-        final Long maxUploadSize = coreCapability == null ? null : coreCapability.getMaxSizeUpload();
+        final Long maxUploadSize =
+                coreCapability == null ? null : coreCapability.getMaxSizeUpload();
         if (maxUploadSize != null && uploadable.getContentLength() > maxUploadSize) {
             return Futures.immediateFailedFuture(
-                    new MaxUploadSizeExceededException(uploadable.getContentLength(), maxUploadSize)
-            );
+                    new MaxUploadSizeExceededException(
+                            uploadable.getContentLength(), maxUploadSize));
         }
         return this.binaryDataClient.upload(httpUrl, uploadable, progress);
     }
@@ -250,25 +254,23 @@ public class JmapClient implements Closeable {
         private final JmapRequest.Builder jmapRequestBuilder = new JmapRequest.Builder();
         private boolean executed = false;
 
-        private MultiCall() {
-
-        }
+        private MultiCall() {}
 
         public synchronized JmapRequest.Call call(MethodCall methodCall) {
-            Preconditions.checkState(!executed, "Unable to add MethodCall. MultiCall has already been executed");
+            Preconditions.checkState(
+                    !executed, "Unable to add MethodCall. MultiCall has already been executed");
             return jmapRequestBuilder.call(methodCall);
         }
 
         public synchronized void execute() {
             Preconditions.checkState(!executed, "You must not execute the same MultiCall twice");
 
-            //TODO check if jmapApiClient is shutdown or closed or something
+            // TODO check if jmapApiClient is shutdown or closed or something
 
-            //Preconditions.checkState(!isShutdown(), "Unable to execute MultiCall. JmapClient has been closed already");
+            // Preconditions.checkState(!isShutdown(), "Unable to execute MultiCall. JmapClient has
+            // been closed already");
             this.executed = true;
             JmapClient.this.execute(jmapRequestBuilder.build());
         }
-
     }
-
 }

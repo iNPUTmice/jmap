@@ -17,12 +17,11 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.entity.EmailAddress;
-
-import java.util.Collection;
-import java.util.Collections;
 
 public class EmailAddressTokenizerTest {
 
@@ -34,19 +33,14 @@ public class EmailAddressTokenizerTest {
     @Test
     public void singleChar() {
         final String input = "s";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        0,
-                        EmailAddress.builder().email("s").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(0, 0, EmailAddress.builder().email("s").build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
@@ -54,109 +48,83 @@ public class EmailAddressTokenizerTest {
         final String input = "     ";
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
         Assertions.assertArrayEquals(
-                new EmailAddressToken[0],
-                actual.toArray(new EmailAddressToken[0])
-        );
+                new EmailAddressToken[0], actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void simpleStandAloneEmailAddress() {
         final String input = "test@example.com";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        15,
-                        EmailAddress.builder().email("test@example.com").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0, 15, EmailAddress.builder().email("test@example.com").build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void singleEmailWithExcessWhiteSpaceAfterDelimiter() {
         final String input = "test@example.com,  ";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        16,
-                        EmailAddress.builder().email("test@example.com").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0, 16, EmailAddress.builder().email("test@example.com").build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void simpleCommaSeparated() {
         final String input = "a@example.com, b@example.com";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        13,
-                        EmailAddress.builder().email("a@example.com").build()
-                ),
-                new EmailAddressToken(
-                        14,
-                        27,
-                        EmailAddress.builder().email("b@example.com").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0, 13, EmailAddress.builder().email("a@example.com").build()),
+                        new EmailAddressToken(
+                                14, 27, EmailAddress.builder().email("b@example.com").build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void bracketedCommaSeparated() {
         final String input = "<a@example.com>, <b@example.com>";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        15,
-                        EmailAddress.builder().email("a@example.com").build()
-                ),
-                new EmailAddressToken(
-                        16,
-                        31,
-                        EmailAddress.builder().email("b@example.com").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0, 15, EmailAddress.builder().email("a@example.com").build()),
+                        new EmailAddressToken(
+                                16, 31, EmailAddress.builder().email("b@example.com").build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void singleEmailWithLabel() {
         final String input = "A <a@example.com>";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        16,
-                        EmailAddress.builder().email("a@example.com").name("A").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0,
+                                16,
+                                EmailAddress.builder().email("a@example.com").name("A").build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
@@ -164,68 +132,67 @@ public class EmailAddressTokenizerTest {
         final String input = "A <a@example.com>";
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input, true);
         Assertions.assertArrayEquals(
-                new EmailAddressToken[0],
-                actual.toArray(new EmailAddressToken[0])
-        );
+                new EmailAddressToken[0], actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void singleEmailWithLabelExcessWhiteSpace() {
         final String input = " A   <a@example.com>";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        19,
-                        EmailAddress.builder().email("a@example.com").name("A").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0,
+                                19,
+                                EmailAddress.builder().email("a@example.com").name("A").build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void multipleWithQuotedLabel() {
         final String input = "\"Last, First\" <first.last@example.com>, Test <test@example.com>";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        38,
-                        EmailAddress.builder().email("first.last@example.com").name("Last, First").build()
-                ),
-                new EmailAddressToken(
-                        39,
-                        62,
-                        EmailAddress.builder().email("test@example.com").name("Test").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0,
+                                38,
+                                EmailAddress.builder()
+                                        .email("first.last@example.com")
+                                        .name("Last, First")
+                                        .build()),
+                        new EmailAddressToken(
+                                39,
+                                62,
+                                EmailAddress.builder()
+                                        .email("test@example.com")
+                                        .name("Test")
+                                        .build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
 
     @Test
     public void multipleWithQuotedLabelExplicitDelimiter() {
         final String input = "\"Last, First\" <first.last@example.com>, Test <test@example.com>";
-        final Collection<EmailAddressToken> expected = ImmutableList.of(
-                new EmailAddressToken(
-                        0,
-                        38,
-                        EmailAddress.builder().email("first.last@example.com").name("Last, First").build()
-                )
-        );
+        final Collection<EmailAddressToken> expected =
+                ImmutableList.of(
+                        new EmailAddressToken(
+                                0,
+                                38,
+                                EmailAddress.builder()
+                                        .email("first.last@example.com")
+                                        .name("Last, First")
+                                        .build()));
         final Collection<EmailAddressToken> actual = EmailAddressTokenizer.tokenize(input, true);
 
         Assertions.assertArrayEquals(
                 expected.toArray(new EmailAddressToken[0]),
-                actual.toArray(new EmailAddressToken[0])
-        );
+                actual.toArray(new EmailAddressToken[0]));
     }
-
 }

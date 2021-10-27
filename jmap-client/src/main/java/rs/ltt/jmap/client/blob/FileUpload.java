@@ -17,7 +17,6 @@
 package rs.ltt.jmap.client.blob;
 
 import com.google.common.net.MediaType;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +33,6 @@ public class FileUpload implements Uploadable, Closeable {
         this.inputStream = Files.newInputStream(path);
         this.contentLength = Files.size(path);
         this.mediaType = MediaType.parse(Files.probeContentType(path));
-
     }
 
     public static FileUpload of(final Path path) throws IOException {

@@ -19,16 +19,15 @@ package rs.ltt.jmap.client.util;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import rs.ltt.jmap.client.MethodResponses;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.method.MethodResponse;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-//TODO test me
+// TODO test me
 public class ResponseAnalyzer {
 
     private final ImmutableMap<String, MethodResponses> methodResponsesMap;
@@ -51,10 +50,12 @@ public class ResponseAnalyzer {
             } else if (methodResponseList.size() == 1) {
                 methodResponses = new MethodResponses(methodResponseList.get(0));
             } else {
-                methodResponses = new MethodResponses(
-                        methodResponseList.get(0),
-                        methodResponseList.subList(1, methodResponseList.size()).toArray(new MethodResponse[0])
-                );
+                methodResponses =
+                        new MethodResponses(
+                                methodResponseList.get(0),
+                                methodResponseList
+                                        .subList(1, methodResponseList.size())
+                                        .toArray(new MethodResponse[0]));
             }
             actualMap.put(id, methodResponses);
         }

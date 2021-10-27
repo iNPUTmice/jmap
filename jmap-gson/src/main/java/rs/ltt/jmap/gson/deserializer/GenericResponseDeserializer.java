@@ -17,21 +17,21 @@
 package rs.ltt.jmap.gson.deserializer;
 
 import com.google.gson.*;
+import java.lang.reflect.Type;
 import rs.ltt.jmap.common.ErrorResponse;
 import rs.ltt.jmap.common.GenericResponse;
 import rs.ltt.jmap.common.Response;
 
-import java.lang.reflect.Type;
-
 public class GenericResponseDeserializer implements JsonDeserializer<GenericResponse> {
-
 
     public static void register(final GsonBuilder builder) {
         builder.registerTypeAdapter(GenericResponse.class, new GenericResponseDeserializer());
     }
 
     @Override
-    public GenericResponse deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+    public GenericResponse deserialize(
+            JsonElement jsonElement, Type type, JsonDeserializationContext context)
+            throws JsonParseException {
         if (jsonElement.isJsonObject()) {
             final JsonObject jsonObject = jsonElement.getAsJsonObject();
             if (jsonObject.has("type") && !jsonObject.has("methodResponses")) {
@@ -40,7 +40,8 @@ public class GenericResponseDeserializer implements JsonDeserializer<GenericResp
             if (jsonObject.has("methodResponses") && !jsonObject.has("type")) {
                 return context.deserialize(jsonObject, Response.class);
             }
-            throw new JsonParseException("Unable to identify response as neither error nor response");
+            throw new JsonParseException(
+                    "Unable to identify response as neither error nor response");
         } else {
             throw new JsonParseException("unexpected json type when parsing response");
         }

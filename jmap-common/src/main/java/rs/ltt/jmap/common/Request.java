@@ -17,10 +17,9 @@
 package rs.ltt.jmap.common;
 
 import com.google.common.base.MoreObjects;
+import java.util.*;
 import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.util.Namespace;
-
-import java.util.*;
 
 public class Request {
 
@@ -42,8 +41,9 @@ public class Request {
             final String namespace = Namespace.get(clazz);
             if (namespace == null) {
                 throw new IllegalArgumentException(
-                        String.format("%s is missing a namespace. Annotate package with @JmapNamespace", clazz.getSimpleName())
-                );
+                        String.format(
+                                "%s is missing a namespace. Annotate package with @JmapNamespace",
+                                clazz.getSimpleName()));
             }
             NAMESPACE_CACHE.put(clazz, namespace);
             return namespace;
@@ -63,9 +63,7 @@ public class Request {
         private MethodCall methodCall;
         private String id;
 
-        private Invocation() {
-
-        }
+        private Invocation() {}
 
         public Invocation(MethodCall methodCall, String id) {
             this.methodCall = methodCall;
@@ -135,9 +133,7 @@ public class Request {
         private final List<Invocation> invocations = new ArrayList<>();
         private final Set<String> using = new TreeSet<>();
 
-        public Builder() {
-
-        }
+        public Builder() {}
 
         public Builder call(MethodCall call) {
             final int id = invocations.size();
@@ -155,7 +151,8 @@ public class Request {
         }
 
         public Request build() {
-            return new Request(using.toArray(new String[0]), invocations.toArray(new Invocation[0]));
+            return new Request(
+                    using.toArray(new String[0]), invocations.toArray(new Invocation[0]));
         }
     }
 }

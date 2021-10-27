@@ -20,17 +20,16 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
-import lombok.*;
-import rs.ltt.jmap.common.entity.EmailAddress;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import lombok.*;
+import rs.ltt.jmap.common.entity.EmailAddress;
 
 @Builder
 @Getter
@@ -48,10 +47,13 @@ public class MailToUri {
 
     @Singular("to")
     private final Collection<EmailAddress> to;
+
     @Singular("cc")
     private final Collection<EmailAddress> cc;
+
     @Singular("bcc")
     private final Collection<EmailAddress> bcc;
+
     private final String inReplyTo;
     private final String subject;
     private final String body;
@@ -71,13 +73,15 @@ public class MailToUri {
     }
 
     @Nonnull
-    public static MailToUri get(final String input, final boolean stripNames) throws IllegalArgumentException {
+    public static MailToUri get(final String input, final boolean stripNames)
+            throws IllegalArgumentException {
         final int schemeDelimiter = input.indexOf(":");
         if (schemeDelimiter < 0) {
             throw new IllegalArgumentException("No scheme detected");
         }
         if (input.substring(0, schemeDelimiter).equals(MAIL_TO)) {
-            final int queryDelimiter = input.length() > schemeDelimiter ? input.indexOf("?", schemeDelimiter + 1) : -1;
+            final int queryDelimiter =
+                    input.length() > schemeDelimiter ? input.indexOf("?", schemeDelimiter + 1) : -1;
             final String to;
             final String query;
             if (queryDelimiter > 0) {
@@ -114,13 +118,13 @@ public class MailToUri {
             mailToUriBuilder.subject(subject);
             mailToUriBuilder.body(body);
             return mailToUriBuilder.build();
-
         }
         throw new IllegalArgumentException("Unknown scheme");
     }
 
-    private static void throwOnName(final Collection<EmailAddress> addresses) throws IllegalArgumentException {
-        for(final EmailAddress address : addresses) {
+    private static void throwOnName(final Collection<EmailAddress> addresses)
+            throws IllegalArgumentException {
+        for (final EmailAddress address : addresses) {
             if (Strings.isNullOrEmpty(address.getName())) {
                 continue;
             }
@@ -150,22 +154,26 @@ public class MailToUri {
         }
     }
 
-    private static Collection<EmailAddress> parseEmailAddress(final String address, final boolean stripNames) {
-        return stripNames ? stripNames(EmailAddressUtil.parse(address)) : EmailAddressUtil.parse(address);
+    private static Collection<EmailAddress> parseEmailAddress(
+            final String address, final boolean stripNames) {
+        return stripNames
+                ? stripNames(EmailAddressUtil.parse(address))
+                : EmailAddressUtil.parse(address);
     }
 
     private static Collection<EmailAddress> stripNames(Collection<EmailAddress> emailAddresses) {
-        return Collections2.transform(emailAddresses, new Function<EmailAddress, EmailAddress>() {
-            @Nullable
-            @Override
-            public EmailAddress apply(@Nullable EmailAddress emailAddress) {
-                if (emailAddress == null || Strings.isNullOrEmpty(emailAddress.getName())) {
-                    return emailAddress;
-                } else {
-                    return EmailAddress.builder().email(emailAddress.getEmail()).build();
-                }
-            }
-        });
+        return Collections2.transform(
+                emailAddresses,
+                new Function<EmailAddress, EmailAddress>() {
+                    @Nullable
+                    @Override
+                    public EmailAddress apply(@Nullable EmailAddress emailAddress) {
+                        if (emailAddress == null || Strings.isNullOrEmpty(emailAddress.getName())) {
+                            return emailAddress;
+                        } else {
+                            return EmailAddress.builder().email(emailAddress.getEmail()).build();
+                        }
+                    }
+                });
     }
-
 }

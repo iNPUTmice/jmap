@@ -17,14 +17,13 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.collect.ImmutableList;
-import rs.ltt.jmap.common.entity.EmailAddress;
-import rs.ltt.jmap.common.entity.IdentifiableEmailWithAddresses;
-import rs.ltt.jmap.common.entity.IdentifiableEmailWithSubject;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import rs.ltt.jmap.common.entity.EmailAddress;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithAddresses;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithSubject;
 
 public class EmailUtil {
 
@@ -32,9 +31,7 @@ public class EmailUtil {
 
     private static final List<String> RESPONSE_PREFIXES = Arrays.asList("re", "aw");
 
-    private EmailUtil() {
-
-    }
+    private EmailUtil() {}
 
     public static String getResponseSubject(IdentifiableEmailWithSubject emailWithSubject) {
         final String subject = emailWithSubject.getSubject();
@@ -43,7 +40,8 @@ public class EmailUtil {
             return subjectWithPrefix(subject);
         }
         final String prefix = subject.substring(0, 3);
-        if (prefix.charAt(2) == ':' && RESPONSE_PREFIXES.contains(prefix.substring(0, 2).toLowerCase())) {
+        if (prefix.charAt(2) == ':'
+                && RESPONSE_PREFIXES.contains(prefix.substring(0, 2).toLowerCase())) {
             return subjectWithPrefix(subject.substring(3));
         }
         return subjectWithPrefix(subject);
@@ -61,7 +59,8 @@ public class EmailUtil {
         return new ReplyAddresses(replyTo(emailWithAddresses));
     }
 
-    private static Collection<EmailAddress> replyTo(IdentifiableEmailWithAddresses emailWithAddresses) {
+    private static Collection<EmailAddress> replyTo(
+            IdentifiableEmailWithAddresses emailWithAddresses) {
         final Collection<EmailAddress> from = emailWithAddresses.getFrom();
         if (from != null && !from.isEmpty()) {
             return from;

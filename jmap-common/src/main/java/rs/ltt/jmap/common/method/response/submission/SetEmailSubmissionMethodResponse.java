@@ -16,27 +16,36 @@
 
 package rs.ltt.jmap.common.method.response.submission;
 
+import java.util.Map;
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.entity.EmailSubmission;
 import rs.ltt.jmap.common.entity.SetError;
 import rs.ltt.jmap.common.method.response.standard.SetMethodResponse;
 
-import java.util.Map;
-
 @JmapMethod("EmailSubmission/set")
 public class SetEmailSubmissionMethodResponse extends SetMethodResponse<EmailSubmission> {
 
     @Builder
-    public SetEmailSubmissionMethodResponse(String accountId,
-                                            String oldState,
-                                            String newState,
-                                            Map<String, EmailSubmission> created,
-                                            Map<String, EmailSubmission> updated,
-                                            String[] destroyed,
-                                            Map<String, SetError> notCreated,
-                                            Map<String, SetError> notUpdated,
-                                            Map<String, SetError> notDestroyed) {
-        super(accountId, oldState, newState, created, updated, destroyed, notCreated, notUpdated, notDestroyed);
+    public SetEmailSubmissionMethodResponse(
+            String accountId,
+            String oldState,
+            String newState,
+            Map<String, EmailSubmission> created,
+            Map<String, EmailSubmission> updated,
+            String[] destroyed,
+            Map<String, SetError> notCreated,
+            Map<String, SetError> notUpdated,
+            Map<String, SetError> notDestroyed) {
+        super(
+                accountId,
+                oldState,
+                newState,
+                created,
+                updated,
+                destroyed,
+                notCreated,
+                notUpdated,
+                notDestroyed);
     }
 }

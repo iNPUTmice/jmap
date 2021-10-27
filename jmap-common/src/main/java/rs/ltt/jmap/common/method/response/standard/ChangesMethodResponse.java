@@ -22,9 +22,9 @@ import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.MethodResponse;
 
-
 @Getter
-public abstract class ChangesMethodResponse<T extends AbstractIdentifiableEntity> implements MethodResponse {
+public abstract class ChangesMethodResponse<T extends AbstractIdentifiableEntity>
+        implements MethodResponse {
 
     protected String accountId;
     protected String oldState;
@@ -34,7 +34,14 @@ public abstract class ChangesMethodResponse<T extends AbstractIdentifiableEntity
     protected String[] updated;
     protected String[] destroyed;
 
-    public ChangesMethodResponse(String accountId, String oldState, String newState, boolean hasMoreChanges, String[] created, String[] updated, String[] destroyed) {
+    public ChangesMethodResponse(
+            String accountId,
+            String oldState,
+            String newState,
+            boolean hasMoreChanges,
+            String[] created,
+            String[] updated,
+            String[] destroyed) {
         this.accountId = accountId;
         this.oldState = oldState;
         this.newState = newState;

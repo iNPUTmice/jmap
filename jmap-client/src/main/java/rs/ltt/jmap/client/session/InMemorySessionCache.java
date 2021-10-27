@@ -20,14 +20,12 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import okhttp3.HttpUrl;
-
 import java.util.HashMap;
+import okhttp3.HttpUrl;
 
 public class InMemorySessionCache implements SessionCache {
 
     private final HashMap<String, Session> cache = new HashMap<>();
-
 
     @Override
     public void store(final String username, final HttpUrl sessionResource, Session session) {
@@ -44,7 +42,8 @@ public class InMemorySessionCache implements SessionCache {
     }
 
     private static String getKey(final String username, final HttpUrl sessionResource) {
-        final String name = username + ':' + (sessionResource == null ? '\00' : sessionResource.toString());
+        final String name =
+                username + ':' + (sessionResource == null ? '\00' : sessionResource.toString());
         return Hashing.sha256().hashString(name, Charsets.UTF_8).toString();
     }
 }

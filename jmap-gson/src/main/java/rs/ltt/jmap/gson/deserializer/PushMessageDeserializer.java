@@ -17,21 +17,27 @@
 package rs.ltt.jmap.gson.deserializer;
 
 import com.google.gson.*;
+import java.lang.reflect.Type;
 import rs.ltt.jmap.common.entity.PushMessage;
 import rs.ltt.jmap.common.entity.PushVerification;
 import rs.ltt.jmap.common.entity.StateChange;
-
-import java.lang.reflect.Type;
 
 public class PushMessageDeserializer implements JsonDeserializer<PushMessage> {
 
     public static void register(final GsonBuilder builder) {
         builder.registerTypeAdapter(PushMessage.class, new PushMessageDeserializer());
     }
+
     @Override
-    public PushMessage deserialize(final JsonElement jsonElement, final Type type, final JsonDeserializationContext context) throws JsonParseException {
+    public PushMessage deserialize(
+            final JsonElement jsonElement,
+            final Type type,
+            final JsonDeserializationContext context)
+            throws JsonParseException {
         if (!jsonElement.isJsonObject()) {
-            throw new JsonParseException("Expected JSON object for PushMessage. Got " + jsonElement.getClass().getSimpleName());
+            throw new JsonParseException(
+                    "Expected JSON object for PushMessage. Got "
+                            + jsonElement.getClass().getSimpleName());
         }
         final JsonObject jsonObject = jsonElement.getAsJsonObject();
         if (!jsonObject.has("@type")) {

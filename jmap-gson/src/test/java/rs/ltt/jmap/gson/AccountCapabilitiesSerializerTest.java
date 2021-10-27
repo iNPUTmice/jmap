@@ -2,6 +2,9 @@ package rs.ltt.jmap.gson;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.entity.AccountCapability;
@@ -9,14 +12,10 @@ import rs.ltt.jmap.common.entity.capability.MailAccountCapability;
 import rs.ltt.jmap.common.entity.capability.SubmissionAccountCapability;
 import rs.ltt.jmap.common.entity.capability.VacationResponseAccountCapability;
 
-import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-
 public class AccountCapabilitiesSerializerTest extends AbstractGsonTest {
-    private static final Type TYPE = new TypeToken<Map<Class<? extends AccountCapability>, AccountCapability>>() {
-    }.getType();
+    private static final Type TYPE =
+            new TypeToken<
+                    Map<Class<? extends AccountCapability>, AccountCapability>>() {}.getType();
 
     private final Gson gson = getGson();
 
@@ -34,7 +33,8 @@ public class AccountCapabilitiesSerializerTest extends AbstractGsonTest {
 
     @Test
     public void submissionAccountCapability() throws Exception {
-        SubmissionAccountCapability submissionAccountCapability = createSubmissionAccountCapability();
+        SubmissionAccountCapability submissionAccountCapability =
+                createSubmissionAccountCapability();
         Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilities =
                 createAccountCapabilitiesMap(submissionAccountCapability);
 
@@ -46,7 +46,8 @@ public class AccountCapabilitiesSerializerTest extends AbstractGsonTest {
 
     @Test
     public void vacationResponseAccountCapability() {
-        VacationResponseAccountCapability vacationResponseAccountCapability = createVacationResponseAccountCapability();
+        VacationResponseAccountCapability vacationResponseAccountCapability =
+                createVacationResponseAccountCapability();
         Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilities =
                 createAccountCapabilitiesMap(vacationResponseAccountCapability);
 
@@ -58,10 +59,15 @@ public class AccountCapabilitiesSerializerTest extends AbstractGsonTest {
     @Test
     public void allSupportedCapabilities() throws Exception {
         MailAccountCapability mailAccountCapability = createMailAccountCapability();
-        SubmissionAccountCapability submissionAccountCapability = createSubmissionAccountCapability();
-        VacationResponseAccountCapability vacationResponseAccountCapability = createVacationResponseAccountCapability();
+        SubmissionAccountCapability submissionAccountCapability =
+                createSubmissionAccountCapability();
+        VacationResponseAccountCapability vacationResponseAccountCapability =
+                createVacationResponseAccountCapability();
         Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilities =
-                createAccountCapabilitiesMap(mailAccountCapability, submissionAccountCapability, vacationResponseAccountCapability);
+                createAccountCapabilitiesMap(
+                        mailAccountCapability,
+                        submissionAccountCapability,
+                        vacationResponseAccountCapability);
 
         String json = gson.toJson(accountCapabilities, TYPE);
 
@@ -75,14 +81,14 @@ public class AccountCapabilitiesSerializerTest extends AbstractGsonTest {
                 .maxMailboxDepth(5L)
                 .maxSizeMailboxName(500L)
                 .maxSizeAttachmentsPerEmail(10_000_000L)
-                .emailQuerySortOptions(new String[]{"receivedAt", "To"})
+                .emailQuerySortOptions(new String[] {"receivedAt", "To"})
                 .mayCreateTopLevelMailbox(false)
                 .build();
     }
 
     private SubmissionAccountCapability createSubmissionAccountCapability() {
         Map<String, String[]> submissionExtensions = new LinkedHashMap<>();
-        submissionExtensions.put("DELIVERBY", new String[]{"240"});
+        submissionExtensions.put("DELIVERBY", new String[] {"240"});
         return SubmissionAccountCapability.builder()
                 .maxDelayedSend(300L)
                 .submissionExtensions(submissionExtensions)
@@ -93,8 +99,10 @@ public class AccountCapabilitiesSerializerTest extends AbstractGsonTest {
         return VacationResponseAccountCapability.builder().build();
     }
 
-    private Map<Class<? extends AccountCapability>, AccountCapability> createAccountCapabilitiesMap(AccountCapability... accountCapabilities) {
-        Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilitiesMap = new LinkedHashMap<>();
+    private Map<Class<? extends AccountCapability>, AccountCapability> createAccountCapabilitiesMap(
+            AccountCapability... accountCapabilities) {
+        Map<Class<? extends AccountCapability>, AccountCapability> accountCapabilitiesMap =
+                new LinkedHashMap<>();
         for (AccountCapability accountCapability : accountCapabilities) {
             accountCapabilitiesMap.put(accountCapability.getClass(), accountCapability);
         }

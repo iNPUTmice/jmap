@@ -24,14 +24,12 @@ import rs.ltt.jmap.common.method.MethodCall;
 
 @AllArgsConstructor
 @Getter
-public abstract class ChangesMethodCall<T extends AbstractIdentifiableEntity> implements MethodCall {
+public abstract class ChangesMethodCall<T extends AbstractIdentifiableEntity>
+        implements MethodCall {
 
-    @NonNull
-    private String accountId;
+    @NonNull private String accountId;
 
-    @NonNull
-    private String sinceState;
+    @NonNull private String sinceState;
 
     private Long maxChanges;
-
 }

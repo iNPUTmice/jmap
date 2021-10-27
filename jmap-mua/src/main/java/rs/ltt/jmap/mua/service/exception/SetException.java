@@ -17,9 +17,8 @@
 package rs.ltt.jmap.mua.service.exception;
 
 import com.google.common.base.MoreObjects;
-import rs.ltt.jmap.common.entity.SetError;
-
 import java.util.Map;
+import rs.ltt.jmap.common.entity.SetError;
 
 public abstract class SetException extends Exception {
 
@@ -27,7 +26,10 @@ public abstract class SetException extends Exception {
     private final Map<String, SetError> notUpdated;
     private final Map<String, SetError> notDestroyed;
 
-    protected SetException(Map<String, SetError> notCreated, Map<String, SetError> notUpdated, Map<String, SetError> notDestroyed) {
+    protected SetException(
+            Map<String, SetError> notCreated,
+            Map<String, SetError> notUpdated,
+            Map<String, SetError> notDestroyed) {
         this.notCreated = notCreated;
         this.notUpdated = notUpdated;
         this.notDestroyed = notDestroyed;

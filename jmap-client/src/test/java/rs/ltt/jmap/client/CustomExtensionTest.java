@@ -16,9 +16,14 @@
 
 package rs.ltt.jmap.client;
 
+import static rs.ltt.jmap.client.HttpJmapClientTest.WELL_KNOWN_PATH;
+import static rs.ltt.jmap.client.HttpJmapClientTest.readResourceAsString;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.hamcrest.CoreMatchers;
@@ -31,19 +36,14 @@ import rs.ltt.jmap.common.method.response.core.EchoMethodResponse;
 import rs.ltt.jmap.common.util.Mapper;
 import rs.ltt.jmap.gson.JmapAdapters;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
-import static rs.ltt.jmap.client.HttpJmapClientTest.WELL_KNOWN_PATH;
-import static rs.ltt.jmap.client.HttpJmapClientTest.readResourceAsString;
-
 public class CustomExtensionTest {
 
     private static final String ACCOUNT_ID = "test@example.com";
     private static final String USERNAME = "test@example.com";
     private static final String PASSWORD = "secret";
 
-    private static final String EXPECTED_JSON_QUERY_CALL = "{\"accountId\":\"accountId\",\"filter\":{\"isPlaceholder\":true}}";
+    private static final String EXPECTED_JSON_QUERY_CALL =
+            "{\"accountId\":\"accountId\",\"filter\":{\"isPlaceholder\":true}}";
 
     @Test
     public void findDummyAndCommonMethodCalls() {
@@ -60,34 +60,33 @@ public class CustomExtensionTest {
     @Test
     public void failOnCallWithoutNamespace() {
         final JmapClient client = new JmapClient(USERNAME, PASSWORD);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            client.call(new GetDummyMethodCall(ACCOUNT_ID)).get();
-        });
-
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> {
+                    client.call(new GetDummyMethodCall(ACCOUNT_ID)).get();
+                });
     }
 
     @Test
     public void notAnnotatedSet() throws IOException {
         final MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
+        server.enqueue(
+                new MockResponse()
+                        .setBody(readResourceAsString("fetch-mailboxes/01-session.json")));
         server.start();
 
-        final JmapClient client = new JmapClient(
-                USERNAME,
-                PASSWORD,
-                server.url(WELL_KNOWN_PATH)
-        );
-        final ExecutionException executionException = Assertions.assertThrows(ExecutionException.class, () -> {
-            client.call(new SetDummyMethodCall(
-                    ACCOUNT_ID,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            )).get();
-        });
-        MatcherAssert.assertThat(executionException.getCause(), CoreMatchers.instanceOf(JsonIOException.class));
+        final JmapClient client = new JmapClient(USERNAME, PASSWORD, server.url(WELL_KNOWN_PATH));
+        final ExecutionException executionException =
+                Assertions.assertThrows(
+                        ExecutionException.class,
+                        () -> {
+                            client.call(
+                                            new SetDummyMethodCall(
+                                                    ACCOUNT_ID, null, null, null, null, null))
+                                    .get();
+                        });
+        MatcherAssert.assertThat(
+                executionException.getCause(), CoreMatchers.instanceOf(JsonIOException.class));
     }
 
     @Test
@@ -95,16 +94,16 @@ public class CustomExtensionTest {
         final GsonBuilder gsonBuilder = new GsonBuilder();
         JmapAdapters.register(gsonBuilder);
         final Gson gson = gsonBuilder.create();
-        final QueryDummyMethodCall queryDummyMethodCall = new QueryDummyMethodCall(
-                "accountId",
-                new DummyFilterCondition(true),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+        final QueryDummyMethodCall queryDummyMethodCall =
+                new QueryDummyMethodCall(
+                        "accountId",
+                        new DummyFilterCondition(true),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
         Assertions.assertEquals(EXPECTED_JSON_QUERY_CALL, gson.toJson(queryDummyMethodCall));
     }
 
@@ -113,8 +112,9 @@ public class CustomExtensionTest {
         final GsonBuilder gsonBuilder = new GsonBuilder();
         JmapAdapters.register(gsonBuilder);
         final Gson gson = gsonBuilder.create();
-        final QueryDummyMethodCall queryMethodCall = gson.fromJson(EXPECTED_JSON_QUERY_CALL, QueryDummyMethodCall.class);
-        MatcherAssert.assertThat(queryMethodCall.getFilter(), CoreMatchers.instanceOf(DummyFilterCondition.class));
+        final QueryDummyMethodCall queryMethodCall =
+                gson.fromJson(EXPECTED_JSON_QUERY_CALL, QueryDummyMethodCall.class);
+        MatcherAssert.assertThat(
+                queryMethodCall.getFilter(), CoreMatchers.instanceOf(DummyFilterCondition.class));
     }
-
 }

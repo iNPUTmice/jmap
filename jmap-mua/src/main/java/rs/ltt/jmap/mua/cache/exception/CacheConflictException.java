@@ -17,12 +17,13 @@
 package rs.ltt.jmap.mua.cache.exception;
 
 /**
- * A cache implementation will throw that for errors that can be recovered from automatically like state mismatched
- * states. (When attempting to update from state a to state c but the state in the cache is b or d.) This usually
- * means that the cache write attempt is a result for a request that got delayed  or duplicated in flight or something.
+ * A cache implementation will throw that for errors that can be recovered from automatically like
+ * state mismatched states. (When attempting to update from state a to state c but the state in the
+ * cache is b or d.) This usually means that the cache write attempt is a result for a request that
+ * got delayed or duplicated in flight or something.
  *
- * MUA will pass this error on to the higher ups but it is probably save to ignore as a request with a correct update
- * is probably already in flight or can easily be made.
+ * <p>MUA will pass this error on to the higher ups but it is probably save to ignore as a request
+ * with a correct update is probably already in flight or can easily be made.
  */
 public class CacheConflictException extends IllegalStateException {
     public CacheConflictException(String message) {

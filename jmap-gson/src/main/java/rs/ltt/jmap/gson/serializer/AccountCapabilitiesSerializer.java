@@ -19,29 +19,37 @@ package rs.ltt.jmap.gson.serializer;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Map;
 import rs.ltt.jmap.common.entity.AccountCapability;
 import rs.ltt.jmap.common.util.Mapper;
 
-import java.lang.reflect.Type;
-import java.util.Map;
+public class AccountCapabilitiesSerializer
+        implements JsonSerializer<Map<Class<? extends AccountCapability>, AccountCapability>> {
 
-public class AccountCapabilitiesSerializer implements JsonSerializer<Map<Class<? extends AccountCapability>, AccountCapability>> {
-
-    private static final ImmutableMap<Class<? extends AccountCapability>, String> ACCOUNT_CAPABILITIES = Mapper.ACCOUNT_CAPABILITIES.inverse();
+    private static final ImmutableMap<Class<? extends AccountCapability>, String>
+            ACCOUNT_CAPABILITIES = Mapper.ACCOUNT_CAPABILITIES.inverse();
 
     public static void register(final GsonBuilder builder) {
-        Type type = new TypeToken<Map<Class<? extends AccountCapability>, AccountCapability>>() {
-        }.getType();
+        Type type =
+                new TypeToken<
+                        Map<Class<? extends AccountCapability>, AccountCapability>>() {}.getType();
         builder.registerTypeAdapter(type, new AccountCapabilitiesSerializer());
     }
 
     @Override
-    public JsonElement serialize(Map<Class<? extends AccountCapability>, AccountCapability> map, Type type, JsonSerializationContext context) {
+    public JsonElement serialize(
+            Map<Class<? extends AccountCapability>, AccountCapability> map,
+            Type type,
+            JsonSerializationContext context) {
         final JsonObject jsonObject = new JsonObject();
-        for (Map.Entry<Class<? extends AccountCapability>, AccountCapability> entry : map.entrySet()) {
+        for (Map.Entry<Class<? extends AccountCapability>, AccountCapability> entry :
+                map.entrySet()) {
             final Class<? extends AccountCapability> clazz = entry.getKey();
             final String name = ACCOUNT_CAPABILITIES.get(clazz);
-            jsonObject.add(name != null ? name : clazz.getSimpleName(), context.serialize(entry.getValue()));
+            jsonObject.add(
+                    name != null ? name : clazz.getSimpleName(),
+                    context.serialize(entry.getValue()));
         }
         return jsonObject;
     }

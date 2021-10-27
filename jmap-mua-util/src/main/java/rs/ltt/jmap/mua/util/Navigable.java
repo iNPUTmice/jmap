@@ -19,5 +19,4 @@ package rs.ltt.jmap.mua.util;
 public interface Navigable {
 
     boolean equals(Object o);
-
 }

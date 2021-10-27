@@ -16,6 +16,9 @@
 
 package rs.ltt.jmap.gson;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
+import java.io.IOException;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,18 +28,19 @@ import rs.ltt.jmap.common.entity.Identity;
 import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.identity.GetIdentityMethodResponse;
 
-import java.io.IOException;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-
 public class RfcExamplesDeserializerTest extends AbstractGsonTest {
 
     @Test
     public void emailGetResponse() throws IOException {
-        Response.Invocation[] responseInvocation = parseFromResource("rfc-example/email-get-response.json", Response.Invocation[].class);
+        Response.Invocation[] responseInvocation =
+                parseFromResource(
+                        "rfc-example/email-get-response.json", Response.Invocation[].class);
         Assertions.assertEquals(responseInvocation.length, 1);
-        MatcherAssert.assertThat(responseInvocation[0].getMethodResponse(), instanceOf(GetEmailMethodResponse.class));
-        final GetEmailMethodResponse methodResponse = (GetEmailMethodResponse) responseInvocation[0].getMethodResponse();
+        MatcherAssert.assertThat(
+                responseInvocation[0].getMethodResponse(),
+                instanceOf(GetEmailMethodResponse.class));
+        final GetEmailMethodResponse methodResponse =
+                (GetEmailMethodResponse) responseInvocation[0].getMethodResponse();
         final Email[] emails = methodResponse.getList();
         Assertions.assertEquals(emails.length, 1);
         final Email email = emails[0];
@@ -49,9 +53,13 @@ public class RfcExamplesDeserializerTest extends AbstractGsonTest {
 
     @Test
     public void identityGetResponse() throws IOException {
-        Response.Invocation invocation = parseFromResource("rfc-example/identity-get-response.json", Response.Invocation.class);
-        MatcherAssert.assertThat(invocation.getMethodResponse(), instanceOf(GetIdentityMethodResponse.class));
-        GetIdentityMethodResponse methodResponse = (GetIdentityMethodResponse) invocation.getMethodResponse();
+        Response.Invocation invocation =
+                parseFromResource(
+                        "rfc-example/identity-get-response.json", Response.Invocation.class);
+        MatcherAssert.assertThat(
+                invocation.getMethodResponse(), instanceOf(GetIdentityMethodResponse.class));
+        GetIdentityMethodResponse methodResponse =
+                (GetIdentityMethodResponse) invocation.getMethodResponse();
         Identity[] identities = methodResponse.getList();
         Assertions.assertEquals(identities.length, 2);
         Assertions.assertEquals(identities[0].getName(), "Joe Bloggs");

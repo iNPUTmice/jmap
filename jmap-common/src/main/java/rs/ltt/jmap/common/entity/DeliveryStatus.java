@@ -26,5 +26,4 @@ public class DeliveryStatus {
     private String deliveryStatus;
     private Delivered delivered;
     private Displayed displayed;
-
 }

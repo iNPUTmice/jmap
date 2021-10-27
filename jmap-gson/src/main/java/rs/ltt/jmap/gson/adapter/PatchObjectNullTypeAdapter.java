@@ -20,9 +20,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import rs.ltt.jmap.common.util.Patches;
-
 import java.io.IOException;
+import rs.ltt.jmap.common.util.Patches;
 
 public class PatchObjectNullTypeAdapter extends TypeAdapter<Patches.Null> {
 

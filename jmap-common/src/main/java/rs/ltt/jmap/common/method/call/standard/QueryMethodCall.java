@@ -26,8 +26,7 @@ import rs.ltt.jmap.common.method.MethodCall;
 @Getter
 public abstract class QueryMethodCall<T extends AbstractIdentifiableEntity> implements MethodCall {
 
-    @NonNull
-    private String accountId;
+    @NonNull private String accountId;
 
     private Filter<T> filter;
 
@@ -43,8 +42,15 @@ public abstract class QueryMethodCall<T extends AbstractIdentifiableEntity> impl
 
     private Boolean calculateTotal;
 
-    public QueryMethodCall(@NonNull String accountId, Filter<T> filter, Comparator[] sort, Long position, String anchor,
-                           Long anchorOffset, Long limit, Boolean calculateTotal) {
+    public QueryMethodCall(
+            @NonNull String accountId,
+            Filter<T> filter,
+            Comparator[] sort,
+            Long position,
+            String anchor,
+            Long anchorOffset,
+            Long limit,
+            Boolean calculateTotal) {
         this.accountId = accountId;
         this.filter = filter;
         this.sort = sort;

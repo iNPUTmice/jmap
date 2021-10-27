@@ -17,6 +17,9 @@
 package rs.ltt.jmap.mua.service;
 
 import com.google.common.util.concurrent.*;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapClient;
@@ -31,10 +34,6 @@ import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.ObjectsState;
 import rs.ltt.jmap.mua.util.UpdateUtil;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
 
 public abstract class MuaService {
 
@@ -65,41 +64,51 @@ public abstract class MuaService {
         return ioExecutorService.submit(cache::getObjectsState);
     }
 
-    protected void registerCacheInvalidationCallback(UpdateUtil.MethodResponsesFuture methodResponsesFuture, Runnable runnable) {
-        methodResponsesFuture.addChangesCallback(new FutureCallback<MethodResponses>() {
-            @Override
-            public void onSuccess(@Nullable MethodResponses methodResponses) {
-                final ChangesMethodResponse<?> changesMethodResponse = methodResponses.getMain(ChangesMethodResponse.class);
-                final TypedState<?> oldState = changesMethodResponse.getTypedOldState();
-                final TypedState<?> newState = changesMethodResponse.getTypedNewState();
-                final boolean hasMoreChanges = changesMethodResponse.isHasMoreChanges();
-                if (hasMoreChanges && oldState.equals(newState)) {
-                    LOGGER.error(
-                            "Invalid server response to {} oldState==newState despite having more changes",
-                            Mapper.METHOD_RESPONSES.inverse().get(methodResponses.getMain().getClass())
-                    );
-                    runnable.run();
-                }
-            }
+    protected void registerCacheInvalidationCallback(
+            UpdateUtil.MethodResponsesFuture methodResponsesFuture, Runnable runnable) {
+        methodResponsesFuture.addChangesCallback(
+                new FutureCallback<MethodResponses>() {
+                    @Override
+                    public void onSuccess(@Nullable MethodResponses methodResponses) {
+                        final ChangesMethodResponse<?> changesMethodResponse =
+                                methodResponses.getMain(ChangesMethodResponse.class);
+                        final TypedState<?> oldState = changesMethodResponse.getTypedOldState();
+                        final TypedState<?> newState = changesMethodResponse.getTypedNewState();
+                        final boolean hasMoreChanges = changesMethodResponse.isHasMoreChanges();
+                        if (hasMoreChanges && oldState.equals(newState)) {
+                            LOGGER.error(
+                                    "Invalid server response to {} oldState==newState despite"
+                                            + " having more changes",
+                                    Mapper.METHOD_RESPONSES
+                                            .inverse()
+                                            .get(methodResponses.getMain().getClass()));
+                            runnable.run();
+                        }
+                    }
 
-            @Override
-            public void onFailure(@Nonnull Throwable throwable) {
-                if (MethodErrorResponseException.matches(throwable, CannotCalculateChangesMethodErrorResponse.class)) {
-                    runnable.run();
-                }
-            }
-        }, ioExecutorService);
+                    @Override
+                    public void onFailure(@Nonnull Throwable throwable) {
+                        if (MethodErrorResponseException.matches(
+                                throwable, CannotCalculateChangesMethodErrorResponse.class)) {
+                            runnable.run();
+                        }
+                    }
+                },
+                ioExecutorService);
     }
 
     protected static ListenableFuture<Status> transform(List<ListenableFuture<Status>> list) {
-        return Futures.transform(Futures.allAsList(list), statuses -> {
-            if (statuses.contains(Status.HAS_MORE)) {
-                return Status.HAS_MORE;
-            }
-            if (statuses.contains(Status.UPDATED)) {
-                return Status.UPDATED;
-            }
-            return Status.UNCHANGED;
-        }, MoreExecutors.directExecutor());
+        return Futures.transform(
+                Futures.allAsList(list),
+                statuses -> {
+                    if (statuses.contains(Status.HAS_MORE)) {
+                        return Status.HAS_MORE;
+                    }
+                    if (statuses.contains(Status.UPDATED)) {
+                        return Status.UPDATED;
+                    }
+                    return Status.UNCHANGED;
+                },
+                MoreExecutors.directExecutor());
     }
 }

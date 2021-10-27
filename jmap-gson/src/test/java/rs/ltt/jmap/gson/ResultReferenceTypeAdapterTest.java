@@ -13,18 +13,18 @@ public class ResultReferenceTypeAdapterTest {
 
     @Test
     public void writeAndReadBack() {
-        Request.Invocation emailQuery = new Request.Invocation(
-                QueryEmailMethodCall.builder().accountId("accountId").build(),
-                METHOD_CALL_ID
-        );
+        Request.Invocation emailQuery =
+                new Request.Invocation(
+                        QueryEmailMethodCall.builder().accountId("accountId").build(),
+                        METHOD_CALL_ID);
         Request.Invocation.ResultReference resultReferenceOut = emailQuery.createReference("/ids");
         GsonBuilder gsonBuilder = new GsonBuilder();
         ResultReferenceTypeAdapter.register(gsonBuilder);
         String json = gsonBuilder.create().toJson(resultReferenceOut);
-        Request.Invocation.ResultReference resultReferenceIn = gsonBuilder.create().fromJson(json, Request.Invocation.ResultReference.class);
+        Request.Invocation.ResultReference resultReferenceIn =
+                gsonBuilder.create().fromJson(json, Request.Invocation.ResultReference.class);
         Assertions.assertEquals(resultReferenceIn.getClazz(), resultReferenceOut.getClazz());
         Assertions.assertEquals(resultReferenceIn.getId(), resultReferenceOut.getId());
         Assertions.assertEquals(resultReferenceIn.getPath(), resultReferenceOut.getPath());
     }
-
 }

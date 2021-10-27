@@ -28,7 +28,8 @@ public class MaxIntegerDeserializationTest extends AbstractGsonTest {
     public void emailDeserialization() throws Exception {
         final Email email = parseFromResource("email/max-int-email.json", Email.class);
         Assertions.assertEquals((long) email.getSize(), LongMath.pow(2, 53) - 1L);
-        Assertions.assertEquals((long) email.getTextBody().get(0).getSize(), LongMath.pow(2, 53) - 2L);
+        Assertions.assertEquals(
+                (long) email.getTextBody().get(0).getSize(), LongMath.pow(2, 53) - 2L);
     }
 
     @Test
@@ -36,7 +37,5 @@ public class MaxIntegerDeserializationTest extends AbstractGsonTest {
         final Mailbox mailbox = parseFromResource("mailbox/max-int-mailbox.json", Mailbox.class);
         Assertions.assertEquals((long) mailbox.getTotalEmails(), LongMath.pow(2, 53) - 1L);
         Assertions.assertEquals((long) mailbox.getUnreadEmails(), LongMath.pow(2, 53) - 2L);
-
     }
-
 }

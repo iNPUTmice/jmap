@@ -25,13 +25,14 @@ import rs.ltt.jmap.common.method.response.standard.ChangesMethodResponse;
 public class ChangesThreadMethodResponse extends ChangesMethodResponse<Thread> {
 
     @Builder
-    public ChangesThreadMethodResponse(String accountId,
-                                       String oldState,
-                                       String newState,
-                                       boolean hasMoreChanges,
-                                       String[] created,
-                                       String[] updated,
-                                       String[] destroyed) {
+    public ChangesThreadMethodResponse(
+            String accountId,
+            String oldState,
+            String newState,
+            boolean hasMoreChanges,
+            String[] created,
+            String[] updated,
+            String[] destroyed) {
         super(accountId, oldState, newState, hasMoreChanges, created, updated, destroyed);
     }
 }

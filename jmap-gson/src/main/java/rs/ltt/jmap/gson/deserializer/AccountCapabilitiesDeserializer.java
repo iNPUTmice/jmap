@@ -19,30 +19,36 @@ package rs.ltt.jmap.gson.deserializer;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Map;
 import rs.ltt.jmap.common.entity.AccountCapability;
 import rs.ltt.jmap.common.util.Mapper;
 
-import java.lang.reflect.Type;
-import java.util.Map;
-
-public class AccountCapabilitiesDeserializer implements JsonDeserializer<Map<Class<? extends AccountCapability>, AccountCapability>> {
+public class AccountCapabilitiesDeserializer
+        implements JsonDeserializer<Map<Class<? extends AccountCapability>, AccountCapability>> {
 
     public static void register(final GsonBuilder builder) {
-        Type type = new TypeToken<Map<Class<? extends AccountCapability>, AccountCapability>>() {
-        }.getType();
+        Type type =
+                new TypeToken<
+                        Map<Class<? extends AccountCapability>, AccountCapability>>() {}.getType();
         builder.registerTypeAdapter(type, new AccountCapabilitiesDeserializer());
     }
 
-    public Map<Class<? extends AccountCapability>, AccountCapability> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+    public Map<Class<? extends AccountCapability>, AccountCapability> deserialize(
+            JsonElement jsonElement, Type type, JsonDeserializationContext context)
+            throws JsonParseException {
         final JsonObject jsonObject = jsonElement.getAsJsonObject();
-        ImmutableMap.Builder<Class<? extends AccountCapability>, AccountCapability> builder = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<Class<? extends AccountCapability>, AccountCapability> builder =
+                new ImmutableMap.Builder<>();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             final String namespace = entry.getKey();
-            final Class<? extends AccountCapability> clazz = Mapper.ACCOUNT_CAPABILITIES.get(namespace);
+            final Class<? extends AccountCapability> clazz =
+                    Mapper.ACCOUNT_CAPABILITIES.get(namespace);
             if (clazz == null) {
                 continue;
             }
-            final AccountCapability accountCapability = context.deserialize(entry.getValue(), clazz);
+            final AccountCapability accountCapability =
+                    context.deserialize(entry.getValue(), clazz);
             builder.put(clazz, accountCapability);
         }
         return builder.build();

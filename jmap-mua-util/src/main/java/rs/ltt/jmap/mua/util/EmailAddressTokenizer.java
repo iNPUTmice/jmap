@@ -18,12 +18,11 @@ package rs.ltt.jmap.mua.util;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import rs.ltt.jmap.common.entity.EmailAddress;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import rs.ltt.jmap.common.entity.EmailAddress;
 
 public class EmailAddressTokenizer {
 
@@ -31,14 +30,16 @@ public class EmailAddressTokenizer {
         return tokenize(cs, false);
     }
 
-    public static Collection<EmailAddressToken> tokenize(final CharSequence cs, final boolean requireExplicitDelimiter) {
+    public static Collection<EmailAddressToken> tokenize(
+            final CharSequence cs, final boolean requireExplicitDelimiter) {
         final ImmutableList.Builder<EmailAddressToken> tokenBuilder = new ImmutableList.Builder<>();
         final TokenReader tokenReader = new TokenReader(cs);
         ArrayList<Token> current = new ArrayList<>();
         while (tokenReader.hasMoreToken()) {
             final Token token = tokenReader.read();
             current.add(token);
-            if (token.tokenType == TokenType.DELIMITER || (!requireExplicitDelimiter && token.tokenType == TokenType.END)) {
+            if (token.tokenType == TokenType.DELIMITER
+                    || (!requireExplicitDelimiter && token.tokenType == TokenType.END)) {
                 if (moreThanJustWhiteSpaces(current)) {
                     tokenBuilder.add(combine(cs, current));
                 }
@@ -49,7 +50,7 @@ public class EmailAddressTokenizer {
     }
 
     private static boolean moreThanJustWhiteSpaces(List<Token> tokens) {
-        for(Token token : tokens) {
+        for (Token token : tokens) {
             if (!isWhitespaceOrDelimiter(token)) {
                 return true;
             }
@@ -58,11 +59,13 @@ public class EmailAddressTokenizer {
     }
 
     private static boolean isWhitespaceOrDelimiter(Token token) {
-        return token.tokenType == TokenType.WHITESPACE || token.tokenType == TokenType.DELIMITER || token.tokenType == TokenType.END;
-
+        return token.tokenType == TokenType.WHITESPACE
+                || token.tokenType == TokenType.DELIMITER
+                || token.tokenType == TokenType.END;
     }
 
-    private static EmailAddressToken combine(final CharSequence charSequence, List<Token> tokenList) {
+    private static EmailAddressToken combine(
+            final CharSequence charSequence, List<Token> tokenList) {
         final ArrayList<Token> labelTokens = new ArrayList<>();
         final ArrayList<Token> addressTokens = new ArrayList<>();
         boolean inAddress = false;
@@ -107,13 +110,17 @@ public class EmailAddressTokenizer {
             emailAddress = label;
             label = null;
         }
-        return new EmailAddressToken(tokenList.get(0).start, tokenList.get(tokenList.size() - 1).end, EmailAddress.builder().email(emailAddress).name(label).build());
+        return new EmailAddressToken(
+                tokenList.get(0).start,
+                tokenList.get(tokenList.size() - 1).end,
+                EmailAddress.builder().email(emailAddress).name(label).build());
     }
 
     private static Token findFirstNonWhiteSpace(List<Token> tokens, boolean removeQuote) {
         for (int i = 0; i < tokens.size(); ++i) {
             final Token token = tokens.get(i);
-            if (token.tokenType != TokenType.WHITESPACE && (!removeQuote || token.tokenType != TokenType.QUOTE_BEGIN)) {
+            if (token.tokenType != TokenType.WHITESPACE
+                    && (!removeQuote || token.tokenType != TokenType.QUOTE_BEGIN)) {
                 return token;
             }
         }
@@ -123,13 +130,13 @@ public class EmailAddressTokenizer {
     private static Token findLastNonWhiteSpace(List<Token> tokens, boolean removeQuote) {
         for (int i = tokens.size() - 1; i >= 0; --i) {
             final Token token = tokens.get(i);
-            if (token.tokenType != TokenType.WHITESPACE && (!removeQuote || token.tokenType != TokenType.QUOTE_END)) {
+            if (token.tokenType != TokenType.WHITESPACE
+                    && (!removeQuote || token.tokenType != TokenType.QUOTE_END)) {
                 return token;
             }
         }
         return null;
     }
-
 
     private enum TokenType {
         TEXT,
@@ -144,7 +151,6 @@ public class EmailAddressTokenizer {
 
     private static class TokenReader {
         private final ArrayDeque<Token> queue = new ArrayDeque<>();
-
 
         private TokenReader(final CharSequence cs) {
             final int length = cs.length();
@@ -251,5 +257,4 @@ public class EmailAddressTokenizer {
                     .toString();
         }
     }
-
 }

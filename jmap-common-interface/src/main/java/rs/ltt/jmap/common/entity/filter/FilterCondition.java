@@ -18,5 +18,4 @@ package rs.ltt.jmap.common.entity.filter;
 
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 
-public interface FilterCondition<T extends AbstractIdentifiableEntity> extends Filter<T> {
-}
+public interface FilterCondition<T extends AbstractIdentifiableEntity> extends Filter<T> {}

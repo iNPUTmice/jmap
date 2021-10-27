@@ -21,5 +21,4 @@ import rs.ltt.jmap.annotation.JmapCapability;
 import rs.ltt.jmap.common.entity.Capability;
 
 @JmapCapability(namespace = Namespace.CALENDARS)
-public class CalendarsCapability implements Capability {
-}
+public class CalendarsCapability implements Capability {}

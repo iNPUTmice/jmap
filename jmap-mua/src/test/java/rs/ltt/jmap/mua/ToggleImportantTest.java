@@ -19,6 +19,8 @@ package rs.ltt.jmap.mua;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import java.io.IOException;
+import java.util.Collection;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.Assertions;
@@ -27,9 +29,6 @@ import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
 import rs.ltt.jmap.mua.util.MailboxUtil;
-
-import java.io.IOException;
-import java.util.Collection;
 
 public class ToggleImportantTest {
 
@@ -43,19 +42,20 @@ public class ToggleImportantTest {
         final MockWebServer server = new MockWebServer();
 
         server.enqueue(new MockResponse().setBody(readResourceAsString("common/01-session.json")));
-        server.enqueue(new MockResponse().setBody(readResourceAsString("common/02-mailboxes.json")));
+        server.enqueue(
+                new MockResponse().setBody(readResourceAsString("common/02-mailboxes.json")));
 
-        try (final Mua mua = Mua.builder()
-                .sessionResource(server.url(WELL_KNOWN_PATH))
-                .username(USERNAME)
-                .password(PASSWORD)
-                .accountId(ACCOUNT_ID)
-                .build()) {
+        try (final Mua mua =
+                Mua.builder()
+                        .sessionResource(server.url(WELL_KNOWN_PATH))
+                        .username(USERNAME)
+                        .password(PASSWORD)
+                        .accountId(ACCOUNT_ID)
+                        .build()) {
             mua.refreshMailboxes().get();
 
-            final Collection<MyIdentifiableEmailWithMailboxes> emails = ImmutableSet.of(
-                    new MyIdentifiableEmailWithMailboxes("e0", "mb2")
-            );
+            final Collection<MyIdentifiableEmailWithMailboxes> emails =
+                    ImmutableSet.of(new MyIdentifiableEmailWithMailboxes("e0", "mb2"));
 
             Assertions.assertFalse(mua.copyToImportant(emails).get());
         }
@@ -64,7 +64,9 @@ public class ToggleImportantTest {
     }
 
     private static String readResourceAsString(String filename) throws IOException {
-        return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8).read().trim();
+        return Resources.asCharSource(Resources.getResource(filename), Charsets.UTF_8)
+                .read()
+                .trim();
     }
 
     @Test
@@ -72,32 +74,32 @@ public class ToggleImportantTest {
         final MockWebServer server = new MockWebServer();
 
         server.enqueue(new MockResponse().setBody(readResourceAsString("common/01-session.json")));
-        server.enqueue(new MockResponse().setBody(readResourceAsString("common/02-mailboxes.json")));
+        server.enqueue(
+                new MockResponse().setBody(readResourceAsString("common/02-mailboxes.json")));
 
         final InMemoryCache inMemoryCache = new InMemoryCache();
 
-        try (final Mua mua = Mua.builder()
-                .sessionResource(server.url(WELL_KNOWN_PATH))
-                .username(USERNAME)
-                .password(PASSWORD)
-                .accountId(ACCOUNT_ID)
-                .cache(inMemoryCache)
-                .build()) {
+        try (final Mua mua =
+                Mua.builder()
+                        .sessionResource(server.url(WELL_KNOWN_PATH))
+                        .username(USERNAME)
+                        .password(PASSWORD)
+                        .accountId(ACCOUNT_ID)
+                        .cache(inMemoryCache)
+                        .build()) {
             mua.refreshMailboxes().get();
 
-            IdentifiableMailboxWithRole mailbox = MailboxUtil.find(inMemoryCache.getSpecialMailboxes(), Role.IMPORTANT);
+            IdentifiableMailboxWithRole mailbox =
+                    MailboxUtil.find(inMemoryCache.getSpecialMailboxes(), Role.IMPORTANT);
 
             Assertions.assertNotNull(mailbox);
 
-            final Collection<MyIdentifiableEmailWithMailboxes> emails = ImmutableSet.of(
-                    new MyIdentifiableEmailWithMailboxes("e0", "mb0")
-            );
+            final Collection<MyIdentifiableEmailWithMailboxes> emails =
+                    ImmutableSet.of(new MyIdentifiableEmailWithMailboxes("e0", "mb0"));
 
             Assertions.assertFalse(mua.removeFromMailbox(emails, mailbox.getId()).get());
         }
 
         server.shutdown();
     }
-
-
 }

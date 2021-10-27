@@ -17,11 +17,10 @@
 package rs.ltt.jmap.common.entity;
 
 import com.google.common.base.MoreObjects;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.Instant;
 import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 public class PushSubscription extends AbstractIdentifiableEntity {
@@ -39,7 +38,14 @@ public class PushSubscription extends AbstractIdentifiableEntity {
     private List<String> types;
 
     @Builder(toBuilder = true)
-    public PushSubscription(String id, String deviceClientId, String url, Keys keys, String verificationCode, Instant expires, List<String> types) {
+    public PushSubscription(
+            String id,
+            String deviceClientId,
+            String url,
+            Keys keys,
+            String verificationCode,
+            Instant expires,
+            List<String> types) {
         this.id = id;
         this.deviceClientId = deviceClientId;
         this.url = url;

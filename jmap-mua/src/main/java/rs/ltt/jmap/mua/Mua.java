@@ -20,6 +20,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.Collection;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import okhttp3.HttpUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +39,6 @@ import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
 import rs.ltt.jmap.mua.service.*;
 import rs.ltt.jmap.mua.util.AttachmentUtil;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collection;
 
 public class Mua extends MuaSession {
 
@@ -77,17 +76,19 @@ public class Mua extends MuaSession {
         return getService(QueryService.class).query(query, calculateTotal);
     }
 
-    public ListenableFuture<Status> query(@Nonnull final EmailQuery query, final String afterEmailId) {
+    public ListenableFuture<Status> query(
+            @Nonnull final EmailQuery query, final String afterEmailId) {
         return getService(QueryService.class).query(query, null, afterEmailId);
     }
 
-    public ListenableFuture<Status> query(@Nonnull final EmailQuery query, Boolean calculateTotal, final String afterEmailId) {
+    public ListenableFuture<Status> query(
+            @Nonnull final EmailQuery query, Boolean calculateTotal, final String afterEmailId) {
         return getService(QueryService.class).query(query, calculateTotal, afterEmailId);
     }
 
     /**
-     * Stores an email as a draft. This method will take care of adding the draft and seen keyword and moving the email
-     * to the draft mailbox.
+     * Stores an email as a draft. This method will take care of adding the draft and seen keyword
+     * and moving the email to the draft mailbox.
      *
      * @param email The email that should be saved as a draft
      * @return String The id of the email that has been created
@@ -97,16 +98,17 @@ public class Mua extends MuaSession {
     }
 
     /**
-     * Stores an email as a draft. This method will take care of adding the draft and seen keyword and moving the email
-     * to the draft mailbox.
+     * Stores an email as a draft. This method will take care of adding the draft and seen keyword
+     * and moving the email to the draft mailbox.
      *
-     * @param email  The email that should be saved as a draft
-     * @param drafts A reference to the Drafts mailbox. Can be null and a new Draft mailbox will automatically be created.
-     *               Do not pass null if a Drafts mailbox exists on the server as this call will attempt to create one
-     *               and fail.
+     * @param email The email that should be saved as a draft
+     * @param drafts A reference to the Drafts mailbox. Can be null and a new Draft mailbox will
+     *     automatically be created. Do not pass null if a Drafts mailbox exists on the server as
+     *     this call will attempt to create one and fail.
      * @return The id of the email that has been created
      */
-    public ListenableFuture<String> draft(final Email email, final IdentifiableMailboxWithRole drafts) {
+    public ListenableFuture<String> draft(
+            final Email email, final IdentifiableMailboxWithRole drafts) {
         return getService(EmailService.class).draft(email, drafts);
     }
 
@@ -115,33 +117,40 @@ public class Mua extends MuaSession {
     }
 
     /**
-     * Submits (sends / EmailSubmission) a previously drafted email. The email will be removed from the Drafts mailbox
-     * and put into the Sent mailbox after successful submission. Additionally the draft keyword will be removed.
+     * Submits (sends / EmailSubmission) a previously drafted email. The email will be removed from
+     * the Drafts mailbox and put into the Sent mailbox after successful submission. Additionally
+     * the draft keyword will be removed.
      *
-     * @param emailId  The id of the email that should be submitted
+     * @param emailId The id of the email that should be submitted
      * @param identity The identity used to submit that email
      * @return
      */
-    public ListenableFuture<Boolean> submit(final String emailId, final IdentifiableIdentity identity) {
+    public ListenableFuture<Boolean> submit(
+            final String emailId, final IdentifiableIdentity identity) {
         return getService(EmailService.class).submit(emailId, identity);
     }
 
     /**
-     * Submits (sends / EmailSubmission) a previously drafted email. The email will be removed from the Drafts mailbox
-     * and put into the Sent mailbox after successful submission. Additionally the draft keyword will be removed.
+     * Submits (sends / EmailSubmission) a previously drafted email. The email will be removed from
+     * the Drafts mailbox and put into the Sent mailbox after successful submission. Additionally
+     * the draft keyword will be removed.
      *
-     * @param emailId        The id of the email that should be submitted
-     * @param identity       The identity used to submit that email
-     * @param draftMailboxId The id of the draft mailbox. After successful submission the email will be removed from
-     *                       this mailbox. Can be null to skip this operation and not remove the email from that mailbox.
-     *                       If not null the caller should ensure that the id belongs to the draft mailbox and the email
-     *                       is in that mailbox.
-     * @param sent           A reference to the Sent mailbox. Can be null and a new sent mailbox will automatically be created.
-     *                       Do not pass null if a Sent mailbox exists on the server as this call will attempt to create one and
-     *                       fail.
+     * @param emailId The id of the email that should be submitted
+     * @param identity The identity used to submit that email
+     * @param draftMailboxId The id of the draft mailbox. After successful submission the email will
+     *     be removed from this mailbox. Can be null to skip this operation and not remove the email
+     *     from that mailbox. If not null the caller should ensure that the id belongs to the draft
+     *     mailbox and the email is in that mailbox.
+     * @param sent A reference to the Sent mailbox. Can be null and a new sent mailbox will
+     *     automatically be created. Do not pass null if a Sent mailbox exists on the server as this
+     *     call will attempt to create one and fail.
      * @return
      */
-    public ListenableFuture<Boolean> submit(final String emailId, final IdentifiableIdentity identity, @Nullable String draftMailboxId, final IdentifiableMailboxWithRole sent) {
+    public ListenableFuture<Boolean> submit(
+            final String emailId,
+            final IdentifiableIdentity identity,
+            @Nullable String draftMailboxId,
+            final IdentifiableMailboxWithRole sent) {
         return getService(EmailService.class).submit(emailId, identity, draftMailboxId, sent);
     }
 
@@ -149,131 +158,146 @@ public class Mua extends MuaSession {
         return getService(EmailService.class).send(email, identity);
     }
 
-    public ListenableFuture<Boolean> setKeyword(final Collection<? extends IdentifiableEmailWithKeywords> emails, final String keyword) {
+    public ListenableFuture<Boolean> setKeyword(
+            final Collection<? extends IdentifiableEmailWithKeywords> emails,
+            final String keyword) {
         return getService(EmailService.class).setKeyword(emails, keyword);
     }
 
-    public ListenableFuture<Boolean> discardDraft(final @Nonnull IdentifiableEmailWithKeywords email) {
+    public ListenableFuture<Boolean> discardDraft(
+            final @Nonnull IdentifiableEmailWithKeywords email) {
         return getService(EmailService.class).discardDraft(email);
     }
 
-    public ListenableFuture<Boolean> removeKeyword(final Collection<? extends IdentifiableEmailWithKeywords> emails,
-                                                   final String keyword) {
+    public ListenableFuture<Boolean> removeKeyword(
+            final Collection<? extends IdentifiableEmailWithKeywords> emails,
+            final String keyword) {
         return getService(EmailService.class).removeKeyword(emails, keyword);
     }
 
     /**
-     * Copies the individual emails in this collection (usually applied to an entire thread) to the mailbox with the
-     * role IMPORTANT. If a mailbox with that role doesn’t exist it will be created.
+     * Copies the individual emails in this collection (usually applied to an entire thread) to the
+     * mailbox with the role IMPORTANT. If a mailbox with that role doesn’t exist it will be
+     * created.
      *
      * @param emails A collection of emails. Usually all messages in a thread
      * @return
      */
-    public ListenableFuture<Boolean> copyToImportant(@Nonnull final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
+    public ListenableFuture<Boolean> copyToImportant(
+            @Nonnull final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
         return getService(EmailService.class).copyToImportant(emails);
     }
 
     /**
-     * Copies the individual emails in this collection (usually applied to an entire thread) to a given mailbox.
-     * If a certain email of this collection is already in that mailbox it will be skipped.
-     * <p>
-     * This method is usually run as a 'add label' action.
+     * Copies the individual emails in this collection (usually applied to an entire thread) to a
+     * given mailbox. If a certain email of this collection is already in that mailbox it will be
+     * skipped.
      *
-     * @param emails  A collection of emails. Usually all messages in a thread
+     * <p>This method is usually run as a 'add label' action.
+     *
+     * @param emails A collection of emails. Usually all messages in a thread
      * @param mailbox The mailbox those emails should be copied to.
      * @return
      */
-    public ListenableFuture<Boolean> copyToMailbox(final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
-                                                   final IdentifiableMailboxWithRole mailbox) {
+    public ListenableFuture<Boolean> copyToMailbox(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
+            final IdentifiableMailboxWithRole mailbox) {
         return getService(EmailService.class).copyToMailbox(emails, mailbox);
     }
 
-
-    public ListenableFuture<Boolean> modifyLabels(final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
-                                                  final Collection<? extends IdentifiableMailboxWithRoleAndName> additions,
-                                                  final Collection<? extends IdentifiableMailboxWithRoleAndName> removals) {
+    public ListenableFuture<Boolean> modifyLabels(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
+            final Collection<? extends IdentifiableMailboxWithRoleAndName> additions,
+            final Collection<? extends IdentifiableMailboxWithRoleAndName> removals) {
         return getService(EmailService.class).modifyLabels(emails, additions, removals);
     }
 
     /**
-     * Removes the emails in this collection from both the Trash and Archive mailbox (if they are in either of those)
-     * and puts all emails into the Inbox instead.
+     * Removes the emails in this collection from both the Trash and Archive mailbox (if they are in
+     * either of those) and puts all emails into the Inbox instead.
      *
      * @param emails A collection of emails; usually all emails in a thread
      * @return
      */
-    public ListenableFuture<Boolean> moveToInbox(final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
+    public ListenableFuture<Boolean> moveToInbox(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
         return getService(EmailService.class).moveToInbox(emails);
     }
 
     /**
-     * Moves the individual emails in this collection (usually applied to an entire thread) from the inbox to the archive.
-     * Any email that is not in the inbox will be skipped.
+     * Moves the individual emails in this collection (usually applied to an entire thread) from the
+     * inbox to the archive. Any email that is not in the inbox will be skipped.
      *
      * @param emails A collection of emails. Usually all messages in a thread
      * @return
      */
-    public ListenableFuture<Boolean> archive(final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
+    public ListenableFuture<Boolean> archive(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
         return getService(EmailService.class).archive(emails);
     }
 
     /**
-     * Removes the individual emails in this collection (usually applied to an entire thread) from a given mailbox. If a
-     * certain email was not in this mailbox it will be skipped. If removing an email from this mailbox would otherwise
-     * lead to the email having no mailbox it will be moved to the Archive mailbox.
+     * Removes the individual emails in this collection (usually applied to an entire thread) from a
+     * given mailbox. If a certain email was not in this mailbox it will be skipped. If removing an
+     * email from this mailbox would otherwise lead to the email having no mailbox it will be moved
+     * to the Archive mailbox.
      *
-     * @param emails    A collection of emails. Usually all messages in a thread
+     * @param emails A collection of emails. Usually all messages in a thread
      * @param mailboxId The id of the mailbox from which those emails should be removed
      * @return
      */
-    public ListenableFuture<Boolean> removeFromMailbox(final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
-                                                       final String mailboxId) {
+    public ListenableFuture<Boolean> removeFromMailbox(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
+            final String mailboxId) {
         return getService(EmailService.class).removeFromMailbox(emails, mailboxId);
     }
 
     /**
-     * Removes the individual emails in this collection (usually applied to an entire thread) from a given mailbox. If a
-     * certain email was not in this mailbox it will be skipped. If removing an email from this mailbox would otherwise
-     * lead to the email having no mailbox it will be moved to the Archive mailbox.
-     * <p>
-     * This method is usually run as a 'remove label' action.
+     * Removes the individual emails in this collection (usually applied to an entire thread) from a
+     * given mailbox. If a certain email was not in this mailbox it will be skipped. If removing an
+     * email from this mailbox would otherwise lead to the email having no mailbox it will be moved
+     * to the Archive mailbox.
      *
-     * @param emails  A collection of emails. Usually all messages in a thread
+     * <p>This method is usually run as a 'remove label' action.
+     *
+     * @param emails A collection of emails. Usually all messages in a thread
      * @param mailbox The mailbox from which those emails should be removed
-     * @param archive A reference to the Archive mailbox. Can be null and a new Archive mailbox will automatically be
-     *                created.
-     *                Do not pass null if an Archive mailbox exists on the server as this call will attempt to create
-     *                one and fail.
+     * @param archive A reference to the Archive mailbox. Can be null and a new Archive mailbox will
+     *     automatically be created. Do not pass null if an Archive mailbox exists on the server as
+     *     this call will attempt to create one and fail.
      */
-    public ListenableFuture<Boolean> removeFromMailbox(final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
-                                                       @Nonnull final Mailbox mailbox,
-                                                       @Nullable final IdentifiableMailboxWithRole archive) {
+    public ListenableFuture<Boolean> removeFromMailbox(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
+            @Nonnull final Mailbox mailbox,
+            @Nullable final IdentifiableMailboxWithRole archive) {
         return getService(EmailService.class).removeFromMailbox(emails, mailbox, archive);
     }
 
     /**
-     * Moves all emails in this collection (usually applied to an entire thread) to the trash mailbox. The emails will
-     * be removed from all other mailboxes. If a certain email in this collection is already only in the trash mailbox
-     * this email will not be processed.
+     * Moves all emails in this collection (usually applied to an entire thread) to the trash
+     * mailbox. The emails will be removed from all other mailboxes. If a certain email in this
+     * collection is already only in the trash mailbox this email will not be processed.
      *
      * @param emails A collection of emails. Usually all messages in a thread
      */
-    public ListenableFuture<Boolean> moveToTrash(final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
+    public ListenableFuture<Boolean> moveToTrash(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails) {
         return getService(EmailService.class).moveToTrash(emails);
     }
 
     /**
-     * Moves all emails in this collection (usually applied to an entire thread) to the trash mailbox. The emails will
-     * be removed from all other mailboxes. If a certain email in this collection is already only in the trash mailbox
-     * this email will not be processed.
+     * Moves all emails in this collection (usually applied to an entire thread) to the trash
+     * mailbox. The emails will be removed from all other mailboxes. If a certain email in this
+     * collection is already only in the trash mailbox this email will not be processed.
      *
      * @param emails A collection of emails. Usually all messages in a thread
-     * @param trash  A reference to the Trash mailbox. Can be null and a new trash mailbox will automatically be created.
-     *               Do not pass null if a Trash mailbox exists on the server as this call will attempt to create one
-     *               and fail.
+     * @param trash A reference to the Trash mailbox. Can be null and a new trash mailbox will
+     *     automatically be created. Do not pass null if a Trash mailbox exists on the server as
+     *     this call will attempt to create one and fail.
      */
-    public ListenableFuture<Boolean> moveToTrash(final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
-                                                 final IdentifiableMailboxWithRole trash) {
+    public ListenableFuture<Boolean> moveToTrash(
+            final Collection<? extends IdentifiableEmailWithMailboxIds> emails,
+            final IdentifiableMailboxWithRole trash) {
         return getService(EmailService.class).moveToTrash(emails, trash);
     }
 
@@ -285,7 +309,8 @@ public class Mua extends MuaSession {
         return getService(EmailService.class).emptyTrash(trash);
     }
 
-    public ListenableFuture<Boolean> setRole(final IdentifiableMailboxWithRole mailbox, final Role role) {
+    public ListenableFuture<Boolean> setRole(
+            final IdentifiableMailboxWithRole mailbox, final Role role) {
         return getService(MailboxService.class).setRole(mailbox, role);
     }
 
@@ -300,13 +325,16 @@ public class Mua extends MuaSession {
     }
 
     /**
-     * Resumes the download of binary data based on a Downloadable (blobId, type, name) and the current file size
+     * Resumes the download of binary data based on a Downloadable (blobId, type, name) and the
+     * current file size
      *
      * @param downloadable An EmailBodyPart or another class that implements Downloadable
-     * @param rangeStart   The amount of data (file size) that has previously been downloaded
-     * @return A Download Future that contains the InputStream, size and the cancelable HTTP Call and an indication if resume has been successful
+     * @param rangeStart The amount of data (file size) that has previously been downloaded
+     * @return A Download Future that contains the InputStream, size and the cancelable HTTP Call
+     *     and an indication if resume has been successful
      */
-    public ListenableFuture<Download> download(final Downloadable downloadable, final long rangeStart) {
+    public ListenableFuture<Download> download(
+            final Downloadable downloadable, final long rangeStart) {
         Preconditions.checkArgument(rangeStart >= 0, "rangeStart must not be smaller than 0");
         return jmapClient.download(getAccountId(), downloadable, rangeStart);
     }
@@ -315,11 +343,16 @@ public class Mua extends MuaSession {
         return jmapClient.upload(getAccountId(), uploadable, progress);
     }
 
-    public ListenableFuture<Void> verifyAttachmentsDoNotExceedLimit(final Collection<? extends Attachment> attachments) {
-        return Futures.transform(getJmapClient().getSession(), session -> {
-            AttachmentUtil.verifyAttachmentsDoNotExceedLimit(session, getAccountId(), attachments);
-            return null;
-        }, MoreExecutors.directExecutor());
+    public ListenableFuture<Void> verifyAttachmentsDoNotExceedLimit(
+            final Collection<? extends Attachment> attachments) {
+        return Futures.transform(
+                getJmapClient().getSession(),
+                session -> {
+                    AttachmentUtil.verifyAttachmentsDoNotExceedLimit(
+                            session, getAccountId(), attachments);
+                    return null;
+                },
+                MoreExecutors.directExecutor());
     }
 
     public static class Builder {
@@ -332,9 +365,7 @@ public class Mua extends MuaSession {
         private Long queryPageSize = null;
         private Boolean useWebSocket;
 
-        private Builder() {
-
-        }
+        private Builder() {}
 
         public Builder username(String username) {
             this.username = username;
@@ -387,7 +418,8 @@ public class Mua extends MuaSession {
         public Mua build() {
             Preconditions.checkNotNull(accountId, "accountId is required");
 
-            final JmapClient jmapClient = new JmapClient(this.username, this.password, this.sessionResource);
+            final JmapClient jmapClient =
+                    new JmapClient(this.username, this.password, this.sessionResource);
             jmapClient.setSessionCache(this.sessionCache);
             if (this.useWebSocket != null) {
                 jmapClient.setUseWebSocket(this.useWebSocket);

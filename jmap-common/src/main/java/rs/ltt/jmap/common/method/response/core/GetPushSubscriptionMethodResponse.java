@@ -19,9 +19,7 @@ package rs.ltt.jmap.common.method.response.core;
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.entity.PushSubscription;
-import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.method.MethodResponse;
-import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
 
 @JmapMethod("PushSubscription/get")
 @Builder

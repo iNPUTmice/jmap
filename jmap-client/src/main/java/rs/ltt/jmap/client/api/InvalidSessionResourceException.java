@@ -25,5 +25,4 @@ public class InvalidSessionResourceException extends JmapApiException {
     public InvalidSessionResourceException(Throwable throwable) {
         super(throwable);
     }
-
 }

@@ -20,5 +20,4 @@ import rs.ltt.jmap.annotation.JmapEntity;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 
 @JmapEntity(filterCondition = DummyFilterCondition.class)
-public class Dummy extends AbstractIdentifiableEntity {
-}
+public class Dummy extends AbstractIdentifiableEntity {}

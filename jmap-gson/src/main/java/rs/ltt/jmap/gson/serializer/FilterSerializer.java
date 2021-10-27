@@ -20,23 +20,25 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.util.Mapper;
 
-import java.lang.reflect.Type;
-
-
-public class FilterSerializer implements JsonSerializer<Filter<? extends AbstractIdentifiableEntity>> {
+public class FilterSerializer
+        implements JsonSerializer<Filter<? extends AbstractIdentifiableEntity>> {
 
     public static void register(final GsonBuilder builder) {
-        for(final Type type : Mapper.TYPE_TO_ENTITY_CLASS.keySet()) {
+        for (final Type type : Mapper.TYPE_TO_ENTITY_CLASS.keySet()) {
             builder.registerTypeAdapter(type, new FilterSerializer());
         }
     }
 
     @Override
-    public JsonElement serialize(Filter<? extends AbstractIdentifiableEntity> filter, Type type, JsonSerializationContext context) {
+    public JsonElement serialize(
+            Filter<? extends AbstractIdentifiableEntity> filter,
+            Type type,
+            JsonSerializationContext context) {
         return context.serialize(filter);
     }
 }

@@ -18,8 +18,8 @@ package rs.ltt.jmap.client;
 
 import rs.ltt.jmap.common.method.MethodResponse;
 
-
-//TODO do we want to type this for the calling method? This could be useful to delegate this into different methods based on the type
+// TODO do we want to type this for the calling method? This could be useful to delegate this into
+// different methods based on the type
 public class MethodResponses {
 
     private final MethodResponse main;
@@ -40,7 +40,7 @@ public class MethodResponses {
     }
 
     public <T extends MethodResponse> T getMain(Class<T> clazz) {
-        //TODO check before cast and throw unexpected method error
+        // TODO check before cast and throw unexpected method error
         return clazz.cast(main);
     }
 

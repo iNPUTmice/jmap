@@ -18,16 +18,14 @@ package rs.ltt.jmap.mua;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
-
 import java.util.Map;
 import java.util.Set;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
 
 class MyIdentifiableEmailWithMailboxes implements IdentifiableEmailWithMailboxIds {
 
     private final String id;
     private final Set<String> mailboxIds;
-
 
     MyIdentifiableEmailWithMailboxes(String id, String mailboxId) {
         this.id = id;
@@ -41,7 +39,7 @@ class MyIdentifiableEmailWithMailboxes implements IdentifiableEmailWithMailboxId
 
     @Override
     public Map<String, Boolean> getMailboxIds() {
-       return  Maps.asMap(mailboxIds, s -> true);
+        return Maps.asMap(mailboxIds, s -> true);
     }
 
     @Override

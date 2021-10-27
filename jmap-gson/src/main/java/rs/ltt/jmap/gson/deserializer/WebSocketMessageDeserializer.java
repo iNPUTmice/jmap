@@ -17,12 +17,11 @@
 package rs.ltt.jmap.gson.deserializer;
 
 import com.google.gson.*;
+import java.lang.reflect.Type;
 import rs.ltt.jmap.common.ErrorResponse;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.websocket.*;
-
-import java.lang.reflect.Type;
 
 public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketMessage> {
 
@@ -31,11 +30,15 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
     }
 
     @Override
-    public WebSocketMessage deserialize(final JsonElement jsonElement,
-                                        final Type type,
-                                        final JsonDeserializationContext context) throws JsonParseException {
+    public WebSocketMessage deserialize(
+            final JsonElement jsonElement,
+            final Type type,
+            final JsonDeserializationContext context)
+            throws JsonParseException {
         if (!jsonElement.isJsonObject()) {
-            throw new JsonParseException("Expected JSON object for WebSocketMessage. Got " + jsonElement.getClass().getSimpleName());
+            throw new JsonParseException(
+                    "Expected JSON object for WebSocketMessage. Got "
+                            + jsonElement.getClass().getSimpleName());
         }
         final JsonObject jsonObject = jsonElement.getAsJsonObject();
         if (!jsonObject.has("@type")) {
@@ -52,7 +55,8 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
                     .build();
         }
         if ("ErrorResponse".equals(messageType)) {
-            final ErrorResponse errorResponse = context.deserialize(jsonElement, ErrorResponse.class);
+            final ErrorResponse errorResponse =
+                    context.deserialize(jsonElement, ErrorResponse.class);
             return ErrorResponseWebSocketMessage.builder()
                     .requestId(requestId)
                     .response(errorResponse)
@@ -63,10 +67,7 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
         }
         if ("Request".equals(messageType)) {
             final Request request = context.deserialize(jsonElement, Request.class);
-            return RequestWebSocketMessage.builder()
-                    .id(id)
-                    .request(request)
-                    .build();
+            return RequestWebSocketMessage.builder().id(id).request(request).build();
         }
         if ("WebSocketPushEnable".equals(messageType)) {
             return context.deserialize(jsonElement, PushEnableWebSocketMessage.class);
@@ -74,7 +75,8 @@ public class WebSocketMessageDeserializer implements JsonDeserializer<WebSocketM
         if ("WebSocketPushDisable".equals(messageType)) {
             return context.deserialize(jsonElement, PushDisableWebSocketMessage.class);
         }
-        throw new JsonParseException(String.format("Unknown WebSocketMessage type %s", messageType));
+        throw new JsonParseException(
+                String.format("Unknown WebSocketMessage type %s", messageType));
     }
 
     private static String getAsString(final JsonObject jsonObject, final String name) {

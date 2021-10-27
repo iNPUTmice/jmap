@@ -18,12 +18,10 @@ package rs.ltt.jmap.common;
 
 public final class Utils {
 
-    private Utils() {
-
-    }
+    private Utils() {}
 
     public static String getFilenameFor(final Class<?> clazz) {
-        return "META-INF/"+plural(clazz.getName());
+        return "META-INF/" + plural(clazz.getName());
     }
 
     private static String plural(String input) {

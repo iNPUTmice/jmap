@@ -17,18 +17,16 @@
 package rs.ltt.jmap.mua.cache.exception;
 
 /**
- * A Cache implementation should throw this when it detects a problem it can not simply recover from.
- * For example seeing an update to an element it doesn't have stored or processing an addQueryResult when the
- * previous page is corrupt or out of sync.
- * MUA will then mark the cache for that object or for that query as invalid and overwrite it on the next request.
+ * A Cache implementation should throw this when it detects a problem it can not simply recover
+ * from. For example seeing an update to an element it doesn't have stored or processing an
+ * addQueryResult when the previous page is corrupt or out of sync. MUA will then mark the cache for
+ * that object or for that query as invalid and overwrite it on the next request.
  *
- * This exception should not be thrown lightly as rebuilding the cache is potentially expensive.
+ * <p>This exception should not be thrown lightly as rebuilding the cache is potentially expensive.
  */
 public class CorruptCacheException extends IllegalStateException {
-
 
     public CorruptCacheException(String message) {
         super(message);
     }
-
 }

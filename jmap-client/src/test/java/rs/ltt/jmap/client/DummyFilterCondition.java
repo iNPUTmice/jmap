@@ -16,10 +16,9 @@
 
 package rs.ltt.jmap.client;
 
+import javax.annotation.Nonnull;
 import rs.ltt.jmap.common.entity.filter.Filter;
 import rs.ltt.jmap.common.entity.filter.FilterCondition;
-
-import javax.annotation.Nonnull;
 
 public class DummyFilterCondition implements FilterCondition<Dummy> {
 

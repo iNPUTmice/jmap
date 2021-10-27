@@ -16,11 +16,10 @@
 
 package rs.ltt.jmap.client;
 
+import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.client.event.State;
-
-import java.util.Arrays;
 
 public class StateTest {
 
@@ -28,32 +27,28 @@ public class StateTest {
     public void testReduceToFailed() {
         Assertions.assertEquals(
                 State.FAILED,
-                State.reduce(Arrays.asList(State.CLOSED, State.CONNECTED, State.FAILED, State.CLOSED))
-        );
+                State.reduce(
+                        Arrays.asList(State.CLOSED, State.CONNECTED, State.FAILED, State.CLOSED)));
     }
 
     @Test
     public void testReduceToClosed() {
         Assertions.assertEquals(
                 State.CLOSED,
-                State.reduce(Arrays.asList(State.CLOSED, State.CONNECTED, State.CONNECTING, State.CLOSED))
-        );
+                State.reduce(
+                        Arrays.asList(
+                                State.CLOSED, State.CONNECTED, State.CONNECTING, State.CLOSED)));
     }
 
     @Test
     public void testReduceToConnecting() {
         Assertions.assertEquals(
-                State.CONNECTING,
-                State.reduce(Arrays.asList(State.CONNECTED, State.CONNECTING))
-        );
+                State.CONNECTING, State.reduce(Arrays.asList(State.CONNECTED, State.CONNECTING)));
     }
 
     @Test
     public void testReduceToConnected() {
         Assertions.assertEquals(
-                State.CONNECTED,
-                State.reduce(Arrays.asList(State.CONNECTED, State.CONNECTED))
-        );
+                State.CONNECTED, State.reduce(Arrays.asList(State.CONNECTED, State.CONNECTED)));
     }
-
 }

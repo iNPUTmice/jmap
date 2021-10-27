@@ -16,7 +16,6 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.base.CharMatcher;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,7 +55,6 @@ public class EmailBodyUtil {
             }
 
             currentBlock.append(withQuoteRemoved);
-
         }
 
         return blocks;
@@ -94,9 +92,14 @@ public class EmailBodyUtil {
                 String firstWord = words.length == 0 ? "" : words[0];
                 if (stringBuilder.length() != 0) {
 
-                    boolean listItem = (firstWord.length() <= 3 && (firstWord.endsWith(")") || firstWord.endsWith(":"))) || line.startsWith("* ") || line.startsWith("- ") || (firstWord.matches("\\[[0-9]+]:"));
+                    boolean listItem =
+                            (firstWord.length() <= 3
+                                            && (firstWord.endsWith(")") || firstWord.endsWith(":")))
+                                    || line.startsWith("* ")
+                                    || line.startsWith("- ")
+                                    || (firstWord.matches("\\[[0-9]+]:"));
                     if (skipNextBreak) {
-                        //do nothing
+                        // do nothing
                     } else if (breakNextBlockUnderscore || breakNextBlockHyphen) {
                         stringBuilder.append('\n');
                     } else if (line.isEmpty()) {
@@ -118,8 +121,12 @@ public class EmailBodyUtil {
                 skipNextBreak |= line.endsWith(" ");
                 final boolean blockBoundaryUnderscore = line.matches("_{2,}");
                 final boolean blockBoundaryHypen = line.matches("-{2,}");
-                breakNextBlockUnderscore = (breakNextBlockUnderscore && !line.isEmpty() && !blockBoundaryUnderscore) || (blockBoundaryUnderscore && !breakNextBlockUnderscore);
-                breakNextBlockHyphen = (breakNextBlockHyphen && !line.isEmpty() && !blockBoundaryHypen) || (blockBoundaryHypen && !breakNextBlockHyphen);
+                breakNextBlockUnderscore =
+                        (breakNextBlockUnderscore && !line.isEmpty() && !blockBoundaryUnderscore)
+                                || (blockBoundaryUnderscore && !breakNextBlockUnderscore);
+                breakNextBlockHyphen =
+                        (breakNextBlockHyphen && !line.isEmpty() && !blockBoundaryHypen)
+                                || (blockBoundaryHypen && !breakNextBlockHyphen);
                 stringBuilder.append(line);
             }
             return stringBuilder.toString();
@@ -138,8 +145,10 @@ public class EmailBodyUtil {
             if (lineLengths.size() <= 1) {
                 return max;
             }
-            //get the top x% of line length
-            List<Integer> topXPercent = lineLengths.subList((int) ((1.0 - X) * lineLengths.size()) - 1, lineLengths.size());
+            // get the top x% of line length
+            List<Integer> topXPercent =
+                    lineLengths.subList(
+                            (int) ((1.0 - X) * lineLengths.size()) - 1, lineLengths.size());
 
             double sum = 0.0;
             int top = lineLengths.get(lineLengths.size() - 1);
@@ -153,10 +162,15 @@ public class EmailBodyUtil {
                 return Integer.MAX_VALUE;
             }
 
-            //are those top x% of lines less than n% apart from each other?
-            if (topXPercent.get(topXPercent.size() - 1) - topXPercent.get(0) <= N * topXPercent.get(topXPercent.size() - 1)) {
-                //return median of those top x%
-                return topXPercent.size() % 2 == 1 ? topXPercent.get(topXPercent.size() / 2) : ((topXPercent.get(topXPercent.size() / 2 - 1) + topXPercent.get(topXPercent.size() / 2)) / 2);
+            // are those top x% of lines less than n% apart from each other?
+            if (topXPercent.get(topXPercent.size() - 1) - topXPercent.get(0)
+                    <= N * topXPercent.get(topXPercent.size() - 1)) {
+                // return median of those top x%
+                return topXPercent.size() % 2 == 1
+                        ? topXPercent.get(topXPercent.size() / 2)
+                        : ((topXPercent.get(topXPercent.size() / 2 - 1)
+                                        + topXPercent.get(topXPercent.size() / 2))
+                                / 2);
             }
             return max;
         }
@@ -191,6 +205,4 @@ public class EmailBodyUtil {
             return new QuoteIndicator(chars, quoteDepth);
         }
     }
-
-
 }

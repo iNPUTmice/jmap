@@ -31,13 +31,16 @@ public class GetMailboxMethodCall extends GetMethodCall<Mailbox> {
     private Request.Invocation.ResultReference propertiesReference;
 
     @Builder
-    public GetMailboxMethodCall(String accountId, String[] ids, String[] properties, Request.Invocation.ResultReference idsReference,
-                                Request.Invocation.ResultReference propertiesReference) {
+    public GetMailboxMethodCall(
+            String accountId,
+            String[] ids,
+            String[] properties,
+            Request.Invocation.ResultReference idsReference,
+            Request.Invocation.ResultReference propertiesReference) {
         super(accountId, ids, properties, idsReference);
         Preconditions.checkArgument(
                 properties == null || propertiesReference == null,
-                "Can't set both 'properties' and 'propertiesReference'"
-        );
+                "Can't set both 'properties' and 'propertiesReference'");
         this.propertiesReference = propertiesReference;
     }
 }

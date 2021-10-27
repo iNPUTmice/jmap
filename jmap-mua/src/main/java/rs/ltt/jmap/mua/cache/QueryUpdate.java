@@ -17,12 +17,11 @@
 package rs.ltt.jmap.mua.cache;
 
 import com.google.common.base.MoreObjects;
+import java.util.List;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.response.standard.QueryChangesMethodResponse;
-
-import java.util.List;
 
 public class QueryUpdate<T extends AbstractIdentifiableEntity, U> extends AbstractUpdate<T> {
 
@@ -32,26 +31,26 @@ public class QueryUpdate<T extends AbstractIdentifiableEntity, U> extends Abstra
 
     private final Long total;
 
-
-    private QueryUpdate(final TypedState<T> oldState,
-                        final TypedState<T> newState,
-                        final String[] removed,
-                        final List<AddedItem<U>> added,
-                        final Long total) {
+    private QueryUpdate(
+            final TypedState<T> oldState,
+            final TypedState<T> newState,
+            final String[] removed,
+            final List<AddedItem<U>> added,
+            final Long total) {
         super(oldState, newState, false);
         this.removed = removed;
         this.added = added;
         this.total = total;
     }
 
-    public static <T extends AbstractIdentifiableEntity, U> QueryUpdate<T, U> of(QueryChangesMethodResponse<T> queryChangesMethodResponse, List<AddedItem<U>> added) {
+    public static <T extends AbstractIdentifiableEntity, U> QueryUpdate<T, U> of(
+            QueryChangesMethodResponse<T> queryChangesMethodResponse, List<AddedItem<U>> added) {
         return new QueryUpdate<>(
                 queryChangesMethodResponse.getOldTypedQueryState(),
                 queryChangesMethodResponse.getNewTypedQueryState(),
                 queryChangesMethodResponse.getRemoved(),
                 added,
-                queryChangesMethodResponse.getTotal()
-        );
+                queryChangesMethodResponse.getTotal());
     }
 
     public String[] getRemoved() {
@@ -68,7 +67,7 @@ public class QueryUpdate<T extends AbstractIdentifiableEntity, U> extends Abstra
 
     @Override
     public boolean hasChanges() {
-        final boolean modifiedItems =  removed.length + added.size() > 0;
+        final boolean modifiedItems = removed.length + added.size() > 0;
         return modifiedItems || hasStateChange();
     }
 

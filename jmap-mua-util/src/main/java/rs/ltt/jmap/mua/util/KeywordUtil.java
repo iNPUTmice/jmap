@@ -17,22 +17,22 @@ package rs.ltt.jmap.mua.util;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import java.util.Collection;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.entity.Role;
 
-import java.util.Collection;
-
-
 public class KeywordUtil {
 
-    public static final BiMap<String, Role> KEYWORD_ROLE = new ImmutableBiMap.Builder<String, Role>()
-            .put(Keyword.FLAGGED,Role.FLAGGED)
-            .put(Keyword.DRAFT, Role.DRAFTS)
-            .build();
+    public static final BiMap<String, Role> KEYWORD_ROLE =
+            new ImmutableBiMap.Builder<String, Role>()
+                    .put(Keyword.FLAGGED, Role.FLAGGED)
+                    .put(Keyword.DRAFT, Role.DRAFTS)
+                    .build();
 
-    public static boolean anyHas(Collection<?extends IdentifiableEmailWithKeywords> emails, String keyword) {
-        for(IdentifiableEmailWithKeywords email : emails) {
+    public static boolean anyHas(
+            Collection<? extends IdentifiableEmailWithKeywords> emails, String keyword) {
+        for (IdentifiableEmailWithKeywords email : emails) {
             if (email.getKeywords().containsKey(keyword)) {
                 return true;
             }
@@ -40,8 +40,9 @@ public class KeywordUtil {
         return false;
     }
 
-    public static boolean everyHas(Collection<?extends IdentifiableEmailWithKeywords> emails, String keyword) {
-        for(IdentifiableEmailWithKeywords email : emails) {
+    public static boolean everyHas(
+            Collection<? extends IdentifiableEmailWithKeywords> emails, String keyword) {
+        for (IdentifiableEmailWithKeywords email : emails) {
             if (!email.getKeywords().containsKey(keyword)) {
                 return false;
             }

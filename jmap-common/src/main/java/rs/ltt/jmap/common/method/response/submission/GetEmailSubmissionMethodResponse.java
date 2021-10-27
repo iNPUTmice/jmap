@@ -25,7 +25,8 @@ import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
 public class GetEmailSubmissionMethodResponse extends GetMethodResponse<EmailSubmission> {
 
     @Builder
-    public GetEmailSubmissionMethodResponse(String accountId, String state, String[] notFound, EmailSubmission[] list) {
+    public GetEmailSubmissionMethodResponse(
+            String accountId, String state, String[] notFound, EmailSubmission[] list) {
         super(accountId, state, notFound, list);
     }
 }

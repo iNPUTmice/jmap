@@ -18,22 +18,25 @@ package rs.ltt.jmap.common.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.gson.annotations.SerializedName;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 import rs.ltt.jmap.annotation.JmapEntity;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-
 @Getter
 @JmapEntity(filterCondition = EmailFilterCondition.class)
-public class Email extends AbstractIdentifiableEntity implements IdentifiableEmailWithKeywords, IdentifiableEmailWithMailboxIds, IdentifiableEmailWithAddresses, IdentifiableEmailWithSubject {
+public class Email extends AbstractIdentifiableEntity
+        implements IdentifiableEmailWithKeywords,
+                IdentifiableEmailWithMailboxIds,
+                IdentifiableEmailWithAddresses,
+                IdentifiableEmailWithSubject {
 
-    //Metadata
+    // Metadata
 
     private String blobId;
 
@@ -47,10 +50,10 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
 
     private Instant receivedAt;
 
-    //Header
+    // Header
     private List<EmailHeader> headers;
 
-    //The following convenience properties are also specified for the Email object:
+    // The following convenience properties are also specified for the Email object:
     private List<String> messageId;
 
     private List<String> inReplyTo;
@@ -73,7 +76,8 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
 
     private OffsetDateTime sentAt;
 
-    //The following properties are not directly specified by JMAP but are provided by the library for your convenience
+    // The following properties are not directly specified by JMAP but are provided by the library
+    // for your convenience
     @SerializedName(Property.USER_AGENT)
     private String userAgent;
 
@@ -86,7 +90,7 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
     @SerializedName(Property.AUTOCRYPT_SETUP_MESSAGE)
     private String autocryptSetupMessage;
 
-    //body data
+    // body data
 
     private EmailBodyPart bodyStructure;
 
@@ -103,37 +107,37 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
     private String preview;
 
     @Builder(toBuilder = true)
-    public Email(String id,
-                 String blobId,
-                 String threadId,
-                 @Singular Map<String, Boolean> mailboxIds,
-                 @Singular Map<String, Boolean> keywords,
-                 Long size,
-                 Instant receivedAt,
-                 @Singular List<EmailHeader> headers,
-                 @Singular("messageId") List<String> messageId,
-                 @Singular("inReplyTo") List<String> inReplyTo,
-                 @Singular List<String> references,
-                 @Singular("sender") List<EmailAddress> sender,
-                 @Singular("from") List<EmailAddress> from,
-                 @Singular("to") List<EmailAddress> to,
-                 @Singular("cc") List<EmailAddress> cc,
-                 @Singular("bcc") List<EmailAddress> bcc,
-                 @Singular("replyTo") List<EmailAddress> replyTo,
-                 String subject,
-                 OffsetDateTime sentAt,
-                 String userAgent,
-                 @Singular("autocrypt") List<String> autocrypt,
-                 String autocryptDraftState,
-                 String autocryptSetupMessage,
-                 EmailBodyPart bodyStructure,
-                 @Singular Map<String, EmailBodyValue> bodyValues,
-                 @Singular("textBody") List<EmailBodyPart> textBody,
-                 @Singular("htmlBody") List<EmailBodyPart> htmlBody,
-                 List<EmailBodyPart> attachments,
-                 Boolean hasAttachment,
-                 String preview
-    ) {
+    public Email(
+            String id,
+            String blobId,
+            String threadId,
+            @Singular Map<String, Boolean> mailboxIds,
+            @Singular Map<String, Boolean> keywords,
+            Long size,
+            Instant receivedAt,
+            @Singular List<EmailHeader> headers,
+            @Singular("messageId") List<String> messageId,
+            @Singular("inReplyTo") List<String> inReplyTo,
+            @Singular List<String> references,
+            @Singular("sender") List<EmailAddress> sender,
+            @Singular("from") List<EmailAddress> from,
+            @Singular("to") List<EmailAddress> to,
+            @Singular("cc") List<EmailAddress> cc,
+            @Singular("bcc") List<EmailAddress> bcc,
+            @Singular("replyTo") List<EmailAddress> replyTo,
+            String subject,
+            OffsetDateTime sentAt,
+            String userAgent,
+            @Singular("autocrypt") List<String> autocrypt,
+            String autocryptDraftState,
+            String autocryptSetupMessage,
+            EmailBodyPart bodyStructure,
+            @Singular Map<String, EmailBodyValue> bodyValues,
+            @Singular("textBody") List<EmailBodyPart> textBody,
+            @Singular("htmlBody") List<EmailBodyPart> htmlBody,
+            List<EmailBodyPart> attachments,
+            Boolean hasAttachment,
+            String preview) {
         this.id = id;
         this.blobId = blobId;
         this.threadId = threadId;
@@ -214,19 +218,17 @@ public class Email extends AbstractIdentifiableEntity implements IdentifiableEma
         public static final String USER_AGENT = "header:User-Agent:asText";
         public static final String AUTOCRYPT = "header:Autocrypt:asText:all";
         public static final String AUTOCRYPT_DRAFT_STATE = "header:Autocrypt-Draft-State:asText";
-        public static final String AUTOCRYPT_SETUP_MESSAGE = "header:Autocrypt-Setup-Message:asText";
+        public static final String AUTOCRYPT_SETUP_MESSAGE =
+                "header:Autocrypt-Setup-Message:asText";
 
-        private Property() {
-
-        }
+        private Property() {}
     }
 
     public static final class Properties {
-        public static final String[] THREAD_ID = new String[]{Property.THREAD_ID};
-        public static final String[] MUTABLE = new String[]{Property.KEYWORDS, Property.MAILBOX_IDS};
+        public static final String[] THREAD_ID = new String[] {Property.THREAD_ID};
+        public static final String[] MUTABLE =
+                new String[] {Property.KEYWORDS, Property.MAILBOX_IDS};
 
-        private Properties() {
-
-        }
+        private Properties() {}
     }
 }

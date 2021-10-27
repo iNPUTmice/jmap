@@ -16,7 +16,7 @@
 
 package rs.ltt.jmap.common.entity;
 
-//TODO move blobId, type, size to BinaryData
+// TODO move blobId, type, size to BinaryData
 public interface Downloadable {
 
     String getBlobId();

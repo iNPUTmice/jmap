@@ -16,6 +16,8 @@
 
 package rs.ltt.jmap.gson;
 
+import java.io.IOException;
+import java.util.Map;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
@@ -25,27 +27,28 @@ import rs.ltt.jmap.common.entity.PushMessage;
 import rs.ltt.jmap.common.entity.PushVerification;
 import rs.ltt.jmap.common.entity.StateChange;
 
-import java.io.IOException;
-import java.util.Map;
-
 public class PushMessageDeserializerTest extends AbstractGsonTest {
 
     @Test
     public void deserializeStateChange() throws IOException {
-        final PushMessage pushMessage = parseFromResource("push/state-change.json", PushMessage.class);
+        final PushMessage pushMessage =
+                parseFromResource("push/state-change.json", PushMessage.class);
         MatcherAssert.assertThat(pushMessage, CoreMatchers.instanceOf(StateChange.class));
         final StateChange stateChange = (StateChange) pushMessage;
-        final Map<Class<? extends AbstractIdentifiableEntity>, String> max = stateChange.getChanged().get("max@example.com");
+        final Map<Class<? extends AbstractIdentifiableEntity>, String> max =
+                stateChange.getChanged().get("max@example.com");
         Assertions.assertEquals(2, max.size());
     }
 
     @Test
     public void deserializeVerification() throws IOException {
-        final PushMessage pushMessage = parseFromResource("push/verification.json", PushMessage.class);
+        final PushMessage pushMessage =
+                parseFromResource("push/verification.json", PushMessage.class);
         MatcherAssert.assertThat(pushMessage, CoreMatchers.instanceOf(PushVerification.class));
         final PushVerification pushVerification = (PushVerification) pushMessage;
-        Assertions.assertEquals("P43dcfa4-1dd4-41ef-9156-2c89b3b19c60", pushVerification.getPushSubscriptionId());
-        Assertions.assertEquals("da1f097b11ca17f06424e30bf02bfa67", pushVerification.getVerificationCode());
+        Assertions.assertEquals(
+                "P43dcfa4-1dd4-41ef-9156-2c89b3b19c60", pushVerification.getPushSubscriptionId());
+        Assertions.assertEquals(
+                "da1f097b11ca17f06424e30bf02bfa67", pushVerification.getVerificationCode());
     }
-
 }

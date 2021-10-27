@@ -16,5 +16,4 @@
 
 package rs.ltt.jmap.common.websocket;
 
-public interface WebSocketMessage {
-}
+public interface WebSocketMessage {}

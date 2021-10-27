@@ -24,7 +24,8 @@ import rs.ltt.jmap.common.entity.filter.MailboxFilterCondition;
 
 @Getter
 @JmapEntity(filterCondition = MailboxFilterCondition.class)
-public class Mailbox extends AbstractIdentifiableEntity implements IdentifiableMailboxWithRoleAndName {
+public class Mailbox extends AbstractIdentifiableEntity
+        implements IdentifiableMailboxWithRoleAndName {
 
     private String name;
 
@@ -47,17 +48,18 @@ public class Mailbox extends AbstractIdentifiableEntity implements IdentifiableM
     private Boolean isSubscribed;
 
     @Builder
-    public Mailbox(String id,
-                   String name,
-                   String parentId,
-                   Role role,
-                   Long sortOrder,
-                   Long totalEmails,
-                   Long unreadEmails,
-                   Long totalThreads,
-                   Long unreadThreads,
-                   MailboxRights myRights,
-                   Boolean isSubscribed) {
+    public Mailbox(
+            String id,
+            String name,
+            String parentId,
+            Role role,
+            Long sortOrder,
+            Long totalEmails,
+            Long unreadEmails,
+            Long totalThreads,
+            Long unreadThreads,
+            MailboxRights myRights,
+            Boolean isSubscribed) {
         this.id = id;
         this.name = name;
         this.parentId = parentId;

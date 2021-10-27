@@ -16,15 +16,20 @@
 
 package rs.ltt.jmap.client.dummy;
 
+import java.util.Map;
 import rs.ltt.jmap.client.Dummy;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.method.call.standard.SetMethodCall;
 
-import java.util.Map;
-
 public class SetDummyMethodCall extends SetMethodCall<Dummy> {
 
-    public SetDummyMethodCall(String accountId, String ifInState, Map<String, Dummy> create, Map<String, Map<String, Object>> update, String[] destroy, Request.Invocation.ResultReference destroyReference) {
+    public SetDummyMethodCall(
+            String accountId,
+            String ifInState,
+            Map<String, Dummy> create,
+            Map<String, Map<String, Object>> update,
+            String[] destroy,
+            Request.Invocation.ResultReference destroyReference) {
         super(accountId, ifInState, create, update, destroy, destroyReference);
     }
 }

@@ -19,6 +19,8 @@ package rs.ltt.jmap.common.entity;
 import com.google.gson.annotations.SerializedName;
 
 public enum Displayed {
-    @SerializedName("unknown") UNKNOWN,
-    @SerializedName("yes") YES
+    @SerializedName("unknown")
+    UNKNOWN,
+    @SerializedName("yes")
+    YES
 }

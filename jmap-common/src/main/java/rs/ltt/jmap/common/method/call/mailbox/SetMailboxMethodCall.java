@@ -16,13 +16,12 @@
 
 package rs.ltt.jmap.common.method.call.mailbox;
 
+import java.util.Map;
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.method.call.standard.SetMethodCall;
-
-import java.util.Map;
 
 @JmapMethod("Mailbox/set")
 public class SetMailboxMethodCall extends SetMethodCall<Mailbox> {
@@ -30,9 +29,14 @@ public class SetMailboxMethodCall extends SetMethodCall<Mailbox> {
     private Boolean onDestroyRemoveEmails;
 
     @Builder
-    public SetMailboxMethodCall(String accountId, String ifInState, Map<String, Mailbox> create,
-                                Map<String, Map<String, Object>> update, String[] destroy,
-                                Request.Invocation.ResultReference destroyReference, Boolean onDestroyRemoveEmails) {
+    public SetMailboxMethodCall(
+            String accountId,
+            String ifInState,
+            Map<String, Mailbox> create,
+            Map<String, Map<String, Object>> update,
+            String[] destroy,
+            Request.Invocation.ResultReference destroyReference,
+            Boolean onDestroyRemoveEmails) {
         super(accountId, ifInState, create, update, destroy, destroyReference);
         this.onDestroyRemoveEmails = onDestroyRemoveEmails;
     }

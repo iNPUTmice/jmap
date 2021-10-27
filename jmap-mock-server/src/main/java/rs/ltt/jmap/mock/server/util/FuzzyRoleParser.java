@@ -24,5 +24,4 @@ public class FuzzyRoleParser {
     public static Role parse(String value) {
         return Role.valueOf(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, value));
     }
-
 }

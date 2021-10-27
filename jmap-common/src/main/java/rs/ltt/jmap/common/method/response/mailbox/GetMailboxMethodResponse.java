@@ -25,7 +25,8 @@ import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
 public class GetMailboxMethodResponse extends GetMethodResponse<Mailbox> {
 
     @Builder
-    public GetMailboxMethodResponse(String accountId, String state, String[] notFound, Mailbox[] list) {
+    public GetMailboxMethodResponse(
+            String accountId, String state, String[] notFound, Mailbox[] list) {
         super(accountId, state, notFound, list);
     }
 }

@@ -24,8 +24,11 @@ public class PreexistingMailboxException extends IllegalStateException {
     private final IdentifiableMailboxWithRoleAndName preexistingMailbox;
     private final Role targetRole;
 
-    public PreexistingMailboxException(IdentifiableMailboxWithRoleAndName preexistingMailbox, final Role role) {
-        super(String.format("A mailbox by the name %s already exits", preexistingMailbox.getName()));
+    public PreexistingMailboxException(
+            IdentifiableMailboxWithRoleAndName preexistingMailbox, final Role role) {
+        super(
+                String.format(
+                        "A mailbox by the name %s already exits", preexistingMailbox.getName()));
         this.preexistingMailbox = preexistingMailbox;
         this.targetRole = role;
     }
@@ -38,7 +41,8 @@ public class PreexistingMailboxException extends IllegalStateException {
         return this.targetRole;
     }
 
-    public static Void throwIfNotNull(final IdentifiableMailboxWithRoleAndName mailbox, final Role role) {
+    public static Void throwIfNotNull(
+            final IdentifiableMailboxWithRoleAndName mailbox, final Role role) {
         if (mailbox != null) {
             throw new PreexistingMailboxException(mailbox, role);
         }

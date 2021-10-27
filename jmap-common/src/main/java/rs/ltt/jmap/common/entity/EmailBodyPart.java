@@ -16,11 +16,10 @@
 
 package rs.ltt.jmap.common.entity;
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
-
-import java.util.List;
 
 @Getter
 @Builder
@@ -29,8 +28,7 @@ public class EmailBodyPart implements Attachment {
     private String partId;
     private String blobId;
     private Long size;
-    @Singular
-    private List<EmailHeader> headers;
+    @Singular private List<EmailHeader> headers;
     private String name;
     private String type;
     private String charset;
@@ -39,9 +37,8 @@ public class EmailBodyPart implements Attachment {
 
     @Singular("language")
     private List<String> language;
+
     private String location;
 
-    @Singular
-    private List<EmailBodyPart> subParts;
-
+    @Singular private List<EmailBodyPart> subParts;
 }

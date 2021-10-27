@@ -26,7 +26,11 @@ import rs.ltt.jmap.common.method.call.standard.GetMethodCall;
 public class GetThreadMethodCall extends GetMethodCall<Thread> {
 
     @Builder
-    public GetThreadMethodCall(String accountId, String[] ids, String[] properties, Request.Invocation.ResultReference idsReference) {
+    public GetThreadMethodCall(
+            String accountId,
+            String[] ids,
+            String[] properties,
+            Request.Invocation.ResultReference idsReference) {
         super(accountId, ids, properties, idsReference);
     }
 }

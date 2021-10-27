@@ -16,7 +16,6 @@
 
 package rs.ltt.jmap.annotation;
 
-
 public @interface JmapMethod {
     String value();
 }

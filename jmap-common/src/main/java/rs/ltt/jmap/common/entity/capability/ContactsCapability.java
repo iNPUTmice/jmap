@@ -21,5 +21,4 @@ import rs.ltt.jmap.annotation.JmapCapability;
 import rs.ltt.jmap.common.entity.Capability;
 
 @JmapCapability(namespace = Namespace.CONTACTS)
-public class ContactsCapability implements Capability {
-}
+public class ContactsCapability implements Capability {}

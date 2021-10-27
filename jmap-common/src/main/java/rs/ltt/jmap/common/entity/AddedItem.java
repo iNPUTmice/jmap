@@ -23,11 +23,10 @@ public class AddedItem<T> {
 
     @SerializedName("id")
     private T item;
+
     private long index;
 
-    private AddedItem() {
-
-    }
+    private AddedItem() {}
 
     private AddedItem(T id, long index) {
         this.item = id;
@@ -40,10 +39,7 @@ public class AddedItem<T> {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("item", item)
-                .add("index", index)
-                .toString();
+        return MoreObjects.toStringHelper(this).add("item", item).add("index", index).toString();
     }
 
     public T getItem() {

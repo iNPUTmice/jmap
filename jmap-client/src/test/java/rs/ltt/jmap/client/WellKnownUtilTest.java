@@ -26,15 +26,13 @@ public class WellKnownUtilTest {
     public void validUsername() throws WellKnownUtil.MalformedUsernameException {
         Assertions.assertEquals(
                 "https://example.com/.well-known/jmap",
-                WellKnownUtil.fromUsername("test@example.com").toString()
-        );
+                WellKnownUtil.fromUsername("test@example.com").toString());
     }
 
     @Test
     public void noUsername() {
-        Assertions.assertThrows(WellKnownUtil.MalformedUsernameException.class, () ->
-                WellKnownUtil.fromUsername("example.com")
-        );
+        Assertions.assertThrows(
+                WellKnownUtil.MalformedUsernameException.class,
+                () -> WellKnownUtil.fromUsername("example.com"));
     }
-
 }

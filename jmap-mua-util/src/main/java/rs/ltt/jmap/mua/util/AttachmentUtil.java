@@ -16,18 +16,15 @@
 
 package rs.ltt.jmap.mua.util;
 
+import java.util.Collection;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.Attachment;
 import rs.ltt.jmap.common.entity.EmailBodyPart;
 import rs.ltt.jmap.common.entity.capability.MailAccountCapability;
 
-import java.util.Collection;
-
 public final class AttachmentUtil {
 
-    private AttachmentUtil() {
-
-    }
+    private AttachmentUtil() {}
 
     public static EmailBodyPart toEmailBodyPart(final Attachment attachment) {
         return EmailBodyPart.builder()
@@ -39,12 +36,16 @@ public final class AttachmentUtil {
                 .build();
     }
 
-    public static void verifyAttachmentsDoNotExceedLimit(final Session session,
-                                                  final String account,
-                                                  final Collection<? extends Attachment> attachments) {
-        final long combinedAttachmentSize = attachments.stream().map(a -> Math.max(0, a.getSize())).reduce(0L, Long::sum);
-        final MailAccountCapability capability = session.getAccountCapability(account, MailAccountCapability.class);
-        final Long maxSizeAttachments = capability == null ? null : capability.getMaxSizeAttachmentsPerEmail();
+    public static void verifyAttachmentsDoNotExceedLimit(
+            final Session session,
+            final String account,
+            final Collection<? extends Attachment> attachments) {
+        final long combinedAttachmentSize =
+                attachments.stream().map(a -> Math.max(0, a.getSize())).reduce(0L, Long::sum);
+        final MailAccountCapability capability =
+                session.getAccountCapability(account, MailAccountCapability.class);
+        final Long maxSizeAttachments =
+                capability == null ? null : capability.getMaxSizeAttachmentsPerEmail();
         if (maxSizeAttachments != null && combinedAttachmentSize > maxSizeAttachments) {
             throw new CombinedAttachmentSizeExceedsLimitException(maxSizeAttachments);
         }

@@ -21,5 +21,4 @@ import rs.ltt.jmap.annotation.Type;
 
 @Builder
 @Type("WebSocketPushDisable")
-public class PushDisableWebSocketMessage implements WebSocketMessage {
-}
+public class PushDisableWebSocketMessage implements WebSocketMessage {}

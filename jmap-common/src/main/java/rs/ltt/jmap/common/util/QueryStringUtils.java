@@ -16,13 +16,12 @@
 
 package rs.ltt.jmap.common.util;
 
-import rs.ltt.jmap.common.entity.Role;
-import rs.ltt.jmap.common.entity.UndoStatus;
-import rs.ltt.jmap.common.entity.filter.QueryString;
-
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Comparator;
+import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.common.entity.UndoStatus;
+import rs.ltt.jmap.common.entity.filter.QueryString;
 
 public class QueryStringUtils {
 

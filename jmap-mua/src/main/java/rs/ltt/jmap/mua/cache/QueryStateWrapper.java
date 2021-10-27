@@ -23,8 +23,8 @@ public class QueryStateWrapper {
     public final UpTo upTo;
     public final ObjectsState objectsState;
 
-
-    public QueryStateWrapper(String queryState, boolean canCalculateChanges, UpTo upTo, ObjectsState objectsState) {
+    public QueryStateWrapper(
+            String queryState, boolean canCalculateChanges, UpTo upTo, ObjectsState objectsState) {
         this.queryState = queryState;
         this.canCalculateChanges = canCalculateChanges;
         this.upTo = upTo;

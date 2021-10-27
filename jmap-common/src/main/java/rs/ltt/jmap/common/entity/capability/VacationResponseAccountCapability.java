@@ -25,5 +25,4 @@ import rs.ltt.jmap.common.entity.AccountCapability;
 @JmapAccountCapability(namespace = Namespace.VACATION_RESPONSE)
 @Builder
 @ToString
-public class VacationResponseAccountCapability implements AccountCapability {
-}
+public class VacationResponseAccountCapability implements AccountCapability {}

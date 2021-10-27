@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.common.entity.capability;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -23,8 +24,6 @@ import rs.ltt.jmap.Namespace;
 import rs.ltt.jmap.annotation.JmapAccountCapability;
 import rs.ltt.jmap.common.entity.AccountCapability;
 import rs.ltt.jmap.common.util.Property;
-
-import java.util.Map;
 
 @JmapAccountCapability(namespace = Namespace.SUBMISSION)
 @Getter

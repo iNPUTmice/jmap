@@ -16,21 +16,18 @@
 
 package rs.ltt.jmap.common.websocket;
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 import rs.ltt.jmap.annotation.Type;
-
-import java.util.List;
 
 @Builder
 @Getter
 @Type("WebSocketPushEnable")
 public class PushEnableWebSocketMessage implements WebSocketMessage {
 
-    @Singular
-    private List<String> dataTypes;
+    @Singular private List<String> dataTypes;
 
     private String pushState;
-
 }

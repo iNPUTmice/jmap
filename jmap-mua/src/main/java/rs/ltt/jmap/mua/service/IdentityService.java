@@ -42,14 +42,18 @@ public class IdentityService extends MuaService {
     }
 
     public ListenableFuture<Status> refreshIdentities() {
-        final ListenableFuture<String> identityStateFuture = ioExecutorService.submit(cache::getIdentityState);
-        return Futures.transformAsync(identityStateFuture, state -> {
-            if (state == null) {
-                return loadIdentities();
-            } else {
-                return updateIdentities(state);
-            }
-        }, MoreExecutors.directExecutor());
+        final ListenableFuture<String> identityStateFuture =
+                ioExecutorService.submit(cache::getIdentityState);
+        return Futures.transformAsync(
+                identityStateFuture,
+                state -> {
+                    if (state == null) {
+                        return loadIdentities();
+                    } else {
+                        return updateIdentities(state);
+                    }
+                },
+                MoreExecutors.directExecutor());
     }
 
     private ListenableFuture<Status> loadIdentities() {
@@ -60,15 +64,20 @@ public class IdentityService extends MuaService {
     }
 
     private ListenableFuture<Status> loadIdentities(final JmapClient.MultiCall multiCall) {
-        final ListenableFuture<MethodResponses> responseFuture = multiCall.call(
-                GetIdentityMethodCall.builder().accountId(accountId).build()
-        ).getMethodResponses();
-        return Futures.transformAsync(responseFuture, methodResponses -> {
-            final GetIdentityMethodResponse response = methodResponses.getMain(GetIdentityMethodResponse.class);
-            final Identity[] identities = response.getList();
-            cache.setIdentities(response.getTypedState(), identities);
-            return Futures.immediateFuture(Status.of(identities.length > 0));
-        }, ioExecutorService);
+        final ListenableFuture<MethodResponses> responseFuture =
+                multiCall
+                        .call(GetIdentityMethodCall.builder().accountId(accountId).build())
+                        .getMethodResponses();
+        return Futures.transformAsync(
+                responseFuture,
+                methodResponses -> {
+                    final GetIdentityMethodResponse response =
+                            methodResponses.getMain(GetIdentityMethodResponse.class);
+                    final Identity[] identities = response.getList();
+                    cache.setIdentities(response.getTypedState(), identities);
+                    return Futures.immediateFuture(Status.of(identities.length > 0));
+                },
+                ioExecutorService);
     }
 
     private ListenableFuture<Status> updateIdentities(final String state) {
@@ -78,26 +87,32 @@ public class IdentityService extends MuaService {
         return future;
     }
 
-    private ListenableFuture<Status> updateIdentities(final String state, final JmapClient.MultiCall multiCall) {
+    private ListenableFuture<Status> updateIdentities(
+            final String state, final JmapClient.MultiCall multiCall) {
         Preconditions.checkNotNull(state, "State can not be null when updating identities");
-        final UpdateUtil.MethodResponsesFuture methodResponsesFuture = UpdateUtil.identities(multiCall, accountId, state);
+        final UpdateUtil.MethodResponsesFuture methodResponsesFuture =
+                UpdateUtil.identities(multiCall, accountId, state);
         registerCacheInvalidationCallback(methodResponsesFuture, this::invalidateCache);
-        return methodResponsesFuture.addCallback(() -> {
-            ChangesIdentityMethodResponse changesResponse = methodResponsesFuture.changes(ChangesIdentityMethodResponse.class);
-            GetIdentityMethodResponse createdResponse = methodResponsesFuture.created(GetIdentityMethodResponse.class);
-            GetIdentityMethodResponse updatedResponse = methodResponsesFuture.updated(GetIdentityMethodResponse.class);
-            final Update<Identity> update = Update.of(changesResponse, createdResponse, updatedResponse);
-            if (update.hasChanges()) {
-                cache.updateIdentities(update);
-            }
-            return Futures.immediateFuture(Status.of(update));
-        }, ioExecutorService);
-
+        return methodResponsesFuture.addCallback(
+                () -> {
+                    ChangesIdentityMethodResponse changesResponse =
+                            methodResponsesFuture.changes(ChangesIdentityMethodResponse.class);
+                    GetIdentityMethodResponse createdResponse =
+                            methodResponsesFuture.created(GetIdentityMethodResponse.class);
+                    GetIdentityMethodResponse updatedResponse =
+                            methodResponsesFuture.updated(GetIdentityMethodResponse.class);
+                    final Update<Identity> update =
+                            Update.of(changesResponse, createdResponse, updatedResponse);
+                    if (update.hasChanges()) {
+                        cache.updateIdentities(update);
+                    }
+                    return Futures.immediateFuture(Status.of(update));
+                },
+                ioExecutorService);
     }
 
     private void invalidateCache() {
         LOGGER.info("Invalidate identities cache after cannotCalculateChanges response");
         cache.invalidateIdentities();
     }
-
 }

@@ -19,10 +19,12 @@ package rs.ltt.jmap.common.entity;
 import com.google.gson.annotations.SerializedName;
 
 public enum Delivered {
-
-    @SerializedName("queued") QUEUED,
-    @SerializedName("yes") YES,
-    @SerializedName("no") NO,
-    @SerializedName("unknown") UNKNOWN
-
+    @SerializedName("queued")
+    QUEUED,
+    @SerializedName("yes")
+    YES,
+    @SerializedName("no")
+    NO,
+    @SerializedName("unknown")
+    UNKNOWN
 }

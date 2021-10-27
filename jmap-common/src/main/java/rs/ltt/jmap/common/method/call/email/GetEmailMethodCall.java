@@ -34,10 +34,16 @@ public class GetEmailMethodCall extends GetMethodCall<Email> {
     private Long maxBodyValueBytes;
 
     @Builder
-    public GetEmailMethodCall(String accountId, String[] ids, String[] properties,
-                              Request.Invocation.ResultReference idsReference,
-                              String[] bodyProperties, Boolean fetchTextBodyValues, Boolean fetchHTMLBodyValues,
-                              Boolean fetchAllBodyValues, Long maxBodyValueBytes) {
+    public GetEmailMethodCall(
+            String accountId,
+            String[] ids,
+            String[] properties,
+            Request.Invocation.ResultReference idsReference,
+            String[] bodyProperties,
+            Boolean fetchTextBodyValues,
+            Boolean fetchHTMLBodyValues,
+            Boolean fetchAllBodyValues,
+            Long maxBodyValueBytes) {
         super(accountId, ids, properties, idsReference);
         this.bodyProperties = bodyProperties;
         this.fetchTextBodyValues = fetchTextBodyValues;
@@ -45,5 +51,4 @@ public class GetEmailMethodCall extends GetMethodCall<Email> {
         this.fetchAllBodyValues = fetchAllBodyValues;
         this.maxBodyValueBytes = maxBodyValueBytes;
     }
-
 }

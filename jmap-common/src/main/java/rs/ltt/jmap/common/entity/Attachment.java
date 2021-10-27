@@ -20,7 +20,7 @@ import com.google.common.net.MediaType;
 import rs.ltt.jmap.common.util.MediaTypes;
 
 public interface Attachment extends Downloadable {
-    
+
     String getCharset();
 
     default MediaType getMediaType() {

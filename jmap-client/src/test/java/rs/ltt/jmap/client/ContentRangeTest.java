@@ -24,7 +24,8 @@ public class ContentRangeTest {
 
     @Test
     public void unitStartEnd() {
-        final BinaryDataClient.ContentRange contentRange = BinaryDataClient.ContentRange.of("bytes 10-20/*");
+        final BinaryDataClient.ContentRange contentRange =
+                BinaryDataClient.ContentRange.of("bytes 10-20/*");
         Assertions.assertEquals(10, contentRange.getStart());
         Assertions.assertEquals(20, contentRange.getEnd());
         Assertions.assertEquals(0, contentRange.getContentLength());
@@ -32,7 +33,8 @@ public class ContentRangeTest {
 
     @Test
     public void unitStartEndContentLength() {
-        final BinaryDataClient.ContentRange contentRange = BinaryDataClient.ContentRange.of("bytes 10-20/20");
+        final BinaryDataClient.ContentRange contentRange =
+                BinaryDataClient.ContentRange.of("bytes 10-20/20");
         Assertions.assertEquals(10, contentRange.getStart());
         Assertions.assertEquals(20, contentRange.getEnd());
         Assertions.assertEquals(20, contentRange.getContentLength());
@@ -40,7 +42,8 @@ public class ContentRangeTest {
 
     @Test
     public void invalid() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BinaryDataClient.ContentRange.of("invalid"));
+        Assertions.assertThrows(
+                IllegalArgumentException.class, () -> BinaryDataClient.ContentRange.of("invalid"));
     }
 
     @Test

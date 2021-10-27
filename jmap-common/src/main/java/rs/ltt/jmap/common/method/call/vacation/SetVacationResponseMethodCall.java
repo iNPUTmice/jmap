@@ -16,21 +16,24 @@
 
 package rs.ltt.jmap.common.method.call.vacation;
 
+import java.util.Map;
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.VacationResponse;
 import rs.ltt.jmap.common.method.call.standard.SetMethodCall;
 
-import java.util.Map;
-
 @JmapMethod("VacationResponse/set")
 public class SetVacationResponseMethodCall extends SetMethodCall<VacationResponse> {
 
     @Builder
-    public SetVacationResponseMethodCall(String accountId, String ifInState, Map<String, VacationResponse> create,
-                                         Map<String, Map<String, Object>> update, String[] destroy,
-                                         Request.Invocation.ResultReference destroyReference) {
+    public SetVacationResponseMethodCall(
+            String accountId,
+            String ifInState,
+            Map<String, VacationResponse> create,
+            Map<String, Map<String, Object>> update,
+            String[] destroy,
+            Request.Invocation.ResultReference destroyReference) {
         super(accountId, ifInState, create, update, destroy, destroyReference);
     }
 }

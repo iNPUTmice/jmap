@@ -17,12 +17,11 @@
 package rs.ltt.jmap.common.method.response.email;
 
 import com.google.common.base.MoreObjects;
+import java.util.Map;
 import lombok.Getter;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.method.MethodResponse;
-
-import java.util.Map;
 
 @JmapMethod("Email/parse")
 @Getter

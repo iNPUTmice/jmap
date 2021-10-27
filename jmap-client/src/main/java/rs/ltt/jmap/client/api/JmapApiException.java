@@ -29,5 +29,4 @@ public abstract class JmapApiException extends Exception {
     JmapApiException(Throwable throwable) {
         super(throwable);
     }
-
 }

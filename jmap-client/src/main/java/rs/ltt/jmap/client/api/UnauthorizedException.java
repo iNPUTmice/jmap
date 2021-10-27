@@ -21,5 +21,4 @@ public class UnauthorizedException extends JmapApiException {
     public UnauthorizedException(String message) {
         super(message);
     }
-
 }

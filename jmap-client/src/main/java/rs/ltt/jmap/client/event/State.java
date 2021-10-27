@@ -21,10 +21,13 @@ import java.util.Collection;
 import java.util.List;
 
 public enum State {
+    FAILED,
+    CLOSED,
+    CONNECTING,
+    CONNECTED;
 
-    FAILED, CLOSED, CONNECTING, CONNECTED;
-
-    private static final List<State> STATES_NEEDING_RECONNECT = Arrays.asList(State.CLOSED, State.FAILED);
+    private static final List<State> STATES_NEEDING_RECONNECT =
+            Arrays.asList(State.CLOSED, State.FAILED);
 
     public boolean needsReconnect() {
         return STATES_NEEDING_RECONNECT.contains(this);
@@ -38,5 +41,4 @@ public enum State {
         }
         return FAILED;
     }
-
 }

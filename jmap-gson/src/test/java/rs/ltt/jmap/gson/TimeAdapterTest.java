@@ -16,11 +16,10 @@
 
 package rs.ltt.jmap.gson;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TimeAdapterTest extends AbstractGsonTest {
 
@@ -36,7 +35,6 @@ public class TimeAdapterTest extends AbstractGsonTest {
         Assertions.assertEquals("value", example.d);
     }
 
-
     public static final class Example {
         private String a;
         private Instant b;
@@ -50,5 +48,4 @@ public class TimeAdapterTest extends AbstractGsonTest {
             this.d = d;
         }
     }
-
 }

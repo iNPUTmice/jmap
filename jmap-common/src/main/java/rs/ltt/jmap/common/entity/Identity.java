@@ -17,11 +17,10 @@
 package rs.ltt.jmap.common.entity;
 
 import com.google.common.base.MoreObjects;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.annotation.JmapEntity;
-
-import java.util.List;
 
 @Getter
 @JmapEntity
@@ -41,14 +40,15 @@ public class Identity extends AbstractIdentifiableEntity implements Identifiable
     private Boolean mayDelete;
 
     @Builder
-    public Identity(final String id,
-                    String name,
-                    String email,
-                    List<EmailAddress> replyTo,
-                    List<EmailAddress> bcc,
-                    String textSignature,
-                    String htmlSignature,
-                    Boolean mayDelete) {
+    public Identity(
+            final String id,
+            String name,
+            String email,
+            List<EmailAddress> replyTo,
+            List<EmailAddress> bcc,
+            String textSignature,
+            String htmlSignature,
+            Boolean mayDelete) {
         this.id = id;
         this.name = name;
         this.email = email;

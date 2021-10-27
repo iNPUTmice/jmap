@@ -20,5 +20,4 @@ import rs.ltt.jmap.annotation.JmapError;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 
 @JmapError("anchorNotFound")
-public class AnchorNotFoundMethodErrorResponse extends MethodErrorResponse {
-}
+public class AnchorNotFoundMethodErrorResponse extends MethodErrorResponse {}

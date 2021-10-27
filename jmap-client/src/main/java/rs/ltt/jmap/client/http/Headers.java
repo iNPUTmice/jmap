@@ -24,5 +24,4 @@ public final class Headers {
     private Headers() {
         throw new IllegalStateException("Do not instantiate me");
     }
-
 }

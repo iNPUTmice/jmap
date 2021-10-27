@@ -17,12 +17,11 @@
 package rs.ltt.jmap.common.entity;
 
 import com.google.common.base.MoreObjects;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 import rs.ltt.jmap.annotation.Type;
-
-import java.util.Map;
 
 @Getter
 @Type
@@ -31,14 +30,14 @@ public class StateChange implements PushMessage {
     protected Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed;
 
     @Builder
-    public StateChange(@Singular("changed") Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed) {
+    public StateChange(
+            @Singular("changed")
+                    Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed) {
         this.changed = changed;
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("changed", changed)
-                .toString();
+        return MoreObjects.toStringHelper(this).add("changed", changed).toString();
     }
 }

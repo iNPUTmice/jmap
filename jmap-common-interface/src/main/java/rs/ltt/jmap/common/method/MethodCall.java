@@ -16,5 +16,4 @@
 
 package rs.ltt.jmap.common.method;
 
-public interface MethodCall {
-}
+public interface MethodCall {}

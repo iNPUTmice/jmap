@@ -18,7 +18,5 @@ package rs.ltt.jmap.common.entity.filter;
 
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
 
-public interface Filter<T extends AbstractIdentifiableEntity> extends QueryString, Comparable<Filter<T>> {
-
-
-}
+public interface Filter<T extends AbstractIdentifiableEntity>
+        extends QueryString, Comparable<Filter<T>> {}

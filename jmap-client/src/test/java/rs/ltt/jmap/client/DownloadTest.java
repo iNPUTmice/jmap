@@ -33,5 +33,4 @@ public class DownloadTest {
         Assertions.assertEquals(100, download.progress(2002));
         Assertions.assertEquals(100, download.progress(3000));
     }
-
 }

@@ -53,9 +53,9 @@ public class EmailAddressToken {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EmailAddressToken that = (EmailAddressToken) o;
-        return start == that.start &&
-                end == that.end &&
-                Objects.equal(emailAddress, that.emailAddress);
+        return start == that.start
+                && end == that.end
+                && Objects.equal(emailAddress, that.emailAddress);
     }
 
     @Override

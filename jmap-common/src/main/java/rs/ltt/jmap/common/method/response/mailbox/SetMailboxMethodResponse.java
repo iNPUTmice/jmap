@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.common.method.response.mailbox;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Singular;
 import rs.ltt.jmap.annotation.JmapMethod;
@@ -23,21 +24,29 @@ import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.SetError;
 import rs.ltt.jmap.common.method.response.standard.SetMethodResponse;
 
-import java.util.Map;
-
 @JmapMethod("Mailbox/set")
 public class SetMailboxMethodResponse extends SetMethodResponse<Mailbox> {
 
     @Builder
-    public SetMailboxMethodResponse(String accountId,
-                                    String oldState,
-                                    String newState,
-                                    @Singular("created") Map<String, Mailbox> created,
-                                    @Singular("updated") Map<String, Mailbox> updated,
-                                    String[] destroyed,
-                                    @Singular("notCreated") Map<String, SetError> notCreated,
-                                    @Singular("notUpdated") Map<String, SetError> notUpdated,
-                                    Map<String, SetError> notDestroyed) {
-        super(accountId, oldState, newState, created, updated, destroyed, notCreated, notUpdated, notDestroyed);
+    public SetMailboxMethodResponse(
+            String accountId,
+            String oldState,
+            String newState,
+            @Singular("created") Map<String, Mailbox> created,
+            @Singular("updated") Map<String, Mailbox> updated,
+            String[] destroyed,
+            @Singular("notCreated") Map<String, SetError> notCreated,
+            @Singular("notUpdated") Map<String, SetError> notUpdated,
+            Map<String, SetError> notDestroyed) {
+        super(
+                accountId,
+                oldState,
+                newState,
+                created,
+                updated,
+                destroyed,
+                notCreated,
+                notUpdated,
+                notDestroyed);
     }
 }

@@ -40,16 +40,14 @@ public final class Pusher {
         GSON = gsonBuilder.create();
     }
 
-    private Pusher() {
-
-    }
-
+    private Pusher() {}
 
     public static boolean push(final HttpUrl url, final PushMessage message) {
         LOGGER.info("push {} to {}", message.getClass().getSimpleName(), url);
-        final Request.Builder requestBuilder = new Request.Builder()
-                .url(url)
-                .post(RequestBody.create(GSON.toJson(message), MEDIA_TYPE_JSON));
+        final Request.Builder requestBuilder =
+                new Request.Builder()
+                        .url(url)
+                        .post(RequestBody.create(GSON.toJson(message), MEDIA_TYPE_JSON));
         try {
             final Response response = OK_HTTP_CLIENT.newCall(requestBuilder.build()).execute();
             return response.isSuccessful();
@@ -58,5 +56,4 @@ public final class Pusher {
             return false;
         }
     }
-
 }

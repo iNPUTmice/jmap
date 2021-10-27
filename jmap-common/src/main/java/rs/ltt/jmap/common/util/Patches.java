@@ -17,14 +17,11 @@
 package rs.ltt.jmap.common.util;
 
 import com.google.common.collect.ImmutableMap;
-
 import java.util.Map;
 
 public class Patches {
 
-    private Patches() {
-
-    }
+    private Patches() {}
 
     public static Map<String, Object> set(String path, Object value) {
         return new Builder().set(path, value).build();
@@ -38,21 +35,16 @@ public class Patches {
         return new Builder();
     }
 
-
     public static final class Null {
-        private Null() {
-
-        }
+        private Null() {}
     }
-
 
     public static class Builder {
 
-        private Builder() {
+        private Builder() {}
 
-        }
-
-        private final ImmutableMap.Builder<String, Object> mapBuilder = new ImmutableMap.Builder<>();
+        private final ImmutableMap.Builder<String, Object> mapBuilder =
+                new ImmutableMap.Builder<>();
 
         public Builder set(String path, Object value) {
             mapBuilder.put(path, value);
@@ -67,8 +59,5 @@ public class Patches {
         public Map<String, Object> build() {
             return mapBuilder.build();
         }
-
     }
-
-
 }

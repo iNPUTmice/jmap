@@ -19,29 +19,34 @@ package rs.ltt.jmap.gson.serializer;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Map;
 import rs.ltt.jmap.common.entity.AccountCapability;
 import rs.ltt.jmap.common.util.Mapper;
 
-import java.lang.reflect.Type;
-import java.util.Map;
+public class PrimaryAccountsSerializer
+        implements JsonSerializer<Map<Class<? extends AccountCapability>, String>> {
 
-public class PrimaryAccountsSerializer implements JsonSerializer<Map<Class<? extends AccountCapability>, String>> {
-
-    private static final ImmutableMap<Class<? extends AccountCapability>, String> ACCOUNT_CAPABILITIES = Mapper.ACCOUNT_CAPABILITIES.inverse();
+    private static final ImmutableMap<Class<? extends AccountCapability>, String>
+            ACCOUNT_CAPABILITIES = Mapper.ACCOUNT_CAPABILITIES.inverse();
 
     public static void register(final GsonBuilder builder) {
-        Type type = new TypeToken<Map<Class<? extends AccountCapability>, String>>() {
-        }.getType();
+        Type type = new TypeToken<Map<Class<? extends AccountCapability>, String>>() {}.getType();
         builder.registerTypeAdapter(type, new PrimaryAccountsSerializer());
     }
 
     @Override
-    public JsonElement serialize(Map<Class<? extends AccountCapability>, String> map, Type type, JsonSerializationContext context) {
+    public JsonElement serialize(
+            Map<Class<? extends AccountCapability>, String> map,
+            Type type,
+            JsonSerializationContext context) {
         final JsonObject jsonObject = new JsonObject();
         for (Map.Entry<Class<? extends AccountCapability>, String> entry : map.entrySet()) {
             final Class<? extends AccountCapability> clazz = entry.getKey();
             final String name = ACCOUNT_CAPABILITIES.get(clazz);
-            jsonObject.add(name != null ? name : clazz.getSimpleName(), context.serialize(entry.getValue()));
+            jsonObject.add(
+                    name != null ? name : clazz.getSimpleName(),
+                    context.serialize(entry.getValue()));
         }
         return jsonObject;
     }

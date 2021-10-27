@@ -21,12 +21,9 @@ import rs.ltt.jmap.gson.adapter.*;
 import rs.ltt.jmap.gson.deserializer.*;
 import rs.ltt.jmap.gson.serializer.*;
 
-
 public final class JmapAdapters {
 
-    private JmapAdapters() {
-
-    }
+    private JmapAdapters() {}
 
     public static void register(GsonBuilder builder) {
 
@@ -57,5 +54,4 @@ public final class JmapAdapters {
         ResponseInvocationSerializer.register(builder);
         StringMapSerializer.register(builder);
     }
-
 }

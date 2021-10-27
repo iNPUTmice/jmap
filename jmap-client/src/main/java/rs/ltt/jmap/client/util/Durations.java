@@ -31,5 +31,4 @@ public final class Durations {
     public static boolean isPositive(final Duration a) {
         return a.toNanos() > 0;
     }
-
 }

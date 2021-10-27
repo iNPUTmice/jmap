@@ -30,8 +30,15 @@ public class QueryChangesEmailMethodCall extends QueryChangesMethodCall<Email> {
     private Boolean collapseThreads;
 
     @Builder
-    public QueryChangesEmailMethodCall(String accountId, Filter<Email> filter, Comparator[] sort, String sinceQueryState,
-                                       Long maxChanges, String upToId, Boolean calculateTotal, Boolean collapseThreads) {
+    public QueryChangesEmailMethodCall(
+            String accountId,
+            Filter<Email> filter,
+            Comparator[] sort,
+            String sinceQueryState,
+            Long maxChanges,
+            String upToId,
+            Boolean calculateTotal,
+            Boolean collapseThreads) {
         super(accountId, filter, sort, sinceQueryState, maxChanges, upToId, calculateTotal);
         this.collapseThreads = collapseThreads;
     }

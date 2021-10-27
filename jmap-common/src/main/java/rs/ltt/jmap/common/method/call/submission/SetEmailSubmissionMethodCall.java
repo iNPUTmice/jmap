@@ -16,6 +16,8 @@
 
 package rs.ltt.jmap.common.method.call.submission;
 
+import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.Namespace;
@@ -24,9 +26,6 @@ import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.EmailSubmission;
 import rs.ltt.jmap.common.method.call.standard.SetMethodCall;
-
-import java.util.List;
-import java.util.Map;
 
 @JmapMethod("EmailSubmission/set")
 @Getter
@@ -38,11 +37,15 @@ public class SetEmailSubmissionMethodCall extends SetMethodCall<EmailSubmission>
     private List<String> onSuccessDestroyEmail;
 
     @Builder
-    public SetEmailSubmissionMethodCall(String accountId, String ifInState, Map<String, EmailSubmission> create,
-                                        Map<String, Map<String, Object>> update, String[] destroy,
-                                        Request.Invocation.ResultReference destroyReference,
-                                        Map<String, Map<String, Object>> onSuccessUpdateEmail,
-                                        List<String> onSuccessDestroyEmail) {
+    public SetEmailSubmissionMethodCall(
+            String accountId,
+            String ifInState,
+            Map<String, EmailSubmission> create,
+            Map<String, Map<String, Object>> update,
+            String[] destroy,
+            Request.Invocation.ResultReference destroyReference,
+            Map<String, Map<String, Object>> onSuccessUpdateEmail,
+            List<String> onSuccessDestroyEmail) {
         super(accountId, ifInState, create, update, destroy, destroyReference);
         this.onSuccessUpdateEmail = onSuccessUpdateEmail;
         this.onSuccessDestroyEmail = onSuccessDestroyEmail;

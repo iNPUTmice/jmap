@@ -20,5 +20,4 @@ import rs.ltt.jmap.annotation.JmapError;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 
 @JmapError("unknownMethod")
-public class UnknownMethodMethodErrorResponse extends MethodErrorResponse {
-}
+public class UnknownMethodMethodErrorResponse extends MethodErrorResponse {}

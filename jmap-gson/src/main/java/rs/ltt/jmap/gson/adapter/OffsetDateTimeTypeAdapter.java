@@ -21,7 +21,6 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,7 +32,8 @@ public class OffsetDateTimeTypeAdapter extends TypeAdapter<OffsetDateTime> {
     }
 
     @Override
-    public void write(final JsonWriter jsonWriter, final OffsetDateTime offsetDateTime) throws IOException {
+    public void write(final JsonWriter jsonWriter, final OffsetDateTime offsetDateTime)
+            throws IOException {
         if (offsetDateTime == null) {
             jsonWriter.nullValue();
         } else {

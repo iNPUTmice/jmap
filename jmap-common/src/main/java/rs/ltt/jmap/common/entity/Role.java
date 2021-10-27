@@ -19,14 +19,24 @@ package rs.ltt.jmap.common.entity;
 import com.google.gson.annotations.SerializedName;
 
 public enum Role {
-    @SerializedName("all") ALL,
-    @SerializedName("inbox") INBOX,
-    @SerializedName("archive") ARCHIVE,
-    @SerializedName("drafts") DRAFTS,
-    @SerializedName("flagged") FLAGGED,
-    @SerializedName("important") IMPORTANT,
-    @SerializedName("sent") SENT,
-    @SerializedName("trash") TRASH,
-    @SerializedName("junk") JUNK,
-    @SerializedName("subscribed") SUBSCRIBED
+    @SerializedName("all")
+    ALL,
+    @SerializedName("inbox")
+    INBOX,
+    @SerializedName("archive")
+    ARCHIVE,
+    @SerializedName("drafts")
+    DRAFTS,
+    @SerializedName("flagged")
+    FLAGGED,
+    @SerializedName("important")
+    IMPORTANT,
+    @SerializedName("sent")
+    SENT,
+    @SerializedName("trash")
+    TRASH,
+    @SerializedName("junk")
+    JUNK,
+    @SerializedName("subscribed")
+    SUBSCRIBED
 }

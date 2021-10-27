@@ -32,8 +32,16 @@ public class QueryEmailMethodCall extends QueryMethodCall<Email> {
     private Boolean collapseThreads;
 
     @Builder
-    public QueryEmailMethodCall(String accountId, Filter<Email> filter, Comparator[] sort, Long position, String anchor,
-                                Long anchorOffset, Long limit, Boolean collapseThreads, Boolean calculateTotal) {
+    public QueryEmailMethodCall(
+            String accountId,
+            Filter<Email> filter,
+            Comparator[] sort,
+            Long position,
+            String anchor,
+            Long anchorOffset,
+            Long limit,
+            Boolean collapseThreads,
+            Boolean calculateTotal) {
         super(accountId, filter, sort, position, anchor, anchorOffset, limit, calculateTotal);
         this.collapseThreads = collapseThreads;
     }

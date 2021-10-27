@@ -16,20 +16,16 @@
 
 package rs.ltt.jmap.common.entity;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
-
-import java.util.Map;
 
 @Builder
 @Getter
 public class Address {
 
-
     private String email;
 
-    @Singular
-    private Map<String, Object> parameters;
-
+    @Singular private Map<String, Object> parameters;
 }

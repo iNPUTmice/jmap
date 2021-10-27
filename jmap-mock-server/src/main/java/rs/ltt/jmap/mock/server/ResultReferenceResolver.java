@@ -17,6 +17,9 @@
 package rs.ltt.jmap.mock.server;
 
 import com.google.common.collect.ListMultimap;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.entity.AddedItem;
@@ -30,16 +33,11 @@ import rs.ltt.jmap.common.method.response.standard.QueryMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
 import rs.ltt.jmap.common.util.Mapper;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 public class ResultReferenceResolver {
 
     public static String[] resolve(
             final Request.Invocation.ResultReference resultReference,
-            final ListMultimap<String, Response.Invocation> previousResponses
-    ) {
+            final ListMultimap<String, Response.Invocation> previousResponses) {
         final MethodResponse methodResponse = find(resultReference, previousResponses);
         final String path = resultReference.getPath();
         switch (resultReference.getPath()) {
@@ -50,12 +48,17 @@ public class ResultReferenceResolver {
                 break;
             case Request.Invocation.ResultReference.Path.LIST_THREAD_IDS:
                 if (methodResponse instanceof GetEmailMethodResponse) {
-                    return Arrays.stream(((GetEmailMethodResponse) methodResponse).getList()).map(Email::getThreadId).toArray(String[]::new);
+                    return Arrays.stream(((GetEmailMethodResponse) methodResponse).getList())
+                            .map(Email::getThreadId)
+                            .toArray(String[]::new);
                 }
                 break;
             case Request.Invocation.ResultReference.Path.LIST_EMAIL_IDS:
                 if (methodResponse instanceof GetThreadMethodResponse) {
-                    return Arrays.stream(((GetThreadMethodResponse) methodResponse).getList()).map(Thread::getEmailIds).flatMap(Collection::stream).toArray(String[]::new);
+                    return Arrays.stream(((GetThreadMethodResponse) methodResponse).getList())
+                            .map(Thread::getEmailIds)
+                            .flatMap(Collection::stream)
+                            .toArray(String[]::new);
                 }
                 break;
             case Request.Invocation.ResultReference.Path.CREATED:
@@ -70,35 +73,41 @@ public class ResultReferenceResolver {
                 break;
             case Request.Invocation.ResultReference.Path.ADDED_IDS:
                 if (methodResponse instanceof QueryChangesMethodResponse) {
-                    return ((QueryChangesMethodResponse<?>) methodResponse).getAdded().stream().map(AddedItem::getItem).toArray(String[]::new);
+                    return ((QueryChangesMethodResponse<?>) methodResponse)
+                            .getAdded().stream().map(AddedItem::getItem).toArray(String[]::new);
                 }
                 break;
             default:
         }
-        throw new IllegalArgumentException(String.format("Unable to resolve path %s for class %s", path, methodResponse.getClass().getName()));
+        throw new IllegalArgumentException(
+                String.format(
+                        "Unable to resolve path %s for class %s",
+                        path, methodResponse.getClass().getName()));
     }
 
     private static MethodResponse find(
             final Request.Invocation.ResultReference resultReference,
-            final ListMultimap<String, Response.Invocation> previousResponses
-    ) {
+            final ListMultimap<String, Response.Invocation> previousResponses) {
         final String id = resultReference.getId();
         final List<Response.Invocation> invocations = previousResponses.get(id);
         if (invocations == null) {
-            throw new IllegalArgumentException("Unable to find any method response with id "+id);
+            throw new IllegalArgumentException("Unable to find any method response with id " + id);
         }
         final String methodCallName = Mapper.METHOD_CALLS.inverse().get(resultReference.getClazz());
-        for(final Response.Invocation invocation : invocations) {
-            final String responseCallName = Mapper.METHOD_RESPONSES.inverse().get(invocation.getMethodResponse().getClass());
+        for (final Response.Invocation invocation : invocations) {
+            final String responseCallName =
+                    Mapper.METHOD_RESPONSES
+                            .inverse()
+                            .get(invocation.getMethodResponse().getClass());
             if (methodCallName.equals(responseCallName)) {
                 return invocation.getMethodResponse();
             }
         }
-        throw new IllegalArgumentException("Unable to find matching response for "+methodCallName);
+        throw new IllegalArgumentException(
+                "Unable to find matching response for " + methodCallName);
     }
 
     private static String[] nullToEmpty(final String[] value) {
         return value == null ? new String[0] : value;
     }
-
 }

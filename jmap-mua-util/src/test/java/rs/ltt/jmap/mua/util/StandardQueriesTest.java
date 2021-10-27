@@ -28,18 +28,14 @@ public class StandardQueriesTest {
     public void mailbox() {
         final Query<Email> query = StandardQueries.mailbox("inbox");
         Assertions.assertEquals(
-                "57839588c47c04e2a010e1cde932f3bebf31c07609235c19a8f95c17445f0818",
-                query.asHash()
-        );
+                "57839588c47c04e2a010e1cde932f3bebf31c07609235c19a8f95c17445f0818", query.asHash());
     }
 
     @Test
     public void keyword() {
-        final Query<Email> query = StandardQueries.keyword(Keyword.FLAGGED, new String[]{"junk", "trash"});
+        final Query<Email> query =
+                StandardQueries.keyword(Keyword.FLAGGED, new String[] {"junk", "trash"});
         Assertions.assertEquals(
-                "c0f83960f59ea96e99bd2cc2ad54db66ece24522e8ce95bb11f37b769468778e",
-                query.asHash()
-        );
+                "c0f83960f59ea96e99bd2cc2ad54db66ece24522e8ce95bb11f37b769468778e", query.asHash());
     }
-
 }

@@ -16,13 +16,9 @@
 
 package rs.ltt.jmap.annotation.processor;
 
-
 import com.google.auto.service.AutoService;
-import rs.ltt.jmap.annotation.JmapMethod;
-import rs.ltt.jmap.common.Utils;
-import rs.ltt.jmap.common.method.MethodCall;
-import rs.ltt.jmap.common.method.MethodResponse;
-
+import java.io.PrintWriter;
+import java.util.*;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -32,8 +28,10 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.PrintWriter;
-import java.util.*;
+import rs.ltt.jmap.annotation.JmapMethod;
+import rs.ltt.jmap.common.Utils;
+import rs.ltt.jmap.common.method.MethodCall;
+import rs.ltt.jmap.common.method.MethodResponse;
 
 @SupportedAnnotationTypes("rs.ltt.jmap.annotation.JmapMethod")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
@@ -56,12 +54,18 @@ public class JmapMethodProcessor extends AbstractProcessor {
         this.elements = processingEnvironment.getElementUtils();
         this.typeMirrors = new TypeMirror[INTERFACES.length];
         for (int i = 0; i < INTERFACES.length; ++i) {
-            this.typeMirrors[i] = processingEnvironment.getElementUtils().getTypeElement(INTERFACES[i].getName()).asType();
+            this.typeMirrors[i] =
+                    processingEnvironment
+                            .getElementUtils()
+                            .getTypeElement(INTERFACES[i].getName())
+                            .asType();
         }
     }
 
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(JmapMethod.class);
+    public boolean process(
+            Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+        Set<? extends Element> elements =
+                roundEnvironment.getElementsAnnotatedWith(JmapMethod.class);
         boolean emptyPass = true;
         for (Element element : elements) {
             if (element instanceof TypeElement) {
@@ -75,7 +79,6 @@ public class JmapMethodProcessor extends AbstractProcessor {
                         emptyPass = false;
                     }
                 }
-
             }
         }
         if (emptyPass) {
@@ -90,11 +93,14 @@ public class JmapMethodProcessor extends AbstractProcessor {
     private void createSourceFile(Class clazz, Collection<TypeElement> classes) {
 
         try {
-            FileObject resourceFile = filer.createResource(StandardLocation.CLASS_OUTPUT, "", Utils.getFilenameFor(clazz));
+            FileObject resourceFile =
+                    filer.createResource(
+                            StandardLocation.CLASS_OUTPUT, "", Utils.getFilenameFor(clazz));
             PrintWriter printWriter = new PrintWriter(resourceFile.openOutputStream());
             for (TypeElement typeElement : classes) {
                 JmapMethod annotation = typeElement.getAnnotation(JmapMethod.class);
-                printWriter.println(String.format("%s %s", typeElement.getQualifiedName(), annotation.value()));
+                printWriter.println(
+                        String.format("%s %s", typeElement.getQualifiedName(), annotation.value()));
             }
             printWriter.flush();
             printWriter.close();

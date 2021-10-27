@@ -16,9 +16,8 @@
 
 package rs.ltt.jmap.mua.util;
 
-import rs.ltt.jmap.common.entity.Role;
-
 import java.util.Locale;
+import rs.ltt.jmap.common.entity.Role;
 
 public class CreateUtil {
 
@@ -31,7 +30,7 @@ public class CreateUtil {
     }
 
     public static String createIdReference(String id) {
-        return "#"+id;
+        return "#" + id;
     }
 
     public static String createId(Role role) {

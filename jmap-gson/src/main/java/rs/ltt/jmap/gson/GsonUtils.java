@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -28,7 +27,6 @@ public final class GsonUtils {
 
     public static final Gson REGULAR_GSON;
     public static final Gson NULL_SERIALIZING_GSON;
-
 
     static {
         GsonBuilder regularBuilder = new GsonBuilder();
@@ -39,9 +37,7 @@ public final class GsonUtils {
         NULL_SERIALIZING_GSON = nullSerializingBuilder.create();
     }
 
-    private GsonUtils() {
-
-    }
+    private GsonUtils() {}
 
     public static void addAll(final JsonObject to, Set<Map.Entry<String, JsonElement>> entries) {
         for (final Map.Entry<String, JsonElement> entry : entries) {

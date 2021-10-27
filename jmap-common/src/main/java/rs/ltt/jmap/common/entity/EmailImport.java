@@ -16,23 +16,19 @@
 
 package rs.ltt.jmap.common.entity;
 
-import lombok.Builder;
-import lombok.NonNull;
-
 import java.time.Instant;
 import java.util.Map;
+import lombok.Builder;
+import lombok.NonNull;
 
 @Builder
 public class EmailImport {
 
-    @NonNull
-    private String blobId;
+    @NonNull private String blobId;
 
-    @NonNull
-    private Map<String, Boolean> mailboxIds;
+    @NonNull private Map<String, Boolean> mailboxIds;
 
     private Map<String, Boolean> keywords;
 
     private Instant receivedAt;
-
 }

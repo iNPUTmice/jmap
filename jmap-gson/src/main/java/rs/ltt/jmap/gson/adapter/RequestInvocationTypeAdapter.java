@@ -16,19 +16,18 @@
 
 package rs.ltt.jmap.gson.adapter;
 
+import static rs.ltt.jmap.common.util.Mapper.METHOD_CALLS;
+import static rs.ltt.jmap.gson.GsonUtils.NULL_SERIALIZING_GSON;
+import static rs.ltt.jmap.gson.GsonUtils.REGULAR_GSON;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.method.MethodCall;
-
-import java.io.IOException;
-
-import static rs.ltt.jmap.common.util.Mapper.METHOD_CALLS;
-import static rs.ltt.jmap.gson.GsonUtils.NULL_SERIALIZING_GSON;
-import static rs.ltt.jmap.gson.GsonUtils.REGULAR_GSON;
 
 public class RequestInvocationTypeAdapter extends TypeAdapter<Request.Invocation> {
 
@@ -42,7 +41,8 @@ public class RequestInvocationTypeAdapter extends TypeAdapter<Request.Invocation
         final Class<? extends MethodCall> clazz = methodCall.getClass();
         final String name = METHOD_CALLS.inverse().get(clazz);
         if (name == null) {
-            throw new JsonIOException(String.format("%s is not a registered @JmapMethod", clazz.getName()));
+            throw new JsonIOException(
+                    String.format("%s is not a registered @JmapMethod", clazz.getName()));
         }
         jsonWriter.beginArray();
         jsonWriter.value(name);
@@ -59,6 +59,6 @@ public class RequestInvocationTypeAdapter extends TypeAdapter<Request.Invocation
         final MethodCall methodCall = REGULAR_GSON.fromJson(jsonReader, clazz);
         final String id = jsonReader.nextString();
         jsonReader.endArray();
-        return new Request.Invocation(methodCall,id);
+        return new Request.Invocation(methodCall, id);
     }
 }

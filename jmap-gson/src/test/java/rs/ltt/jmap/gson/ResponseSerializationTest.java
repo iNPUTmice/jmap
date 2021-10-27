@@ -18,59 +18,60 @@ package rs.ltt.jmap.gson;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonIOException;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.MethodResponse;
 
-import java.util.UUID;
-
 public class ResponseSerializationTest extends AbstractGsonTest {
 
     @Test
     public void customNotAnnotatedMethodError() {
-        final ImmutableList.Builder<Response.Invocation> responseInvocations = ImmutableList.builder();
-        responseInvocations.add(new Response.Invocation(new CustomMethodError(), UUID.randomUUID().toString()));
-        Response response = new Response(
-                responseInvocations.build().toArray(new Response.Invocation[0]),
-                "session-state-01"
-        );
-        final JsonIOException jsonIOException = Assertions.assertThrows(JsonIOException.class, () -> {
-            getGson().toJson(response);
-        });
+        final ImmutableList.Builder<Response.Invocation> responseInvocations =
+                ImmutableList.builder();
+        responseInvocations.add(
+                new Response.Invocation(new CustomMethodError(), UUID.randomUUID().toString()));
+        Response response =
+                new Response(
+                        responseInvocations.build().toArray(new Response.Invocation[0]),
+                        "session-state-01");
+        final JsonIOException jsonIOException =
+                Assertions.assertThrows(
+                        JsonIOException.class,
+                        () -> {
+                            getGson().toJson(response);
+                        });
         Assertions.assertEquals(
-                "Unable to serialize CustomMethodError. Did you annotate the Method with @JmapError?",
-                jsonIOException.getMessage()
-        );
-
+                "Unable to serialize CustomMethodError. Did you annotate the Method with"
+                        + " @JmapError?",
+                jsonIOException.getMessage());
     }
 
     @Test
     public void customNotAnnotatedMethodResponse() {
-        final ImmutableList.Builder<Response.Invocation> responseInvocations = ImmutableList.builder();
-        responseInvocations.add(new Response.Invocation(new CustomMethodResponse(), UUID.randomUUID().toString()));
-        Response response = new Response(
-                responseInvocations.build().toArray(new Response.Invocation[0]),
-                "session-state-01"
-        );
-        final JsonIOException jsonIOException = Assertions.assertThrows(JsonIOException.class, () -> {
-            getGson().toJson(response);
-        });
+        final ImmutableList.Builder<Response.Invocation> responseInvocations =
+                ImmutableList.builder();
+        responseInvocations.add(
+                new Response.Invocation(new CustomMethodResponse(), UUID.randomUUID().toString()));
+        Response response =
+                new Response(
+                        responseInvocations.build().toArray(new Response.Invocation[0]),
+                        "session-state-01");
+        final JsonIOException jsonIOException =
+                Assertions.assertThrows(
+                        JsonIOException.class,
+                        () -> {
+                            getGson().toJson(response);
+                        });
         Assertions.assertEquals(
-                "Unable to serialize CustomMethodResponse. Did you annotate the method with @JmapMethod?",
-                jsonIOException.getMessage()
-        );
-
+                "Unable to serialize CustomMethodResponse. Did you annotate the method with"
+                        + " @JmapMethod?",
+                jsonIOException.getMessage());
     }
 
-    public static class CustomMethodResponse implements MethodResponse {
+    public static class CustomMethodResponse implements MethodResponse {}
 
-    }
-
-    public static class CustomMethodError extends MethodErrorResponse {
-
-    }
-
-
+    public static class CustomMethodError extends MethodErrorResponse {}
 }

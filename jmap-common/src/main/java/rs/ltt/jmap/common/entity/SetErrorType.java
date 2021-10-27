@@ -19,28 +19,50 @@ package rs.ltt.jmap.common.entity;
 import com.google.gson.annotations.SerializedName;
 
 public enum SetErrorType {
-
-    @SerializedName("forbidden") FORBIDDEN,
-    @SerializedName("overQuota") OVER_QUOTA,
-    @SerializedName("tooLarge") TOO_LARGE,
-    @SerializedName("rateLimit") RATE_LIMIT,
-    @SerializedName("notFound") NOT_FOUND,
-    @SerializedName("invalidPatch") INVALID_PATCH,
-    @SerializedName("willDestroy") WILL_DESTROY,
-    @SerializedName("invalidProperties") INVALID_PROPERTIES,
-    @SerializedName("singleton") SINGLETON,
-    @SerializedName("mailboxHasEmail") MAILBOX_HAS_EMAIL,
-    @SerializedName("mailboxHasChild") MAILBOX_HAS_CHILD,
-    @SerializedName("blobNotFound") BLOB_NOT_FOUND,
-    @SerializedName("tooManyKeywords") TOO_MANY_KEYWORDS,
-    @SerializedName("tooManyMailboxes") TOO_MANY_MAILBOXES,
-    @SerializedName("invalidEmail") INVALID_EMAIL,
-    @SerializedName("forbiddenFrom") FORBIDDEN_FROM,
-    @SerializedName("tooManyRecipients") TOO_MANY_RECIPIENTS,
-    @SerializedName("noRecipients") NO_RECIPIENTS,
-    @SerializedName("invalidRecipients") INVALID_RECIPIENTS,
-    @SerializedName("forbiddenMailFrom") FORBIDDEN_MAIL_FROM,
-    @SerializedName("forbiddenToSend") FORBIDDEN_TO_SEND,
-    @SerializedName("cannotUnsend") CANNOT_UNSEND,
-    @SerializedName("alreadyExists") ALREADY_EXISTS
+    @SerializedName("forbidden")
+    FORBIDDEN,
+    @SerializedName("overQuota")
+    OVER_QUOTA,
+    @SerializedName("tooLarge")
+    TOO_LARGE,
+    @SerializedName("rateLimit")
+    RATE_LIMIT,
+    @SerializedName("notFound")
+    NOT_FOUND,
+    @SerializedName("invalidPatch")
+    INVALID_PATCH,
+    @SerializedName("willDestroy")
+    WILL_DESTROY,
+    @SerializedName("invalidProperties")
+    INVALID_PROPERTIES,
+    @SerializedName("singleton")
+    SINGLETON,
+    @SerializedName("mailboxHasEmail")
+    MAILBOX_HAS_EMAIL,
+    @SerializedName("mailboxHasChild")
+    MAILBOX_HAS_CHILD,
+    @SerializedName("blobNotFound")
+    BLOB_NOT_FOUND,
+    @SerializedName("tooManyKeywords")
+    TOO_MANY_KEYWORDS,
+    @SerializedName("tooManyMailboxes")
+    TOO_MANY_MAILBOXES,
+    @SerializedName("invalidEmail")
+    INVALID_EMAIL,
+    @SerializedName("forbiddenFrom")
+    FORBIDDEN_FROM,
+    @SerializedName("tooManyRecipients")
+    TOO_MANY_RECIPIENTS,
+    @SerializedName("noRecipients")
+    NO_RECIPIENTS,
+    @SerializedName("invalidRecipients")
+    INVALID_RECIPIENTS,
+    @SerializedName("forbiddenMailFrom")
+    FORBIDDEN_MAIL_FROM,
+    @SerializedName("forbiddenToSend")
+    FORBIDDEN_TO_SEND,
+    @SerializedName("cannotUnsend")
+    CANNOT_UNSEND,
+    @SerializedName("alreadyExists")
+    ALREADY_EXISTS
 }

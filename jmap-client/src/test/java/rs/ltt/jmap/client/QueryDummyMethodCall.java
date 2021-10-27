@@ -22,7 +22,15 @@ import rs.ltt.jmap.common.method.call.standard.QueryMethodCall;
 
 public class QueryDummyMethodCall extends QueryMethodCall<Dummy> {
 
-    public QueryDummyMethodCall(String accountId, Filter<Dummy> filter, Comparator[] sort, Long position, String anchor, Long anchorOffset, Long limit, Boolean calculateTotal) {
+    public QueryDummyMethodCall(
+            String accountId,
+            Filter<Dummy> filter,
+            Comparator[] sort,
+            Long position,
+            String anchor,
+            Long anchorOffset,
+            Long limit,
+            Boolean calculateTotal) {
         super(accountId, filter, sort, position, anchor, anchorOffset, limit, calculateTotal);
     }
 }

@@ -18,6 +18,12 @@ package rs.ltt.jmap.mua;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutionException;
 import okhttp3.mockwebserver.MockWebServer;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -34,20 +40,13 @@ import rs.ltt.jmap.mock.server.MockMailServer;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
 import rs.ltt.jmap.mua.util.AttachmentUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.ExecutionException;
-
 public class FileUploadTest {
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
-    //@Test
-    public void createAndUploadTextFile() throws IOException, ExecutionException, InterruptedException {
+    // @Test
+    public void createAndUploadTextFile()
+            throws IOException, ExecutionException, InterruptedException {
         final Path textFileLocation = tempDir.resolve("test.txt");
         Files.write(textFileLocation, "hello world".getBytes(StandardCharsets.UTF_8));
         System.out.println(textFileLocation);
@@ -56,13 +55,14 @@ public class FileUploadTest {
         final MockMailServer mailServer = new MockMailServer(2);
         server.setDispatcher(mailServer);
 
-        final Mua mua = Mua.builder()
-                .cache(new InMemoryCache())
-                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(mailServer.getUsername())
-                .password(JmapDispatcher.PASSWORD)
-                .accountId(mailServer.getAccountId())
-                .build();
+        final Mua mua =
+                Mua.builder()
+                        .cache(new InMemoryCache())
+                        .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                        .username(mailServer.getUsername())
+                        .password(JmapDispatcher.PASSWORD)
+                        .accountId(mailServer.getAccountId())
+                        .build();
 
         try (final FileUpload fileUpload = FileUpload.of(textFileLocation)) {
             final Upload upload = mua.upload(fileUpload, null).get();
@@ -75,72 +75,82 @@ public class FileUploadTest {
         final MockMailServer mailServer = new MockMailServer(2);
         server.setDispatcher(mailServer);
 
-        final Mua mua = Mua.builder()
-                .cache(new InMemoryCache())
-                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(mailServer.getUsername())
-                .password(JmapDispatcher.PASSWORD)
-                .accountId(mailServer.getAccountId())
-                .build();
-        final Uploadable fakeUpload = new Uploadable() {
-            @Override
-            public InputStream getInputStream() {
-                return null;
-            }
+        final Mua mua =
+                Mua.builder()
+                        .cache(new InMemoryCache())
+                        .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                        .username(mailServer.getUsername())
+                        .password(JmapDispatcher.PASSWORD)
+                        .accountId(mailServer.getAccountId())
+                        .build();
+        final Uploadable fakeUpload =
+                new Uploadable() {
+                    @Override
+                    public InputStream getInputStream() {
+                        return null;
+                    }
 
-            @Override
-            public MediaType getMediaType() {
-                return null;
-            }
+                    @Override
+                    public MediaType getMediaType() {
+                        return null;
+                    }
 
-            @Override
-            public long getContentLength() {
-                return 120 * 1024 * 1024L; //mock server is configured to accept 100MiB
-            }
-        };
-        final ExecutionException ee = Assertions.assertThrows(
-                ExecutionException.class,
-                ()-> mua.upload(fakeUpload, null).get()
-        );
-        MatcherAssert.assertThat(ee.getCause(), CoreMatchers.instanceOf(MaxUploadSizeExceededException.class));
+                    @Override
+                    public long getContentLength() {
+                        return 120 * 1024 * 1024L; // mock server is configured to accept 100MiB
+                    }
+                };
+        final ExecutionException ee =
+                Assertions.assertThrows(
+                        ExecutionException.class, () -> mua.upload(fakeUpload, null).get());
+        MatcherAssert.assertThat(
+                ee.getCause(), CoreMatchers.instanceOf(MaxUploadSizeExceededException.class));
     }
 
     @Test
     public void combinedAttachmentSize() throws ExecutionException, InterruptedException {
-        final EmailBodyPart imageAttachment = EmailBodyPart.builder()
-                .type("image/png")
-                .size(23 * 1024 * 1024L)
-                .build();
-        final EmailBodyPart zipAttachment = EmailBodyPart.builder()
-                .type("application/zip")
-                .size(50 * 1024 * 1024L)
-                .build();
-        final EmailBodyPart textAttachment = EmailBodyPart.builder()
-                .type("text/plain")
-                .size(-100 * 1024 * 1024L)
-                .build();
+        final EmailBodyPart imageAttachment =
+                EmailBodyPart.builder().type("image/png").size(23 * 1024 * 1024L).build();
+        final EmailBodyPart zipAttachment =
+                EmailBodyPart.builder().type("application/zip").size(50 * 1024 * 1024L).build();
+        final EmailBodyPart textAttachment =
+                EmailBodyPart.builder().type("text/plain").size(-100 * 1024 * 1024L).build();
 
         final MockWebServer server = new MockWebServer();
         final MockMailServer mailServer = new MockMailServer(2);
         server.setDispatcher(mailServer);
 
-        final Mua mua = Mua.builder()
-                .cache(new InMemoryCache())
-                .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
-                .username(mailServer.getUsername())
-                .password(JmapDispatcher.PASSWORD)
-                .accountId(mailServer.getAccountId())
-                .build();
+        final Mua mua =
+                Mua.builder()
+                        .cache(new InMemoryCache())
+                        .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                        .username(mailServer.getUsername())
+                        .password(JmapDispatcher.PASSWORD)
+                        .accountId(mailServer.getAccountId())
+                        .build();
         mua.verifyAttachmentsDoNotExceedLimit(ImmutableList.of(imageAttachment)).get();
-        mua.verifyAttachmentsDoNotExceedLimit(ImmutableList.of(imageAttachment, imageAttachment)).get();
+        mua.verifyAttachmentsDoNotExceedLimit(ImmutableList.of(imageAttachment, imageAttachment))
+                .get();
         mua.verifyAttachmentsDoNotExceedLimit(ImmutableList.of(zipAttachment)).get();
-        final ExecutionException executionException = Assertions.assertThrows(ExecutionException.class, () -> {
-            mua.verifyAttachmentsDoNotExceedLimit(ImmutableList.of(imageAttachment, zipAttachment)).get();
-        });
-        MatcherAssert.assertThat(executionException.getCause(), CoreMatchers.instanceOf(AttachmentUtil.CombinedAttachmentSizeExceedsLimitException.class));
-        Assertions.assertThrows(ExecutionException.class, () -> {
-            mua.verifyAttachmentsDoNotExceedLimit(ImmutableList.of(imageAttachment, zipAttachment, textAttachment)).get();
-        });
+        final ExecutionException executionException =
+                Assertions.assertThrows(
+                        ExecutionException.class,
+                        () -> {
+                            mua.verifyAttachmentsDoNotExceedLimit(
+                                            ImmutableList.of(imageAttachment, zipAttachment))
+                                    .get();
+                        });
+        MatcherAssert.assertThat(
+                executionException.getCause(),
+                CoreMatchers.instanceOf(
+                        AttachmentUtil.CombinedAttachmentSizeExceedsLimitException.class));
+        Assertions.assertThrows(
+                ExecutionException.class,
+                () -> {
+                    mua.verifyAttachmentsDoNotExceedLimit(
+                                    ImmutableList.of(
+                                            imageAttachment, zipAttachment, textAttachment))
+                            .get();
+                });
     }
-
 }

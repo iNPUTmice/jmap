@@ -18,6 +18,9 @@ package rs.ltt.jmap.mua.cache;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.common.entity.AbstractIdentifiableEntity;
@@ -25,11 +28,7 @@ import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.response.standard.ChangesMethodResponse;
 import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-//TODO: together with AbstractUpdate and QueryUpdate this can probably be moved to jmap-client
+// TODO: together with AbstractUpdate and QueryUpdate this can probably be moved to jmap-client
 public class Update<T extends AbstractIdentifiableEntity> extends AbstractUpdate<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Update.class);
@@ -38,25 +37,41 @@ public class Update<T extends AbstractIdentifiableEntity> extends AbstractUpdate
     private final T[] updated;
     private final String[] destroyed;
 
-    private Update(TypedState<T> oldState, TypedState<T> newState, T[] created, T[] updated, String[] destroyed, boolean hasMore) {
+    private Update(
+            TypedState<T> oldState,
+            TypedState<T> newState,
+            T[] created,
+            T[] updated,
+            String[] destroyed,
+            boolean hasMore) {
         super(oldState, newState, hasMore);
         this.created = created;
         this.updated = updated;
         this.destroyed = destroyed;
     }
 
-    public static <T extends AbstractIdentifiableEntity> Update<T> of(ChangesMethodResponse<T> changesMethodResponse, GetMethodResponse<T> createdMethodResponse, GetMethodResponse<T> updatedMethodResponse) {
+    public static <T extends AbstractIdentifiableEntity> Update<T> of(
+            ChangesMethodResponse<T> changesMethodResponse,
+            GetMethodResponse<T> createdMethodResponse,
+            GetMethodResponse<T> updatedMethodResponse) {
         checkEquals(
                 changesMethodResponse.getCreated(),
-                Arrays.stream(createdMethodResponse.getList()).map(AbstractIdentifiableEntity::getId).collect(Collectors.toSet()),
-                String.format("IDs returned by %s.created does not match ids found in Get call", changesMethodResponse.getClass().getSimpleName())
-        );
+                Arrays.stream(createdMethodResponse.getList())
+                        .map(AbstractIdentifiableEntity::getId)
+                        .collect(Collectors.toSet()),
+                String.format(
+                        "IDs returned by %s.created does not match ids found in Get call",
+                        changesMethodResponse.getClass().getSimpleName()));
         checkEquals(
                 changesMethodResponse.getUpdated(),
-                Arrays.stream(updatedMethodResponse.getList()).map(AbstractIdentifiableEntity::getId).collect(Collectors.toSet()),
-                String.format("IDs returned by %s.updated does not match ids found in Get call", changesMethodResponse.getClass().getSimpleName())
-        );
-        return new Update<T>(changesMethodResponse.getTypedOldState(),
+                Arrays.stream(updatedMethodResponse.getList())
+                        .map(AbstractIdentifiableEntity::getId)
+                        .collect(Collectors.toSet()),
+                String.format(
+                        "IDs returned by %s.updated does not match ids found in Get call",
+                        changesMethodResponse.getClass().getSimpleName()));
+        return new Update<T>(
+                changesMethodResponse.getTypedOldState(),
                 changesMethodResponse.getTypedNewState(),
                 createdMethodResponse.getList(),
                 updatedMethodResponse.getList(),
@@ -100,5 +115,4 @@ public class Update<T extends AbstractIdentifiableEntity> extends AbstractUpdate
         final boolean modifiedItems = created.length + updated.length + destroyed.length > 0;
         return modifiedItems || hasStateChange();
     }
-
 }

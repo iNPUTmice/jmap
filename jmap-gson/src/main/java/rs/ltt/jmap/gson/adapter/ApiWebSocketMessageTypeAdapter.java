@@ -16,6 +16,9 @@
 
 package rs.ltt.jmap.gson.adapter;
 
+import static rs.ltt.jmap.gson.GsonUtils.NULL_SERIALIZING_GSON;
+import static rs.ltt.jmap.gson.GsonUtils.REGULAR_GSON;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.GsonBuilder;
@@ -24,21 +27,18 @@ import com.google.gson.JsonIOException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import rs.ltt.jmap.common.websocket.*;
-
 import java.io.IOException;
 import java.util.Map;
-
-import static rs.ltt.jmap.gson.GsonUtils.NULL_SERIALIZING_GSON;
-import static rs.ltt.jmap.gson.GsonUtils.REGULAR_GSON;
+import rs.ltt.jmap.common.websocket.*;
 
 public class ApiWebSocketMessageTypeAdapter extends TypeAdapter<AbstractApiWebSocketMessage> {
 
-    private static final BiMap<String, Class<? extends AbstractApiWebSocketMessage>> MESSAGE_MAP = new ImmutableBiMap.Builder<String, Class<? extends AbstractApiWebSocketMessage>>()
-            .put("RequestError", ErrorResponseWebSocketMessage.class)
-            .put("Request", RequestWebSocketMessage.class)
-            .put("Response", ResponseWebSocketMessage.class)
-            .build();
+    private static final BiMap<String, Class<? extends AbstractApiWebSocketMessage>> MESSAGE_MAP =
+            new ImmutableBiMap.Builder<String, Class<? extends AbstractApiWebSocketMessage>>()
+                    .put("RequestError", ErrorResponseWebSocketMessage.class)
+                    .put("Request", RequestWebSocketMessage.class)
+                    .put("Response", ResponseWebSocketMessage.class)
+                    .build();
 
     public static void register(final GsonBuilder builder) {
         for (final Class<? extends WebSocketMessage> clazz : MESSAGE_MAP.values()) {
@@ -47,7 +47,8 @@ public class ApiWebSocketMessageTypeAdapter extends TypeAdapter<AbstractApiWebSo
     }
 
     @Override
-    public void write(final JsonWriter jsonWriter, final AbstractApiWebSocketMessage message) throws IOException {
+    public void write(final JsonWriter jsonWriter, final AbstractApiWebSocketMessage message)
+            throws IOException {
         jsonWriter.beginObject();
 
         jsonWriter.name("@type");
@@ -77,6 +78,7 @@ public class ApiWebSocketMessageTypeAdapter extends TypeAdapter<AbstractApiWebSo
         if (message instanceof AbstractApiWebSocketMessage) {
             return (AbstractApiWebSocketMessage) message;
         }
-        throw new IOException(String.format("WebSocketMessage was of type %s", message.getClass().getName()));
+        throw new IOException(
+                String.format("WebSocketMessage was of type %s", message.getClass().getName()));
     }
 }

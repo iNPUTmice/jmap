@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.common.method.response.email;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Singular;
 import rs.ltt.jmap.annotation.JmapMethod;
@@ -23,21 +24,29 @@ import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.SetError;
 import rs.ltt.jmap.common.method.response.standard.SetMethodResponse;
 
-import java.util.Map;
-
 @JmapMethod("Email/set")
 public class SetEmailMethodResponse extends SetMethodResponse<Email> {
 
     @Builder
-    public SetEmailMethodResponse(String accountId,
-                                  String oldState,
-                                  String newState,
-                                  @Singular("created") Map<String, Email> created,
-                                  @Singular("updated") Map<String, Email> updated,
-                                  String[] destroyed,
-                                  @Singular("notCreated") Map<String, SetError> notCreated,
-                                  @Singular("notUpdated") Map<String, SetError> notUpdated,
-                                  @Singular("notDestroyed") Map<String, SetError> notDestroyed) {
-        super(accountId, oldState, newState, created, updated, destroyed, notCreated, notUpdated, notDestroyed);
+    public SetEmailMethodResponse(
+            String accountId,
+            String oldState,
+            String newState,
+            @Singular("created") Map<String, Email> created,
+            @Singular("updated") Map<String, Email> updated,
+            String[] destroyed,
+            @Singular("notCreated") Map<String, SetError> notCreated,
+            @Singular("notUpdated") Map<String, SetError> notUpdated,
+            @Singular("notDestroyed") Map<String, SetError> notDestroyed) {
+        super(
+                accountId,
+                oldState,
+                newState,
+                created,
+                updated,
+                destroyed,
+                notCreated,
+                notUpdated,
+                notDestroyed);
     }
 }

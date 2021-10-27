@@ -25,13 +25,10 @@ import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public final class StandardQueries {
 
-    private static final Comparator[] SORT_DEFAULT = new Comparator[]{
-            new Comparator(Email.Property.RECEIVED_AT, false)
-    };
+    private static final Comparator[] SORT_DEFAULT =
+            new Comparator[] {new Comparator(Email.Property.RECEIVED_AT, false)};
 
-    private StandardQueries() {
-
-    }
+    private StandardQueries() {}
 
     public static EmailQuery mailbox(final IdentifiableMailboxWithRole mailbox) {
         return mailbox(mailbox.getId());
@@ -40,32 +37,35 @@ public final class StandardQueries {
     public static EmailQuery mailbox(final String mailboxId) {
         Preconditions.checkNotNull(mailboxId);
         return EmailQuery.of(
-                EmailFilterCondition.builder().inMailbox(mailboxId).build(),
-                SORT_DEFAULT,
-                true
-        );
+                EmailFilterCondition.builder().inMailbox(mailboxId).build(), SORT_DEFAULT, true);
     }
 
     public static EmailQuery keyword(final String keyword, final String[] trashAndJunk) {
         Preconditions.checkNotNull(keyword);
         Preconditions.checkNotNull(trashAndJunk);
-        Preconditions.checkArgument(trashAndJunk.length <= 2, "Provide mailbox ids for trash and junk");
-        //TODO; we probably want to change this to someInThreadHaveKeyword?
+        Preconditions.checkArgument(
+                trashAndJunk.length <= 2, "Provide mailbox ids for trash and junk");
+        // TODO; we probably want to change this to someInThreadHaveKeyword?
         return EmailQuery.of(
-                EmailFilterCondition.builder().hasKeyword(keyword).inMailboxOtherThan(trashAndJunk).build(),
+                EmailFilterCondition.builder()
+                        .hasKeyword(keyword)
+                        .inMailboxOtherThan(trashAndJunk)
+                        .build(),
                 SORT_DEFAULT,
-                true
-        );
+                true);
     }
 
     public static EmailQuery search(final String searchTerm, final String[] trashAndJunk) {
         Preconditions.checkNotNull(searchTerm);
         Preconditions.checkNotNull(trashAndJunk);
-        Preconditions.checkArgument(trashAndJunk.length <= 2, "Provide mailbox ids for trash and junk");
+        Preconditions.checkArgument(
+                trashAndJunk.length <= 2, "Provide mailbox ids for trash and junk");
         return EmailQuery.of(
-                EmailFilterCondition.builder().text(searchTerm).inMailboxOtherThan(trashAndJunk).build(),
+                EmailFilterCondition.builder()
+                        .text(searchTerm)
+                        .inMailboxOtherThan(trashAndJunk)
+                        .build(),
                 SORT_DEFAULT,
-                true
-        );
+                true);
     }
 }

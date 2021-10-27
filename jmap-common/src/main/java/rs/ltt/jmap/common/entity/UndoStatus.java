@@ -19,9 +19,10 @@ package rs.ltt.jmap.common.entity;
 import com.google.gson.annotations.SerializedName;
 
 public enum UndoStatus {
-
-    @SerializedName("pending") PENDING,
-    @SerializedName("final") FINAL,
-    @SerializedName("canceled") CANCELED
-
+    @SerializedName("pending")
+    PENDING,
+    @SerializedName("final")
+    FINAL,
+    @SerializedName("canceled")
+    CANCELED
 }

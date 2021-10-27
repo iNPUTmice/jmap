@@ -24,5 +24,4 @@ public abstract class AbstractApiWebSocketMessage implements WebSocketMessage {
     public abstract Object getPayload();
 
     public abstract String getRequestId();
-
 }

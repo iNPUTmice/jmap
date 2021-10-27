@@ -19,19 +19,19 @@ package rs.ltt.jmap.mua;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.Closeable;
+import java.util.concurrent.Executors;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.service.*;
-
-import java.io.Closeable;
-import java.util.concurrent.Executors;
 
 public class MuaSession implements Closeable {
 
     protected final JmapClient jmapClient;
     private final Cache cache;
     private final String accountId;
-    private final ListeningExecutorService ioExecutorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+    private final ListeningExecutorService ioExecutorService =
+            MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
     private final ImmutableClassToInstanceMap<MuaService> services;
     private Long queryPageSize = null;
 
@@ -39,14 +39,15 @@ public class MuaSession implements Closeable {
         this.jmapClient = jmapClient;
         this.cache = cache;
         this.accountId = accountId;
-        this.services = ImmutableClassToInstanceMap.<MuaService>builder()
-                .put(EmailService.class, new EmailService(this))
-                .put(IdentityService.class, new IdentityService(this))
-                .put(MailboxService.class, new MailboxService(this))
-                .put(QueryService.class, new QueryService(this))
-                .put(RefreshService.class, new RefreshService(this))
-                .put(ThreadService.class, new ThreadService(this))
-                .build();
+        this.services =
+                ImmutableClassToInstanceMap.<MuaService>builder()
+                        .put(EmailService.class, new EmailService(this))
+                        .put(IdentityService.class, new IdentityService(this))
+                        .put(MailboxService.class, new MailboxService(this))
+                        .put(QueryService.class, new QueryService(this))
+                        .put(RefreshService.class, new RefreshService(this))
+                        .put(ThreadService.class, new ThreadService(this))
+                        .build();
     }
 
     public <T extends MuaService> T getService(Class<T> clazz) {

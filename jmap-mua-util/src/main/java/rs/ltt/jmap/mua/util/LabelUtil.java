@@ -19,22 +19,27 @@ package rs.ltt.jmap.mua.util;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ComparisonChain;
-import rs.ltt.jmap.common.entity.Role;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import rs.ltt.jmap.common.entity.Role;
 
 public class LabelUtil {
 
-    public static final Comparator<? super Label> COMPARATOR = (Comparator<Label>) (a, b) -> ComparisonChain.start()
-            .compare(order(a.getRole()), (order(b.getRole())))
-            .compare(Strings.nullToEmpty(a.getName()), Strings.nullToEmpty(b.getName()))
-            .result();
-    private static final Collection<KeywordLabel> KEYWORD_LABELS = Collections2.transform(
-            KeywordUtil.KEYWORD_ROLE.entrySet(),
-            entry -> new KeywordLabel(entry.getKey(), entry.getValue()));
+    public static final Comparator<? super Label> COMPARATOR =
+            (Comparator<Label>)
+                    (a, b) ->
+                            ComparisonChain.start()
+                                    .compare(order(a.getRole()), (order(b.getRole())))
+                                    .compare(
+                                            Strings.nullToEmpty(a.getName()),
+                                            Strings.nullToEmpty(b.getName()))
+                                    .result();
+    private static final Collection<KeywordLabel> KEYWORD_LABELS =
+            Collections2.transform(
+                    KeywordUtil.KEYWORD_ROLE.entrySet(),
+                    entry -> new KeywordLabel(entry.getKey(), entry.getValue()));
 
     public static List<LabelWithCount> fillUpAndSort(List<? extends LabelWithCount> mailboxes) {
         final ArrayList<LabelWithCount> labels = new ArrayList<>(mailboxes);

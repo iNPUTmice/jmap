@@ -17,6 +17,7 @@
 package rs.ltt.jmap.client.api;
 
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.JmapRequest;
@@ -29,12 +30,9 @@ import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.MethodResponse;
 
-import java.util.Map;
-
 public abstract class AbstractJmapApiClient implements JmapApiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractJmapApiClient.class);
-
 
     private final SessionStateListener sessionStateListener;
 
@@ -42,21 +40,25 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
         this.sessionStateListener = sessionStateListener;
     }
 
-
-    protected void processResponse(final JmapRequest jmapRequest, final GenericResponse genericResponse) {
+    protected void processResponse(
+            final JmapRequest jmapRequest, final GenericResponse genericResponse) {
         if (genericResponse instanceof ErrorResponse) {
             jmapRequest.setException(new ErrorResponseException((ErrorResponse) genericResponse));
         } else if (genericResponse instanceof Response) {
             final Response response = (Response) genericResponse;
             final ResponseAnalyzer responseAnalyzer = ResponseAnalyzer.analyse(response);
-            final Map<Request.Invocation, SettableFuture<MethodResponses>> map = jmapRequest.getInvocationFutureImmutableMap();
+            final Map<Request.Invocation, SettableFuture<MethodResponses>> map =
+                    jmapRequest.getInvocationFutureImmutableMap();
 
-            // Notify about potentially updated session state *before* setting the response futures. This way we'll
-            // make sure that additional requests guarded by a wait on one of the response futures will trigger
+            // Notify about potentially updated session state *before* setting the response futures.
+            // This way we'll
+            // make sure that additional requests guarded by a wait on one of the response futures
+            // will trigger
             // re-fetching the session resource.
             onSessionStateRetrieved(response.getSessionState());
 
-            for (Map.Entry<Request.Invocation, SettableFuture<MethodResponses>> entry : map.entrySet()) {
+            for (Map.Entry<Request.Invocation, SettableFuture<MethodResponses>> entry :
+                    map.entrySet()) {
                 final Request.Invocation invocation = entry.getKey();
                 final SettableFuture<MethodResponses> future = entry.getValue();
                 final MethodResponses methodResponses = responseAnalyzer.find(invocation);
@@ -66,18 +68,20 @@ public abstract class AbstractJmapApiClient implements JmapApiClient {
                 }
                 final MethodResponse main = methodResponses.getMain();
                 if (main instanceof MethodErrorResponse) {
-                    future.setException(new MethodErrorResponseException((MethodErrorResponse) main,
-                            methodResponses.getAdditional(),
-                            invocation.getMethodCall())
-                    );
+                    future.setException(
+                            new MethodErrorResponseException(
+                                    (MethodErrorResponse) main,
+                                    methodResponses.getAdditional(),
+                                    invocation.getMethodCall()));
                 } else {
                     future.set(methodResponses);
                 }
             }
         } else {
             throw new IllegalArgumentException(
-                    String.format("Unable to process response of type %s", genericResponse.getClass().getName())
-            );
+                    String.format(
+                            "Unable to process response of type %s",
+                            genericResponse.getClass().getName()));
         }
     }
 

@@ -19,6 +19,7 @@ package rs.ltt.jmap.gson;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.Request;
@@ -26,8 +27,6 @@ import rs.ltt.jmap.common.entity.EmailSubmission;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.method.call.submission.SetEmailSubmissionMethodCall;
 import rs.ltt.jmap.common.util.Patches;
-
-import java.io.IOException;
 
 public class SetEmailSubmissionMethodCallTest extends AbstractGsonTest {
 
@@ -40,26 +39,21 @@ public class SetEmailSubmissionMethodCallTest extends AbstractGsonTest {
         final Patches.Builder patchesBuilder = Patches.builder();
         patchesBuilder.remove("keywords/" + Keyword.DRAFT);
         patchesBuilder.set("mailboxIds/MB3", true);
-        SetEmailSubmissionMethodCall submissionCall = SetEmailSubmissionMethodCall.builder()
-                .accountId("accountId")
-                .create(
-                        ImmutableMap.of(
-                                "es0",
-                                EmailSubmission.builder()
-                                        .emailId("M1234")
-                                        .identityId("I0")
-                                        .build()
-                        )
-                )
-                .onSuccessUpdateEmail(
-                        ImmutableMap.of(
-                                "#es0",
-                                patchesBuilder.build()
-                        )
-                )
-                .build();
+        SetEmailSubmissionMethodCall submissionCall =
+                SetEmailSubmissionMethodCall.builder()
+                        .accountId("accountId")
+                        .create(
+                                ImmutableMap.of(
+                                        "es0",
+                                        EmailSubmission.builder()
+                                                .emailId("M1234")
+                                                .identityId("I0")
+                                                .build()))
+                        .onSuccessUpdateEmail(ImmutableMap.of("#es0", patchesBuilder.build()))
+                        .build();
         Request request = new Request.Builder().call(submissionCall).build();
-        Assertions.assertEquals(readResourceAsString("request/set-email-submission.json"), gson.toJson(request));
+        Assertions.assertEquals(
+                readResourceAsString("request/set-email-submission.json"), gson.toJson(request));
     }
 
     @Test
@@ -71,19 +65,20 @@ public class SetEmailSubmissionMethodCallTest extends AbstractGsonTest {
         final Patches.Builder patchesBuilder = Patches.builder();
         patchesBuilder.remove("keywords/" + Keyword.DRAFT);
         patchesBuilder.set("mailboxIds/MB3", true);
-        SetEmailSubmissionMethodCall submissionCall = SetEmailSubmissionMethodCall.builder()
-                .accountId("accountId")
-                .create(
-                        ImmutableMap.of(
-                                "es0",
-                                EmailSubmission.builder()
-                                        .emailId("M1234")
-                                        .identityId("I0")
-                                        .build()
-                        )
-                )
-                .build();
+        SetEmailSubmissionMethodCall submissionCall =
+                SetEmailSubmissionMethodCall.builder()
+                        .accountId("accountId")
+                        .create(
+                                ImmutableMap.of(
+                                        "es0",
+                                        EmailSubmission.builder()
+                                                .emailId("M1234")
+                                                .identityId("I0")
+                                                .build()))
+                        .build();
         final Request request = new Request.Builder().call(submissionCall).build();
-        Assertions.assertEquals(readResourceAsString("request/set-email-submission-no-implicit.json"), gson.toJson(request));
+        Assertions.assertEquals(
+                readResourceAsString("request/set-email-submission-no-implicit.json"),
+                gson.toJson(request));
     }
 }

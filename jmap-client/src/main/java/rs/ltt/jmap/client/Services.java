@@ -18,6 +18,8 @@ package rs.ltt.jmap.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.Logger;
@@ -25,15 +27,13 @@ import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.api.UserAgentInterceptor;
 import rs.ltt.jmap.gson.JmapAdapters;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
 public final class Services {
 
     public static final OkHttpClient OK_HTTP_CLIENT;
     public static final OkHttpClient OK_HTTP_CLIENT_LOGGING;
     public static final Gson GSON;
-    public static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
+    public static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE =
+            Executors.newSingleThreadScheduledExecutor();
 
     static {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -63,6 +63,4 @@ public final class Services {
     private Services() {
         throw new IllegalStateException("Do not instantiate this class");
     }
-
-
 }

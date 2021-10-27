@@ -26,14 +26,16 @@ public class EmailQuery extends Query<Email> {
 
     public final Boolean collapseThreads;
 
-    private EmailQuery(final Filter<Email> filter, final Comparator[] sort, final Boolean collapseThreads) {
+    private EmailQuery(
+            final Filter<Email> filter, final Comparator[] sort, final Boolean collapseThreads) {
         super(filter, sort);
         this.collapseThreads = collapseThreads;
     }
 
     @Override
     public String toQueryString() {
-        return QueryStringUtils.toQueryString(L0_DIVIDER, L1_DIVIDER, filter, sort, collapseThreads);
+        return QueryStringUtils.toQueryString(
+                L0_DIVIDER, L1_DIVIDER, filter, sort, collapseThreads);
     }
 
     public static EmailQuery unfiltered() {

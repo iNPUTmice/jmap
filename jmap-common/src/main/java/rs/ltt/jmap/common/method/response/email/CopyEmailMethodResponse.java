@@ -21,5 +21,4 @@ import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.method.response.standard.CopyMethodResponse;
 
 @JmapMethod("Email/copy")
-public class CopyEmailMethodResponse extends CopyMethodResponse<Email> {
-}
+public class CopyEmailMethodResponse extends CopyMethodResponse<Email> {}

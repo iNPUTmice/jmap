@@ -16,12 +16,19 @@
 
 package rs.ltt.jmap.client.api;
 
+import static rs.ltt.jmap.client.Services.GSON;
+import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +38,6 @@ import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.client.util.SettableCallFuture;
 import rs.ltt.jmap.common.GenericResponse;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import static rs.ltt.jmap.client.Services.GSON;
-import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
 
 public class HttpJmapApiClient extends AbstractJmapApiClient {
 
@@ -54,7 +52,10 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
         this(apiUrl, new BasicAuthHttpAuthentication(username, password), null);
     }
 
-    public HttpJmapApiClient(final HttpUrl apiUrl, final HttpAuthentication httpAuthentication, @Nullable final SessionStateListener sessionStateListener) {
+    public HttpJmapApiClient(
+            final HttpUrl apiUrl,
+            final HttpAuthentication httpAuthentication,
+            @Nullable final SessionStateListener sessionStateListener) {
         super(sessionStateListener);
         this.apiUrl = Preconditions.checkNotNull(apiUrl, "This API URL must not be null");
         this.httpAuthentication = httpAuthentication;
@@ -75,22 +76,26 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
         }
         final ListenableFuture<InputStream> inputStreamFuture = send(json);
         jmapRequest.addDependentFuture(inputStreamFuture);
-        Futures.addCallback(inputStreamFuture, new FutureCallback<InputStream>() {
-            @Override
-            public void onSuccess(final InputStream inputStream) {
-                try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
-                    final GenericResponse genericResponse = GSON.fromJson(reader, GenericResponse.class);
-                    processResponse(jmapRequest, genericResponse);
-                } catch (final Exception e) {
-                    jmapRequest.setException(e);
-                }
-            }
+        Futures.addCallback(
+                inputStreamFuture,
+                new FutureCallback<InputStream>() {
+                    @Override
+                    public void onSuccess(final InputStream inputStream) {
+                        try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
+                            final GenericResponse genericResponse =
+                                    GSON.fromJson(reader, GenericResponse.class);
+                            processResponse(jmapRequest, genericResponse);
+                        } catch (final Exception e) {
+                            jmapRequest.setException(e);
+                        }
+                    }
 
-            @Override
-            public void onFailure(@Nonnull Throwable throwable) {
-                jmapRequest.setException(throwable);
-            }
-        }, MoreExecutors.directExecutor());
+                    @Override
+                    public void onFailure(@Nonnull Throwable throwable) {
+                        jmapRequest.setException(throwable);
+                    }
+                },
+                MoreExecutors.directExecutor());
     }
 
     private ListenableFuture<InputStream> send(final String out) {
@@ -99,40 +104,42 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
         this.httpAuthentication.authenticate(requestBuilder);
         requestBuilder.post(RequestBody.create(out, MEDIA_TYPE_JSON));
         final Call call = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build());
-        final SettableCallFuture<InputStream> settableInputStreamFuture = SettableCallFuture.create(call);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
-                settableInputStreamFuture.setException(e);
-            }
+        final SettableCallFuture<InputStream> settableInputStreamFuture =
+                SettableCallFuture.create(call);
+        call.enqueue(
+                new Callback() {
+                    @Override
+                    public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
+                        settableInputStreamFuture.setException(e);
+                    }
 
-            @Override
-            public void onResponse(@Nonnull Call call, @Nonnull Response response) {
-                final int code = response.code();
-                if (code == 404) {
-                    settableInputStreamFuture.setException(
-                            new EndpointNotFoundException(String.format("API URL(%s) not found", apiUrl))
-                    );
-                    return;
-                }
-                if (code == 401) {
-                    settableInputStreamFuture.setException(
-                            new UnauthorizedException(String.format("API URL(%s) was unauthorized", apiUrl))
-                    );
-                    return;
-                }
+                    @Override
+                    public void onResponse(@Nonnull Call call, @Nonnull Response response) {
+                        final int code = response.code();
+                        if (code == 404) {
+                            settableInputStreamFuture.setException(
+                                    new EndpointNotFoundException(
+                                            String.format("API URL(%s) not found", apiUrl)));
+                            return;
+                        }
+                        if (code == 401) {
+                            settableInputStreamFuture.setException(
+                                    new UnauthorizedException(
+                                            String.format("API URL(%s) was unauthorized", apiUrl)));
+                            return;
+                        }
 
-                //TODO: code 500+ should probably just throw internal server error exception
-                final ResponseBody body = response.body();
-                if (body == null) {
-                    settableInputStreamFuture.setException(
-                            new IllegalStateException("response body was empty")
-                    );
-                    return;
-                }
-                settableInputStreamFuture.set(body.byteStream());
-            }
-        });
+                        // TODO: code 500+ should probably just throw internal server error
+                        // exception
+                        final ResponseBody body = response.body();
+                        if (body == null) {
+                            settableInputStreamFuture.setException(
+                                    new IllegalStateException("response body was empty"));
+                            return;
+                        }
+                        settableInputStreamFuture.set(body.byteStream());
+                    }
+                });
         return settableInputStreamFuture;
     }
 

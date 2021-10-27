@@ -16,13 +16,12 @@
 
 package rs.ltt.jmap.common;
 
+import java.util.Collection;
+import java.util.Map;
 import lombok.*;
 import rs.ltt.jmap.common.entity.Account;
 import rs.ltt.jmap.common.entity.AccountCapability;
 import rs.ltt.jmap.common.entity.Capability;
-
-import java.util.Collection;
-import java.util.Map;
 
 @Builder
 @Getter
@@ -34,13 +33,14 @@ public class SessionResource {
     private String downloadUrl;
     private String uploadUrl;
     private String eventSourceUrl;
-    @Singular
-    private Map<String, Account> accounts;
+    @Singular private Map<String, Account> accounts;
+
     @Getter(AccessLevel.NONE)
     private Map<Class<? extends AccountCapability>, String> primaryAccounts;
-    //TODO @Singular annotation doesn’t seem to compile. Maybe report with lombok?
+    // TODO @Singular annotation doesn’t seem to compile. Maybe report with lombok?
     @Getter(AccessLevel.NONE)
     private Map<Class<? extends Capability>, Capability> capabilities;
+
     private String state;
 
     public <T extends Capability> T getCapability(Class<T> clazz) {
@@ -56,17 +56,20 @@ public class SessionResource {
     }
 
     public static class SessionResourceBuilder {
-        public SessionResourceBuilder capabilities(Map<Class<? extends Capability>, Capability> capabilities) {
-            for (Map.Entry<Class<? extends Capability>, Capability> entry : capabilities.entrySet()) {
+        public SessionResourceBuilder capabilities(
+                Map<Class<? extends Capability>, Capability> capabilities) {
+            for (Map.Entry<Class<? extends Capability>, Capability> entry :
+                    capabilities.entrySet()) {
                 final Class<? extends Capability> key = entry.getKey();
                 final Capability value = entry.getValue();
                 if (key != value.getClass()) {
-                    throw new IllegalArgumentException(String.format("key %s does not match value type %s", key, value.getClass()));
+                    throw new IllegalArgumentException(
+                            String.format(
+                                    "key %s does not match value type %s", key, value.getClass()));
                 }
             }
             this.capabilities = capabilities;
             return this;
         }
     }
-
 }

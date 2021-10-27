@@ -20,5 +20,4 @@ import rs.ltt.jmap.annotation.JmapError;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 
 @JmapError("invalidResultReference")
-public class InvalidResultReferenceMethodErrorResponse extends MethodErrorResponse {
-}
+public class InvalidResultReferenceMethodErrorResponse extends MethodErrorResponse {}

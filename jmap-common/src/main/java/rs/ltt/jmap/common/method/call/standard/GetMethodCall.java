@@ -36,8 +36,13 @@ public abstract class GetMethodCall<T extends AbstractIdentifiableEntity> implem
     @SerializedName("#ids")
     private Request.Invocation.ResultReference idsReference;
 
-    public GetMethodCall(@NonNull String accountId, String[] ids, String[] properties, Request.Invocation.ResultReference idsReference) {
-        Preconditions.checkArgument(ids == null || idsReference == null, "Can't set both 'ids' and 'idsReference'");
+    public GetMethodCall(
+            @NonNull String accountId,
+            String[] ids,
+            String[] properties,
+            Request.Invocation.ResultReference idsReference) {
+        Preconditions.checkArgument(
+                ids == null || idsReference == null, "Can't set both 'ids' and 'idsReference'");
         this.accountId = accountId;
         this.ids = ids;
         this.properties = properties;

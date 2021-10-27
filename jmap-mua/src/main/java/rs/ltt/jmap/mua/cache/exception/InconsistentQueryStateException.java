@@ -21,5 +21,4 @@ public class InconsistentQueryStateException extends IllegalStateException {
     public InconsistentQueryStateException(String message) {
         super(message);
     }
-
 }

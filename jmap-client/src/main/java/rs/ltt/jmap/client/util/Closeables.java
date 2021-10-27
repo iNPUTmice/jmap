@@ -21,16 +21,13 @@ import java.io.IOException;
 
 public final class Closeables {
 
-    private Closeables() {
-
-    }
+    private Closeables() {}
 
     public static void closeQuietly(final Closeable closeable) {
         try {
             closeable.close();
         } catch (final IOException e) {
-            //ignored
+            // ignored
         }
     }
-
 }

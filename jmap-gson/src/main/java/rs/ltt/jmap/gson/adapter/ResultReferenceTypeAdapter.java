@@ -20,28 +20,32 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import rs.ltt.jmap.common.Request;
-import rs.ltt.jmap.common.util.Mapper;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import rs.ltt.jmap.common.Request;
+import rs.ltt.jmap.common.util.Mapper;
 
 public class ResultReferenceTypeAdapter extends TypeAdapter<Request.Invocation.ResultReference> {
 
     public static void register(final GsonBuilder builder) {
-        builder.registerTypeAdapter(Request.Invocation.ResultReference.class, new ResultReferenceTypeAdapter());
+        builder.registerTypeAdapter(
+                Request.Invocation.ResultReference.class, new ResultReferenceTypeAdapter());
     }
 
     @Override
-    public void write(JsonWriter jsonWriter, final Request.Invocation.ResultReference resultReference) throws IOException {
+    public void write(
+            JsonWriter jsonWriter, final Request.Invocation.ResultReference resultReference)
+            throws IOException {
         if (resultReference == null) {
             jsonWriter.nullValue();
             return;
         }
         jsonWriter.beginObject();
         jsonWriter.name("resultOf").value(resultReference.getId());
-        jsonWriter.name("name").value(Mapper.METHOD_CALLS.inverse().get(resultReference.getClazz()));
+        jsonWriter
+                .name("name")
+                .value(Mapper.METHOD_CALLS.inverse().get(resultReference.getClazz()));
         jsonWriter.name("path").value(resultReference.getPath());
         jsonWriter.endObject();
     }
@@ -68,10 +72,15 @@ public class ResultReferenceTypeAdapter extends TypeAdapter<Request.Invocation.R
         jsonReader.endObject();
         try {
 
-            Constructor<Request.Invocation.ResultReference> constructor = Request.Invocation.ResultReference.class.getDeclaredConstructor(String.class, Class.class, String.class);
+            Constructor<Request.Invocation.ResultReference> constructor =
+                    Request.Invocation.ResultReference.class.getDeclaredConstructor(
+                            String.class, Class.class, String.class);
             constructor.setAccessible(true);
             return constructor.newInstance(id, Mapper.METHOD_CALLS.get(name), path);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException
+                | InstantiationException
+                | IllegalAccessException
+                | InvocationTargetException e) {
             e.printStackTrace();
         }
         return null;

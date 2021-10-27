@@ -16,11 +16,16 @@
 
 package rs.ltt.jmap.client.session;
 
+import static rs.ltt.jmap.client.Services.GSON;
+import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -32,12 +37,6 @@ import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.util.SettableCallFuture;
 import rs.ltt.jmap.client.util.WellKnownUtil;
 import rs.ltt.jmap.common.SessionResource;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-
-import static rs.ltt.jmap.client.Services.GSON;
-import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
 
 public class SessionClient {
 
@@ -87,7 +86,8 @@ public class SessionClient {
         }
     }
 
-    private ListenableFuture<Session> fetchSession(final String username, final HttpUrl sessionResource) {
+    private ListenableFuture<Session> fetchSession(
+            final String username, final HttpUrl sessionResource) {
         final SessionCache cache = sessionResourceChanged ? null : sessionCache;
         final ListenableFuture<Session> cachedSessionFuture;
         if (cache == null) {
@@ -95,15 +95,18 @@ public class SessionClient {
         } else {
             cachedSessionFuture = cache.load(username, sessionResource);
         }
-        return Futures.transformAsync(cachedSessionFuture, session -> {
-            if (session != null) {
-                synchronized (this) {
-                    this.currentSession = session;
-                }
-                return Futures.immediateFuture(session);
-            }
-            return fetchSession(sessionResource);
-        }, MoreExecutors.directExecutor());
+        return Futures.transformAsync(
+                cachedSessionFuture,
+                session -> {
+                    if (session != null) {
+                        synchronized (this) {
+                            this.currentSession = session;
+                        }
+                        return Futures.immediateFuture(session);
+                    }
+                    return fetchSession(sessionResource);
+                },
+                MoreExecutors.directExecutor());
     }
 
     private ListenableFuture<Session> fetchSession(final HttpUrl sessionResource) {
@@ -112,21 +115,22 @@ public class SessionClient {
         httpAuthentication.authenticate(requestBuilder);
         final Call call = OK_HTTP_CLIENT_LOGGING.newCall(requestBuilder.build());
         final SettableCallFuture<Session> settableFuture = SettableCallFuture.create(call);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                settableFuture.setException(e);
-            }
+        call.enqueue(
+                new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        settableFuture.setException(e);
+                    }
 
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) {
-                try {
-                    settableFuture.set(processResponse(sessionResource, response));
-                } catch (final Exception e) {
-                    settableFuture.setException(e);
-                }
-            }
-        });
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) {
+                        try {
+                            settableFuture.set(processResponse(sessionResource, response));
+                        } catch (final Exception e) {
+                            settableFuture.setException(e);
+                        }
+                    }
+                });
         return settableFuture;
     }
 
@@ -135,7 +139,8 @@ public class SessionClient {
         if (code == 200 || code == 201) {
             final ResponseBody body = response.body();
             if (body == null) {
-                throw new InvalidSessionResourceException("Unable to fetch session object. Response body was empty.");
+                throw new InvalidSessionResourceException(
+                        "Unable to fetch session object. Response body was empty.");
             }
             try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
                 final SessionResource sessionResource;
@@ -154,13 +159,16 @@ public class SessionClient {
                 return session;
             }
         } else if (code == 401) {
-            throw new UnauthorizedException(String.format("Session object(%s) was unauthorized", base.toString()));
+            throw new UnauthorizedException(
+                    String.format("Session object(%s) was unauthorized", base.toString()));
         } else {
-            throw new EndpointNotFoundException(String.format("Unable to fetch session object(%s)", base.toString()));
+            throw new EndpointNotFoundException(
+                    String.format("Unable to fetch session object(%s)", base.toString()));
         }
     }
 
-    private void validateSessionResource(final SessionResource sessionResource) throws InvalidSessionResourceException {
+    private void validateSessionResource(final SessionResource sessionResource)
+            throws InvalidSessionResourceException {
         if (sessionResource.getApiUrl() == null) {
             throw new InvalidSessionResourceException("Missing API URL");
         }
@@ -199,5 +207,4 @@ public class SessionClient {
     public void setSessionCache(SessionCache sessionCache) {
         this.sessionCache = sessionCache;
     }
-
 }

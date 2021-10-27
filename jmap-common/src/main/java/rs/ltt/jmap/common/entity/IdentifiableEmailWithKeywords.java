@@ -21,5 +21,4 @@ import java.util.Map;
 public interface IdentifiableEmailWithKeywords extends Identifiable {
 
     Map<String, Boolean> getKeywords();
-
 }

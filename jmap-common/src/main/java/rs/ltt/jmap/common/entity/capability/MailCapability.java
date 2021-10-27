@@ -23,5 +23,4 @@ import rs.ltt.jmap.common.entity.Capability;
 
 @JmapCapability(namespace = Namespace.MAIL)
 @Builder
-public class MailCapability implements Capability {
-}
+public class MailCapability implements Capability {}

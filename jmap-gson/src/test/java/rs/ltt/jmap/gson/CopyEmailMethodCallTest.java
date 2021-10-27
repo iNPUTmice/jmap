@@ -19,13 +19,12 @@ package rs.ltt.jmap.gson;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.method.call.email.CopyEmailMethodCall;
-
-import java.io.IOException;
 
 public class CopyEmailMethodCallTest extends AbstractGsonTest {
 
@@ -34,13 +33,14 @@ public class CopyEmailMethodCallTest extends AbstractGsonTest {
         GsonBuilder builder = new GsonBuilder();
         JmapAdapters.register(builder);
         Gson gson = builder.create();
-        CopyEmailMethodCall copyEmailMethodCall = CopyEmailMethodCall.builder()
-                .fromAccountId("from@domain.tld")
-                .accountId("to@domain.tld")
-                .create(ImmutableMap.of("a", Email.of("M1001")))
-                .build();
+        CopyEmailMethodCall copyEmailMethodCall =
+                CopyEmailMethodCall.builder()
+                        .fromAccountId("from@domain.tld")
+                        .accountId("to@domain.tld")
+                        .create(ImmutableMap.of("a", Email.of("M1001")))
+                        .build();
         Request request = new Request.Builder().call(copyEmailMethodCall).build();
-        Assertions.assertEquals(readResourceAsString("request/copy-email.json"), gson.toJson(request));
+        Assertions.assertEquals(
+                readResourceAsString("request/copy-email.json"), gson.toJson(request));
     }
-
 }

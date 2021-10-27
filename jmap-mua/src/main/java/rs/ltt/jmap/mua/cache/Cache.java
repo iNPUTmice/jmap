@@ -16,8 +16,11 @@
 
 package rs.ltt.jmap.mua.cache;
 
-import rs.ltt.jmap.common.entity.Thread;
+import java.util.Collection;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import rs.ltt.jmap.common.entity.*;
+import rs.ltt.jmap.common.entity.Thread;
 import rs.ltt.jmap.mua.cache.exception.CacheConflictException;
 import rs.ltt.jmap.mua.cache.exception.CacheReadException;
 import rs.ltt.jmap.mua.cache.exception.CacheWriteException;
@@ -25,13 +28,9 @@ import rs.ltt.jmap.mua.cache.exception.NotSynchronizedException;
 import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collection;
-
 public interface Cache {
 
-    //states
+    // states
     String getIdentityState();
 
     String getMailboxState();
@@ -44,45 +43,63 @@ public interface Cache {
 
     void setMailboxes(TypedState<Mailbox> state, Mailbox[] mailboxes) throws CacheWriteException;
 
-    void updateMailboxes(Update<Mailbox> mailboxUpdate, String[] updatedProperties) throws CacheWriteException, CacheConflictException;
+    void updateMailboxes(Update<Mailbox> mailboxUpdate, String[] updatedProperties)
+            throws CacheWriteException, CacheConflictException;
 
-    Collection<? extends IdentifiableMailboxWithRole> getSpecialMailboxes() throws NotSynchronizedException;
+    Collection<? extends IdentifiableMailboxWithRole> getSpecialMailboxes()
+            throws NotSynchronizedException;
 
-    IdentifiableMailboxWithRoleAndName getMailboxByNameAndParent(final String name, final String parentId) throws NotSynchronizedException;
+    IdentifiableMailboxWithRoleAndName getMailboxByNameAndParent(
+            final String name, final String parentId) throws NotSynchronizedException;
 
-    Collection<? extends IdentifiableMailboxWithRoleAndName> getMailboxesByNames(final String[] names);
+    Collection<? extends IdentifiableMailboxWithRoleAndName> getMailboxesByNames(
+            final String[] names);
 
-    void setThreadsAndEmails(TypedState<Thread> threadState, Thread[] threads, TypedState<Email> emailState, Email[] emails);
+    void setThreadsAndEmails(
+            TypedState<Thread> threadState,
+            Thread[] threads,
+            TypedState<Email> emailState,
+            Email[] emails);
 
-    void addThreadsAndEmail(TypedState<Thread> threadState, Thread[] threads, TypedState<Email> emailState, Email[] emails);
+    void addThreadsAndEmail(
+            TypedState<Thread> threadState,
+            Thread[] threads,
+            TypedState<Email> emailState,
+            Email[] emails);
 
-    void updateThreads(Update<Thread> threadUpdate) throws CacheWriteException, CacheConflictException;
+    void updateThreads(Update<Thread> threadUpdate)
+            throws CacheWriteException, CacheConflictException;
 
-    void updateEmails(Update<Email> emailUpdate, String[] updatedProperties) throws CacheWriteException, CacheConflictException;
+    void updateEmails(Update<Email> emailUpdate, String[] updatedProperties)
+            throws CacheWriteException, CacheConflictException;
 
     void invalidateEmailThreadsAndQueries();
 
     void invalidateMailboxes();
 
+    // Identity
+    void setIdentities(TypedState<Identity> state, Identity[] identities)
+            throws CacheWriteException;
 
-    //Identity
-    void setIdentities(TypedState<Identity> state, Identity[] identities) throws CacheWriteException;
-
-
-    void updateIdentities(Update<Identity> identityUpdate) throws CacheWriteException, CacheConflictException;
+    void updateIdentities(Update<Identity> identityUpdate)
+            throws CacheWriteException, CacheConflictException;
 
     void invalidateIdentities();
 
-    //Queries
+    // Queries
 
     void setQueryResult(String queryString, QueryResult queryResult) throws CacheWriteException;
 
-    void addQueryResult(String queryString, String afterId, QueryResult queryResult) throws CacheWriteException, CacheConflictException;
+    void addQueryResult(String queryString, String afterId, QueryResult queryResult)
+            throws CacheWriteException, CacheConflictException;
 
-    void updateQueryResults(String queryString, QueryUpdate<Email, QueryResultItem> update, TypedState<Email> emailState) throws CacheWriteException, CacheConflictException;
+    void updateQueryResults(
+            String queryString,
+            QueryUpdate<Email, QueryResultItem> update,
+            TypedState<Email> emailState)
+            throws CacheWriteException, CacheConflictException;
 
     void invalidateQueryResult(String queryString);
 
     Missing getMissing(String query) throws CacheReadException;
 }
-

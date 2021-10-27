@@ -25,7 +25,8 @@ import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
 public class GetVacationResponseMethodResponse extends GetMethodResponse<VacationResponse> {
 
     @Builder
-    public GetVacationResponseMethodResponse(String accountId, String state, String[] notFound, VacationResponse[] list) {
+    public GetVacationResponseMethodResponse(
+            String accountId, String state, String[] notFound, VacationResponse[] list) {
         super(accountId, state, notFound, list);
     }
 }

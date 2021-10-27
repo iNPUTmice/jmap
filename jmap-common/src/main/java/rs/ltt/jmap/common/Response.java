@@ -36,14 +36,11 @@ public class Response implements GenericResponse {
         return sessionState;
     }
 
-
     public static class Invocation {
         private MethodResponse methodResponse;
         private String id;
 
-        public Invocation() {
-
-        }
+        public Invocation() {}
 
         public Invocation(MethodResponse methodResponse, String id) {
             this.methodResponse = methodResponse;

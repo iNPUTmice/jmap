@@ -16,21 +16,24 @@
 
 package rs.ltt.jmap.common.method.call.identity;
 
+import java.util.Map;
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
 import rs.ltt.jmap.common.Request;
 import rs.ltt.jmap.common.entity.Identity;
 import rs.ltt.jmap.common.method.call.standard.SetMethodCall;
 
-import java.util.Map;
-
 @JmapMethod("Identity/set")
 public class SetIdentityMethodCall extends SetMethodCall<Identity> {
 
     @Builder
-    public SetIdentityMethodCall(String accountId, String ifInState, Map<String, Identity> create,
-                                 Map<String, Map<String, Object>> update, String[] destroy,
-                                 Request.Invocation.ResultReference destroyReference) {
+    public SetIdentityMethodCall(
+            String accountId,
+            String ifInState,
+            Map<String, Identity> create,
+            Map<String, Map<String, Object>> update,
+            String[] destroy,
+            Request.Invocation.ResultReference destroyReference) {
         super(accountId, ifInState, create, update, destroy, destroyReference);
     }
 }

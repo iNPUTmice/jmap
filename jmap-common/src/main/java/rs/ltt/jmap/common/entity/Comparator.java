@@ -40,7 +40,8 @@ public class Comparator implements QueryString {
 
     @Override
     public String toQueryString() {
-        return QueryStringUtils.toQueryString(L2_DIVIDER, L3_DIVIDER, property, isAscending, collation);
+        return QueryStringUtils.toQueryString(
+                L2_DIVIDER, L3_DIVIDER, property, isAscending, collation);
     }
 
     @Override

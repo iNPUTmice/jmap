@@ -18,6 +18,7 @@ package rs.ltt.jmap.common.util;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import rs.ltt.jmap.common.entity.AccountCapability;
 import rs.ltt.jmap.common.entity.Capability;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
@@ -29,25 +30,24 @@ import rs.ltt.jmap.common.method.call.core.EchoMethodCall;
 import rs.ltt.jmap.common.method.error.UnknownMethodMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.core.EchoMethodResponse;
 
-import java.util.Map;
-
 public class MapperLoggingUtils {
 
     private static final Map<Class<?>, Class<?>> WELL_KNOWN_MAPPINGS;
 
     static {
-        WELL_KNOWN_MAPPINGS = new ImmutableMap.Builder<Class<?>, Class<?>>()
-                .put(MethodCall.class, EchoMethodCall.class)
-                .put(MethodResponse.class, EchoMethodResponse.class)
-                .put(MethodErrorResponse.class, UnknownMethodMethodErrorResponse.class)
-                .put(Capability.class, CoreCapability.class)
-                .put(AccountCapability.class, MailAccountCapability.class)
-                .build();
+        WELL_KNOWN_MAPPINGS =
+                new ImmutableMap.Builder<Class<?>, Class<?>>()
+                        .put(MethodCall.class, EchoMethodCall.class)
+                        .put(MethodResponse.class, EchoMethodResponse.class)
+                        .put(MethodErrorResponse.class, UnknownMethodMethodErrorResponse.class)
+                        .put(Capability.class, CoreCapability.class)
+                        .put(AccountCapability.class, MailAccountCapability.class)
+                        .build();
     }
 
-    public static <T> boolean isMissingWellKnown(ImmutableBiMap<String, Class<? extends T>> map, Class<T> type) {
+    public static <T> boolean isMissingWellKnown(
+            ImmutableBiMap<String, Class<? extends T>> map, Class<T> type) {
         final Class<?> wellKnownMapping = WELL_KNOWN_MAPPINGS.get(type);
         return wellKnownMapping != null && !map.containsValue(wellKnownMapping);
     }
-
 }

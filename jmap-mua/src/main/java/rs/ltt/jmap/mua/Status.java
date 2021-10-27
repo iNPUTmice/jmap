@@ -37,9 +37,8 @@ public enum Status {
         try {
             return statusListenableFuture.get() == UNCHANGED;
         } catch (Exception e) {
-            //exception also means no changes
+            // exception also means no changes
             return true;
         }
     }
-
 }

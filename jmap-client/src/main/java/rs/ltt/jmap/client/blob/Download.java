@@ -16,9 +16,8 @@
 
 package rs.ltt.jmap.client.blob;
 
-import okhttp3.Call;
-
 import java.io.InputStream;
+import okhttp3.Call;
 
 public final class Download {
     private final Call call;

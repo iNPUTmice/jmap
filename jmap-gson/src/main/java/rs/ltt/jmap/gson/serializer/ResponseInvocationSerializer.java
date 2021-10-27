@@ -17,12 +17,11 @@
 package rs.ltt.jmap.gson.serializer;
 
 import com.google.gson.*;
+import java.lang.reflect.Type;
 import rs.ltt.jmap.common.Response;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.MethodResponse;
 import rs.ltt.jmap.common.util.Mapper;
-
-import java.lang.reflect.Type;
 
 public class ResponseInvocationSerializer implements JsonSerializer<Response.Invocation> {
 
@@ -31,18 +30,23 @@ public class ResponseInvocationSerializer implements JsonSerializer<Response.Inv
     }
 
     @Override
-    public JsonElement serialize(final Response.Invocation invocation, final Type type, final JsonSerializationContext context) {
+    public JsonElement serialize(
+            final Response.Invocation invocation,
+            final Type type,
+            final JsonSerializationContext context) {
         final String id = invocation.getId();
         final MethodResponse methodResponse = invocation.getMethodResponse();
         final JsonArray jsonArray = new JsonArray();
         if (methodResponse instanceof MethodErrorResponse) {
             jsonArray.add("error");
-            final String errorType = Mapper.METHOD_ERROR_RESPONSES.inverse().get(methodResponse.getClass());
+            final String errorType =
+                    Mapper.METHOD_ERROR_RESPONSES.inverse().get(methodResponse.getClass());
             if (errorType == null) {
-                throw new JsonIOException(String.format(
-                        "Unable to serialize %s. Did you annotate the Method with @JmapError?",
-                        methodResponse.getClass().getSimpleName()
-                ));
+                throw new JsonIOException(
+                        String.format(
+                                "Unable to serialize %s. Did you annotate the Method with"
+                                        + " @JmapError?",
+                                methodResponse.getClass().getSimpleName()));
             }
             final JsonObject jsonObject = (JsonObject) context.serialize(methodResponse);
             jsonObject.addProperty("type", errorType);
@@ -50,10 +54,11 @@ public class ResponseInvocationSerializer implements JsonSerializer<Response.Inv
         } else {
             final String name = Mapper.METHOD_RESPONSES.inverse().get(methodResponse.getClass());
             if (name == null) {
-                throw new JsonIOException(String.format(
-                        "Unable to serialize %s. Did you annotate the method with @JmapMethod?",
-                        methodResponse.getClass().getSimpleName()
-                ));
+                throw new JsonIOException(
+                        String.format(
+                                "Unable to serialize %s. Did you annotate the method with"
+                                        + " @JmapMethod?",
+                                methodResponse.getClass().getSimpleName()));
             }
             jsonArray.add(name);
             jsonArray.add(context.serialize(methodResponse));

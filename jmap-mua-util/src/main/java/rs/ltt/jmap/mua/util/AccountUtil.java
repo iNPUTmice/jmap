@@ -18,27 +18,25 @@ package rs.ltt.jmap.mua.util;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 public final class AccountUtil {
 
-    private AccountUtil() {
-
-    }
+    private AccountUtil() {}
 
     public static String printableName(final String username) {
         final int atPosition = username.indexOf("@");
         if (atPosition <= 0) {
             return username;
         }
-        final List<String> words = Splitter.onPattern("[\\.\\-_]")
-                .splitToStream(username.substring(0, atPosition))
-                .filter(word -> word.length() > 0)
-                .map(AccountUtil::capitalizeFirst)
-                .collect(Collectors.toList());
+        final List<String> words =
+                Splitter.onPattern("[\\.\\-_]")
+                        .splitToStream(username.substring(0, atPosition))
+                        .filter(word -> word.length() > 0)
+                        .map(AccountUtil::capitalizeFirst)
+                        .collect(Collectors.toList());
         if (words.size() > 0) {
             return Joiner.on(' ').join(words);
         } else {
@@ -47,6 +45,7 @@ public final class AccountUtil {
     }
 
     private static String capitalizeFirst(final String word) {
-        return word.substring(0, 1).toUpperCase(Locale.ENGLISH) + word.substring(1).toLowerCase(Locale.ENGLISH);
+        return word.substring(0, 1).toUpperCase(Locale.ENGLISH)
+                + word.substring(1).toLowerCase(Locale.ENGLISH);
     }
 }

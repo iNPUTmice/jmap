@@ -47,7 +47,10 @@ public class ProblemDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProblemDetails details = (ProblemDetails) o;
-        return status == details.status && Objects.equal(type, details.type) && Objects.equal(title, details.title) && Objects.equal(detail, details.detail);
+        return status == details.status
+                && Objects.equal(type, details.type)
+                && Objects.equal(title, details.title)
+                && Objects.equal(detail, details.detail);
     }
 
     @Override

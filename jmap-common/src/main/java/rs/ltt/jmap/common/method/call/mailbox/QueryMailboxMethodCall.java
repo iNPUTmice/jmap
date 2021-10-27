@@ -32,9 +32,17 @@ public class QueryMailboxMethodCall extends QueryMethodCall<Mailbox> {
     private Boolean filterAsTree;
 
     @Builder
-    public QueryMailboxMethodCall(@NonNull String accountId, Filter<Mailbox> filter, Comparator[] sort, Long position,
-                                  String anchor, Long anchorOffset, Long limit, Boolean sortAsTree, Boolean filterAsTree,
-                                  Boolean calculateTotal) {
+    public QueryMailboxMethodCall(
+            @NonNull String accountId,
+            Filter<Mailbox> filter,
+            Comparator[] sort,
+            Long position,
+            String anchor,
+            Long anchorOffset,
+            Long limit,
+            Boolean sortAsTree,
+            Boolean filterAsTree,
+            Boolean calculateTotal) {
         super(accountId, filter, sort, position, anchor, anchorOffset, limit, calculateTotal);
         this.sortAsTree = sortAsTree;
         this.filterAsTree = filterAsTree;

@@ -33,5 +33,4 @@ public interface PushService {
     State getConnectionState();
 
     void setPingInterval(Duration pingInterval);
-
 }

@@ -16,7 +16,16 @@
 
 package rs.ltt.jmap.client.event;
 
+import static rs.ltt.jmap.client.Services.GSON;
+import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT;
+
 import com.google.common.base.Strings;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -33,32 +42,26 @@ import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.StateChange;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import static rs.ltt.jmap.client.Services.GSON;
-import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT;
-
 public class EventSourcePushService implements PushService, OnStateChangeListenerManager.Callback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSourcePushService.class);
 
     private final Session session;
     private final HttpAuthentication authentication;
-    private final OnStateChangeListenerManager onStateChangeListenerManager = new OnStateChangeListenerManager(this);
-    private final List<OnConnectionStateChangeListener> onConnectionStateListeners = new ArrayList<>();
+    private final OnStateChangeListenerManager onStateChangeListenerManager =
+            new OnStateChangeListenerManager(this);
+    private final List<OnConnectionStateChangeListener> onConnectionStateListeners =
+            new ArrayList<>();
     private EventSource currentEventSource;
     private Duration pingInterval = Duration.ofSeconds(30);
-    private ReconnectionStrategy reconnectionStrategy = ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
+    private ReconnectionStrategy reconnectionStrategy =
+            ReconnectionStrategy.truncatedBinaryExponentialBackoffStrategy(60, 4);
     private int attempt = 0;
     private State state = State.CLOSED;
     private ScheduledFuture<?> reconnectionFuture;
 
-    //TODO do we want to pass JmapClient instead to always have access to the session. or an SessionRetriever interface
+    // TODO do we want to pass JmapClient instead to always have access to the session. or an
+    // SessionRetriever interface
     public EventSourcePushService(final Session session, final HttpAuthentication authentication) {
         this.session = session;
         this.authentication = authentication;
@@ -81,7 +84,8 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
                 listener.onConnectionStateChange(state);
             }
         }
-        if (state.needsReconnect() && this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
+        if (state.needsReconnect()
+                && this.onStateChangeListenerManager.isPushNotificationsEnabled()) {
             scheduleReconnect();
         }
     }
@@ -90,11 +94,9 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         final int attempt = this.attempt;
         final Duration reconnectIn = reconnectionStrategy.getNextReconnectionAttempt(attempt);
         LOGGER.info("schedule reconnect in {} for {} time ", reconnectIn, attempt + 1);
-        this.reconnectionFuture = Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
-                this::connect,
-                reconnectIn.toMillis(),
-                TimeUnit.MILLISECONDS
-        );
+        this.reconnectionFuture =
+                Services.SCHEDULED_EXECUTOR_SERVICE.schedule(
+                        this::connect, reconnectIn.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     private void cancelReconnectionFuture() {
@@ -105,7 +107,7 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     }
 
     private void connect() {
-        //TODO there needs to be some synchronization since connect can be called externally
+        // TODO there needs to be some synchronization since connect can be called externally
         if (!this.state.needsReconnect()) {
             return;
         }
@@ -115,11 +117,9 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
 
         final HttpUrl eventSourceUrl;
         try {
-            eventSourceUrl = session.getEventSourceUrl(
-                    Collections.emptyList(),
-                    CloseAfter.NO,
-                    pingInterval.getSeconds()
-            );
+            eventSourceUrl =
+                    session.getEventSourceUrl(
+                            Collections.emptyList(), CloseAfter.NO, pingInterval.getSeconds());
         } catch (final Exception e) {
             LOGGER.warn("Unable to connect to EventSource URL");
             disconnect(State.FAILED);
@@ -129,18 +129,19 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     }
 
     private void connectEventSource(final HttpUrl eventSourceUrl) {
-        final EventSource.Factory factory = EventSources.createFactory(
-                OK_HTTP_CLIENT.newBuilder()
-                        .readTimeout(pingInterval.plus(PING_INTERVAL_TOLERANCE))
-                        .retryOnConnectionFailure(true)
-                        .build()
-        );
+        final EventSource.Factory factory =
+                EventSources.createFactory(
+                        OK_HTTP_CLIENT
+                                .newBuilder()
+                                .readTimeout(pingInterval.plus(PING_INTERVAL_TOLERANCE))
+                                .retryOnConnectionFailure(true)
+                                .build());
         final Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(eventSourceUrl);
         authentication.authenticate(requestBuilder);
-        //Something in the Cyrus-Nginx-OkHttp pipeline doesn't support compression
-        //Since curl can handle it fine it might be OkHttp
-        //Okio.GzipSource throws in checkEqual
+        // Something in the Cyrus-Nginx-OkHttp pipeline doesn't support compression
+        // Since curl can handle it fine it might be OkHttp
+        // Okio.GzipSource throws in checkEqual
         requestBuilder.addHeader(Headers.ACCEPT_ENCODING, "identity");
         final Request request = requestBuilder.build();
         LOGGER.info("Using event source url {}", eventSourceUrl);
@@ -149,7 +150,8 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
 
     private void setCurrentEventSource(final EventSource eventSource) {
         if (this.currentEventSource != null) {
-            throw new IllegalStateException("Unable to set current EventSource. One already exists");
+            throw new IllegalStateException(
+                    "Unable to set current EventSource. One already exists");
         }
         this.currentEventSource = eventSource;
     }
@@ -183,14 +185,16 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
     }
 
     @Override
-    public void addOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener) {
+    public void addOnConnectionStateListener(
+            OnConnectionStateChangeListener onConnectionStateListener) {
         synchronized (this.onConnectionStateListeners) {
             this.onConnectionStateListeners.add(onConnectionStateListener);
         }
     }
 
     @Override
-    public void removeOnConnectionStateListener(OnConnectionStateChangeListener onConnectionStateListener) {
+    public void removeOnConnectionStateListener(
+            OnConnectionStateChangeListener onConnectionStateListener) {
         synchronized (this.onConnectionStateListeners) {
             this.onConnectionStateListeners.remove(onConnectionStateListener);
         }
@@ -225,7 +229,11 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         }
 
         @Override
-        public void onEvent(@NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
+        public void onEvent(
+                @NotNull EventSource eventSource,
+                @Nullable String id,
+                @Nullable String type,
+                @NotNull String data) {
             super.onEvent(eventSource, id, type, data);
             switch (Strings.nullToEmpty(type)) {
                 case Type.STATE:
@@ -239,13 +247,18 @@ public class EventSourcePushService implements PushService, OnStateChangeListene
         }
 
         @Override
-        public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
+        public void onFailure(
+                @NotNull EventSource eventSource,
+                @Nullable Throwable t,
+                @Nullable Response response) {
             super.onFailure(eventSource, t, response);
             if (onStateChangeListenerManager.isPushNotificationsEnabled()) {
                 if (t != null) {
                     LOGGER.warn("Unable to connect to EventSource URL", t);
                 } else if (response != null) {
-                    LOGGER.warn("Unable to connect to EventSource URL. Status code was {}", response.code());
+                    LOGGER.warn(
+                            "Unable to connect to EventSource URL. Status code was {}",
+                            response.code());
                 } else {
                     LOGGER.warn("Unable to connect to EventSource URL");
                 }

@@ -16,12 +16,11 @@
 
 package rs.ltt.jmap.annotation.processor;
 
-
 import com.google.auto.service.AutoService;
-import rs.ltt.jmap.annotation.JmapAccountCapability;
-import rs.ltt.jmap.common.Utils;
-import rs.ltt.jmap.common.entity.AccountCapability;
-
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -30,10 +29,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import rs.ltt.jmap.annotation.JmapAccountCapability;
+import rs.ltt.jmap.common.Utils;
+import rs.ltt.jmap.common.entity.AccountCapability;
 
 @SupportedAnnotationTypes("rs.ltt.jmap.annotation.JmapAccountCapability")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
@@ -51,11 +49,17 @@ public class JmapAccountCapabilityProcessor extends AbstractProcessor {
         super.init(processingEnvironment);
         this.filer = processingEnvironment.getFiler();
         this.typeUtils = processingEnvironment.getTypeUtils();
-        this.accountCapability = processingEnvironment.getElementUtils().getTypeElement(INTERFACE.getName()).asType();
+        this.accountCapability =
+                processingEnvironment
+                        .getElementUtils()
+                        .getTypeElement(INTERFACE.getName())
+                        .asType();
     }
 
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(JmapAccountCapability.class);
+    public boolean process(
+            Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+        Set<? extends Element> elements =
+                roundEnvironment.getElementsAnnotatedWith(JmapAccountCapability.class);
         final List<TypeElement> classes = new ArrayList<>();
         for (Element element : elements) {
             if (element instanceof TypeElement) {
@@ -63,7 +67,12 @@ public class JmapAccountCapabilityProcessor extends AbstractProcessor {
                 if (typeUtils.isAssignable(element.asType(), accountCapability)) {
                     classes.add(typeElement);
                 } else {
-                    System.out.println(typeElement.getQualifiedName() + " does not implement " + accountCapability + " but " + typeElement.getInterfaces());
+                    System.out.println(
+                            typeElement.getQualifiedName()
+                                    + " does not implement "
+                                    + accountCapability
+                                    + " but "
+                                    + typeElement.getInterfaces());
                 }
             }
         }
@@ -77,11 +86,16 @@ public class JmapAccountCapabilityProcessor extends AbstractProcessor {
         }
 
         try {
-            FileObject resourceFile = filer.createResource(StandardLocation.CLASS_OUTPUT, "", Utils.getFilenameFor(INTERFACE));
+            FileObject resourceFile =
+                    filer.createResource(
+                            StandardLocation.CLASS_OUTPUT, "", Utils.getFilenameFor(INTERFACE));
             PrintWriter printWriter = new PrintWriter(resourceFile.openOutputStream());
             for (TypeElement typeElement : classes) {
-                JmapAccountCapability annotation = typeElement.getAnnotation(JmapAccountCapability.class);
-                printWriter.println(String.format("%s %s", typeElement.getQualifiedName(), annotation.namespace()));
+                JmapAccountCapability annotation =
+                        typeElement.getAnnotation(JmapAccountCapability.class);
+                printWriter.println(
+                        String.format(
+                                "%s %s", typeElement.getQualifiedName(), annotation.namespace()));
             }
             printWriter.flush();
             printWriter.close();

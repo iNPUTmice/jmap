@@ -28,8 +28,14 @@ import rs.ltt.jmap.common.method.call.standard.QueryChangesMethodCall;
 public class QueryChangesMailboxMethodCall extends QueryChangesMethodCall<Mailbox> {
 
     @Builder
-    public QueryChangesMailboxMethodCall(String accountId, Filter<Mailbox> filter, Comparator[] sort,
-                                         String sinceQueryState, Long maxChanges, String upToId, Boolean calculateTotal) {
+    public QueryChangesMailboxMethodCall(
+            String accountId,
+            Filter<Mailbox> filter,
+            Comparator[] sort,
+            String sinceQueryState,
+            Long maxChanges,
+            String upToId,
+            Boolean calculateTotal) {
         super(accountId, filter, sort, sinceQueryState, maxChanges, upToId, calculateTotal);
     }
 

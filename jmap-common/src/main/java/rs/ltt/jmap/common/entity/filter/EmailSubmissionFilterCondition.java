@@ -17,14 +17,13 @@
 package rs.ltt.jmap.common.entity.filter;
 
 import com.google.common.collect.ComparisonChain;
+import java.time.Instant;
+import javax.annotation.Nonnull;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.common.entity.EmailSubmission;
 import rs.ltt.jmap.common.entity.UndoStatus;
 import rs.ltt.jmap.common.util.QueryStringUtils;
-
-import javax.annotation.Nonnull;
-import java.time.Instant;
 
 @Getter
 @Builder
@@ -47,10 +46,15 @@ public class EmailSubmissionFilterCondition implements FilterCondition<EmailSubm
         if (filter instanceof EmailSubmissionFilterCondition) {
             final EmailSubmissionFilterCondition other = (EmailSubmissionFilterCondition) filter;
             return ComparisonChain.start()
-                    .compare(identityIds, other.identityIds, QueryStringUtils.STRING_ARRAY_COMPARATOR)
+                    .compare(
+                            identityIds,
+                            other.identityIds,
+                            QueryStringUtils.STRING_ARRAY_COMPARATOR)
                     .compare(emailIds, other.emailIds, QueryStringUtils.STRING_ARRAY_COMPARATOR)
                     .compare(threadIds, other.threadIds, QueryStringUtils.STRING_ARRAY_COMPARATOR)
-                    .compare(QueryStringUtils.nullToEmpty(undoStatus), QueryStringUtils.nullToEmpty(other.undoStatus))
+                    .compare(
+                            QueryStringUtils.nullToEmpty(undoStatus),
+                            QueryStringUtils.nullToEmpty(other.undoStatus))
                     .compare(before, other.before)
                     .compare(after, other.after, QueryStringUtils.INSTANT_COMPARATOR)
                     .result();
@@ -61,7 +65,14 @@ public class EmailSubmissionFilterCondition implements FilterCondition<EmailSubm
 
     @Override
     public String toQueryString() {
-        return QueryStringUtils.toQueryString(L3_DIVIDER, L4_DIVIDER, identityIds, emailIds, threadIds, undoStatus, before, after);
+        return QueryStringUtils.toQueryString(
+                L3_DIVIDER,
+                L4_DIVIDER,
+                identityIds,
+                emailIds,
+                threadIds,
+                undoStatus,
+                before,
+                after);
     }
-
 }

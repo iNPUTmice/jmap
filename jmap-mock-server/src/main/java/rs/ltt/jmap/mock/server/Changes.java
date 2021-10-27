@@ -18,7 +18,6 @@ package rs.ltt.jmap.mock.server;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
-
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -35,7 +34,7 @@ public class Changes {
     public static Changes merge(Collection<Changes> changes) {
         final HashSet<String> updated = new HashSet<>();
         final HashSet<String> created = new HashSet<>();
-        for(final Changes change : changes) {
+        for (final Changes change : changes) {
             created.addAll(ImmutableSet.copyOf(change.created));
             for (final String id : change.updated) {
                 if (created.contains(id)) {

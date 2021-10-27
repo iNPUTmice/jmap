@@ -16,9 +16,7 @@
 
 package rs.ltt.jmap.client.blob;
 
-
 import com.google.common.net.MediaType;
-
 import java.io.InputStream;
 
 public interface Uploadable {

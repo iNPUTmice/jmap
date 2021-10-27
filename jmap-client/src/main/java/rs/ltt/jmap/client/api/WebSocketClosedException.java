@@ -18,9 +18,7 @@ package rs.ltt.jmap.client.api;
 
 public class WebSocketClosedException extends Exception {
 
-
     public WebSocketClosedException(final int code, final String reason) {
         super(String.format("WebSocket closed with code %d and reason %s", code, reason));
     }
-
 }

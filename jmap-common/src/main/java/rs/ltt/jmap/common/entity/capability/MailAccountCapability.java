@@ -36,7 +36,6 @@ public class MailAccountCapability implements AccountCapability {
     private String[] emailQuerySortOptions;
     private Boolean mayCreateTopLevelMailbox;
 
-
     public long maxSizeMailboxName() {
         return Property.expected(maxSizeMailboxName);
     }

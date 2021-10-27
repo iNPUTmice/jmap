@@ -23,7 +23,5 @@ public final class Keyword {
     public static final String FLAGGED = "$flagged";
     public static final String ANSWERED = "$answered";
 
-    private Keyword() {
-
-    }
+    private Keyword() {}
 }

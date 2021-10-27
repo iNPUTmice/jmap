@@ -17,14 +17,13 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.collect.Iterables;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import rs.ltt.jmap.common.entity.EmailAddress;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Objects;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import rs.ltt.jmap.common.entity.EmailAddress;
 
 public class MailToUriTest {
 
@@ -41,8 +40,7 @@ public class MailToUriTest {
                 MailToUri.builder()
                         .to(EmailAddress.builder().email(EXAMPLE_ADDRESS_ALPHA).build())
                         .build(),
-                MailToUri.get(String.format("mailto:%s", EXAMPLE_ADDRESS_ALPHA))
-        );
+                MailToUri.get(String.format("mailto:%s", EXAMPLE_ADDRESS_ALPHA)));
     }
 
     @Test
@@ -50,7 +48,9 @@ public class MailToUriTest {
         final MailToUri uri = MailToUri.get(String.format("mailto:%s", EXAMPLE_ADDRESS_AT));
         final Collection<EmailAddress> to = uri.getTo();
         Assertions.assertEquals(1, to.size(), "Unexpected number of email addresses in URI");
-        Assertions.assertEquals(EXAMPLE_ADDRESS_AT, Objects.requireNonNull(Iterables.getFirst(to, null)).getEmail());
+        Assertions.assertEquals(
+                EXAMPLE_ADDRESS_AT,
+                Objects.requireNonNull(Iterables.getFirst(to, null)).getEmail());
     }
 
     @Test
@@ -60,18 +60,16 @@ public class MailToUriTest {
                         .to(EmailAddress.builder().email(EXAMPLE_ADDRESS_ALPHA).build())
                         .subject(EXAMPLE_SUBJECT)
                         .build(),
-                MailToUri.get(String.format("mailto:%s?subject=%s", EXAMPLE_ADDRESS_ALPHA, EXAMPLE_SUBJECT))
-        );
+                MailToUri.get(
+                        String.format(
+                                "mailto:%s?subject=%s", EXAMPLE_ADDRESS_ALPHA, EXAMPLE_SUBJECT)));
     }
 
     @Test
     public void emptyToAndSubject() {
         Assertions.assertEquals(
-                MailToUri.builder()
-                        .subject(EXAMPLE_SUBJECT)
-                        .build(),
-                MailToUri.get(String.format("mailto:?subject=%s", EXAMPLE_SUBJECT))
-        );
+                MailToUri.builder().subject(EXAMPLE_SUBJECT).build(),
+                MailToUri.get(String.format("mailto:?subject=%s", EXAMPLE_SUBJECT)));
     }
 
     @Test
@@ -84,15 +82,14 @@ public class MailToUriTest {
                         .bcc((EmailAddress.builder().email(EXAMPLE_ADDRESS_DELTA).build()))
                         .subject(EXAMPLE_SUBJECT)
                         .build(),
-                MailToUri.get(String.format(
-                        "mailto:%s?cc=%s,%s&bcc=%s&subject=%s",
-                        EXAMPLE_ADDRESS_ALPHA,
-                        EXAMPLE_ADDRESS_BETA,
-                        EXAMPLE_ADDRESS_GAMMA,
-                        EXAMPLE_ADDRESS_DELTA,
-                        EXAMPLE_SUBJECT)
-                )
-        );
+                MailToUri.get(
+                        String.format(
+                                "mailto:%s?cc=%s,%s&bcc=%s&subject=%s",
+                                EXAMPLE_ADDRESS_ALPHA,
+                                EXAMPLE_ADDRESS_BETA,
+                                EXAMPLE_ADDRESS_GAMMA,
+                                EXAMPLE_ADDRESS_DELTA,
+                                EXAMPLE_SUBJECT)));
     }
 
     @Test
@@ -102,8 +99,8 @@ public class MailToUriTest {
                         .to(EmailAddress.builder().email("list@example.com").build())
                         .inReplyTo("<3469A91.D10AF4C@example.com>")
                         .build(),
-                MailToUri.get("mailto:list@example.com?In-Reply-To=%3C3469A91.D10AF4C@example.com%3E")
-        );
+                MailToUri.get(
+                        "mailto:list@example.com?In-Reply-To=%3C3469A91.D10AF4C@example.com%3E"));
     }
 
     @Test
@@ -112,13 +109,13 @@ public class MailToUriTest {
                 MailToUri.builder()
                         .to(EmailAddress.builder().email("\",\"@example.com").build())
                         .build(),
-                MailToUri.get("mailto:\",\"@example.com")
-        );
+                MailToUri.get("mailto:\",\"@example.com"));
     }
 
     @Test
     public void unknownScheme() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> MailToUri.get("xmpp:test@example.com"));
+        Assertions.assertThrows(
+                IllegalArgumentException.class, () -> MailToUri.get("xmpp:test@example.com"));
     }
 
     @Test
@@ -132,42 +129,33 @@ public class MailToUriTest {
                 MailToUri.builder()
                         .to(EmailAddress.builder().email(EXAMPLE_ADDRESS_ALPHA).build())
                         .build(),
-                MailToUri.get(String.format("mailto:%s?", EXAMPLE_ADDRESS_ALPHA))
-        );
+                MailToUri.get(String.format("mailto:%s?", EXAMPLE_ADDRESS_ALPHA)));
     }
 
     @Test
     public void emptyMailto() {
-        Assertions.assertEquals(
-                MailToUri.builder()
-                        .build(),
-                MailToUri.get("mailto:")
-        );
+        Assertions.assertEquals(MailToUri.builder().build(), MailToUri.get("mailto:"));
     }
 
     @Test
     public void emptyMailtoEmptyQuery() {
-        Assertions.assertEquals(
-                MailToUri.builder()
-                        .build(),
-                MailToUri.get("mailto:?")
-        );
+        Assertions.assertEquals(MailToUri.builder().build(), MailToUri.get("mailto:?"));
     }
 
     @Test
     public void namedEmailAddressInMailto() throws UnsupportedEncodingException {
         Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> MailToUri.get(
-                        String.format(
-                                "mailto:%s",
-                                URLEncoder.encode(
-                                        EmailAddressUtil.toString(
-                                                EmailAddress.builder().name("Alpha").email(EXAMPLE_ADDRESS_ALPHA).build()
-                                        ),
-                                        "UTF-8"
-                                )
-                        )
-                ));
+                () ->
+                        MailToUri.get(
+                                String.format(
+                                        "mailto:%s",
+                                        URLEncoder.encode(
+                                                EmailAddressUtil.toString(
+                                                        EmailAddress.builder()
+                                                                .name("Alpha")
+                                                                .email(EXAMPLE_ADDRESS_ALPHA)
+                                                                .build()),
+                                                "UTF-8"))));
     }
 }

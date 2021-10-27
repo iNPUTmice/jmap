@@ -18,13 +18,12 @@ package rs.ltt.jmap.common.entity.filter;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
+import javax.annotation.Nonnull;
 import lombok.Builder;
 import lombok.Getter;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.util.QueryStringUtils;
-
-import javax.annotation.Nonnull;
 
 @Getter
 @Builder
@@ -47,7 +46,9 @@ public class MailboxFilterCondition implements FilterCondition<Mailbox> {
             return ComparisonChain.start()
                     .compare(Strings.nullToEmpty(parentId), Strings.nullToEmpty(other.parentId))
                     .compare(Strings.nullToEmpty(name), Strings.nullToEmpty(other.name))
-                    .compare(QueryStringUtils.nullToEmpty(role), QueryStringUtils.nullToEmpty(other.role))
+                    .compare(
+                            QueryStringUtils.nullToEmpty(role),
+                            QueryStringUtils.nullToEmpty(other.role))
                     .compare(hasAnyRole, other.hasAnyRole, QueryStringUtils.BOOLEAN_COMPARATOR)
                     .compare(isSubscribed, other.isSubscribed, QueryStringUtils.BOOLEAN_COMPARATOR)
                     .result();
@@ -58,7 +59,7 @@ public class MailboxFilterCondition implements FilterCondition<Mailbox> {
 
     @Override
     public String toQueryString() {
-        return QueryStringUtils.toQueryString(L3_DIVIDER, L4_DIVIDER, parentId, name, role, hasAnyRole, isSubscribed);
+        return QueryStringUtils.toQueryString(
+                L3_DIVIDER, L4_DIVIDER, parentId, name, role, hasAnyRole, isSubscribed);
     }
-
 }

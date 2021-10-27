@@ -25,18 +25,22 @@ import rs.ltt.jmap.common.method.response.standard.SetMethodResponse;
 
 public class CreationIdResolver {
 
-    public static String resolveIfNecessary(final String id, final ListMultimap<String, Response.Invocation> previousResponses) {
+    public static String resolveIfNecessary(
+            final String id, final ListMultimap<String, Response.Invocation> previousResponses) {
         return isCreationId(id) ? resolve(id, previousResponses) : id;
     }
 
-    private static String resolve(final String creationId, final ListMultimap<String, Response.Invocation> previousResponses) {
+    private static String resolve(
+            final String creationId,
+            final ListMultimap<String, Response.Invocation> previousResponses) {
         Preconditions.checkNotNull(creationId);
         Preconditions.checkArgument(creationId.charAt(0) == '#');
         final String strippedId = creationId.substring(1);
         for (final Response.Invocation invocation : previousResponses.values()) {
             final MethodResponse methodResponse = invocation.getMethodResponse();
             if (methodResponse instanceof SetMethodResponse) {
-                final AbstractIdentifiableEntity entity = ((SetMethodResponse<?>) methodResponse).getCreated().get(strippedId);
+                final AbstractIdentifiableEntity entity =
+                        ((SetMethodResponse<?>) methodResponse).getCreated().get(strippedId);
                 if (entity != null) {
                     return entity.getId();
                 }

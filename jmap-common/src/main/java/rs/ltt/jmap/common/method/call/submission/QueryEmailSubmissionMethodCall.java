@@ -29,9 +29,15 @@ import rs.ltt.jmap.common.method.call.standard.QueryMethodCall;
 public class QueryEmailSubmissionMethodCall extends QueryMethodCall<EmailSubmission> {
 
     @Builder
-    public QueryEmailSubmissionMethodCall(@NonNull String accountId, Filter<EmailSubmission> filter, Comparator[] sort,
-                                          Long position, String anchor, Long anchorOffset, Long limit,
-                                          Boolean calculateTotal) {
+    public QueryEmailSubmissionMethodCall(
+            @NonNull String accountId,
+            Filter<EmailSubmission> filter,
+            Comparator[] sort,
+            Long position,
+            String anchor,
+            Long anchorOffset,
+            Long limit,
+            Boolean calculateTotal) {
         super(accountId, filter, sort, position, anchor, anchorOffset, limit, calculateTotal);
     }
 

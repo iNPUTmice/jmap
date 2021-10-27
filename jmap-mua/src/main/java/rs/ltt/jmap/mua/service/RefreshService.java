@@ -20,12 +20,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.List;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.ObjectsState;
-
-import java.util.List;
 
 public class RefreshService extends MuaService {
 
@@ -34,7 +33,8 @@ public class RefreshService extends MuaService {
     }
 
     public ListenableFuture<Status> refresh() {
-        return Futures.transformAsync(getObjectsState(), this::refresh, MoreExecutors.directExecutor());
+        return Futures.transformAsync(
+                getObjectsState(), this::refresh, MoreExecutors.directExecutor());
     }
 
     public ListenableFuture<Status> refresh(ObjectsState objectsState) {
@@ -44,20 +44,28 @@ public class RefreshService extends MuaService {
         return transform(futuresList);
     }
 
-    public List<ListenableFuture<Status>> refresh(ObjectsState objectsState, JmapClient.MultiCall multiCall) {
-        ImmutableList.Builder<ListenableFuture<Status>> futuresListBuilder = new ImmutableList.Builder<>();
+    public List<ListenableFuture<Status>> refresh(
+            ObjectsState objectsState, JmapClient.MultiCall multiCall) {
+        ImmutableList.Builder<ListenableFuture<Status>> futuresListBuilder =
+                new ImmutableList.Builder<>();
         if (objectsState.mailboxState != null) {
-            futuresListBuilder.add(getService(MailboxService.class).updateMailboxes(objectsState.mailboxState, multiCall));
+            futuresListBuilder.add(
+                    getService(MailboxService.class)
+                            .updateMailboxes(objectsState.mailboxState, multiCall));
         } else {
             futuresListBuilder.add(getService(MailboxService.class).loadMailboxes(multiCall));
         }
 
-        //update to emails should happen before update to threads
-        //when mua queries threads the corresponding emails should already be in the cache
+        // update to emails should happen before update to threads
+        // when mua queries threads the corresponding emails should already be in the cache
 
         if (objectsState.emailState != null && objectsState.threadState != null) {
-            futuresListBuilder.add(getService(EmailService.class).updateEmails(objectsState.emailState, multiCall));
-            futuresListBuilder.add(getService(ThreadService.class).updateThreads(objectsState.threadState, multiCall));
+            futuresListBuilder.add(
+                    getService(EmailService.class)
+                            .updateEmails(objectsState.emailState, multiCall));
+            futuresListBuilder.add(
+                    getService(ThreadService.class)
+                            .updateThreads(objectsState.threadState, multiCall));
         }
         return futuresListBuilder.build();
     }

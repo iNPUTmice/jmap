@@ -20,9 +20,7 @@ import okhttp3.HttpUrl;
 
 public final class WellKnownUtil {
 
-    private WellKnownUtil() {
-
-    }
+    private WellKnownUtil() {}
 
     public static HttpUrl fromUsername(String username) throws MalformedUsernameException {
         int index = username.lastIndexOf("@");
@@ -46,5 +44,4 @@ public final class WellKnownUtil {
             super(message);
         }
     }
-
 }
