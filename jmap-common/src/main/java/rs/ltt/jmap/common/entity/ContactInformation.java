@@ -1,6 +1,5 @@
 package rs.ltt.jmap.common.entity;
 
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter

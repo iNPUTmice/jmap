@@ -2,7 +2,6 @@ package rs.ltt.jmap.common.method.response.contactgroup;
 
 import lombok.Builder;
 import rs.ltt.jmap.annotation.JmapMethod;
-import rs.ltt.jmap.common.entity.Contact;
 import rs.ltt.jmap.common.entity.ContactGroup;
 import rs.ltt.jmap.common.method.response.standard.GetMethodResponse;
 

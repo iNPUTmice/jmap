@@ -3,8 +3,6 @@ package rs.ltt.jmap.common.entity;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.Duration;
-
 @Getter
 public class ContactInformationEmail extends ContactInformation {
 	private final ContactInformationEmailType type;
