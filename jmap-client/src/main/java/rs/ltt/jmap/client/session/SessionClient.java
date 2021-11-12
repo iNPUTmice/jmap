@@ -38,6 +38,9 @@ import rs.ltt.jmap.client.util.SettableCallFuture;
 import rs.ltt.jmap.client.util.WellKnownUtil;
 import rs.ltt.jmap.common.SessionResource;
 
+import java.io.BufferedReader;
+import java.util.stream.Collectors;
+
 public class SessionClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionClient.class);
@@ -142,11 +145,19 @@ public class SessionClient {
                 throw new InvalidSessionResourceException(
                         "Unable to fetch session object. Response body was empty.");
             }
+
+            String json_str = "Unreadable InputStream";
+
             try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
                 final SessionResource sessionResource;
                 try {
-                    sessionResource = GSON.fromJson(reader, SessionResource.class);
+                    json_str = new BufferedReader(reader).lines().collect(Collectors.joining("\n"));
+                    sessionResource = GSON.fromJson(json_str, SessionResource.class);
                 } catch (JsonIOException | JsonSyntaxException e) {
+                    if (json_str.length() > 1000)
+                        json_str = json_str.substring(0,1000) + "...";
+
+                    LOGGER.warn("Invalid JSON: " + json_str);
                     throw new InvalidSessionResourceException(e);
                 }
                 validateSessionResource(sessionResource);
