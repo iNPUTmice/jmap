@@ -37,10 +37,7 @@ import okio.ByteString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rs.ltt.jmap.common.*;
-import rs.ltt.jmap.common.entity.Account;
-import rs.ltt.jmap.common.entity.Capability;
-import rs.ltt.jmap.common.entity.EmailAddress;
-import rs.ltt.jmap.common.entity.ErrorType;
+import rs.ltt.jmap.common.entity.*;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
 import rs.ltt.jmap.common.entity.capability.MailAccountCapability;
 import rs.ltt.jmap.common.entity.capability.WebSocketCapability;
@@ -52,8 +49,8 @@ import rs.ltt.jmap.gson.JmapAdapters;
 public abstract class JmapDispatcher extends Dispatcher {
 
     public static final String PASSWORD = "secret";
-    protected static final Gson GSON;
     public static final String WELL_KNOWN_PATH = "/.well-known/jmap";
+    protected static final Gson GSON;
     private static final String API_PATH = "/jmap/";
     private static final String UPLOAD_PATH = "/upload/";
     private static final String WEB_SOCKET_PATH = "/jmap/ws";
@@ -65,15 +62,9 @@ public abstract class JmapDispatcher extends Dispatcher {
     }
 
     public final EmailAddress account;
-    private int sessionState = 0;
-
     protected final List<WebSocket> pushEnabledWebSockets = new ArrayList<>();
-
+    private int sessionState = 0;
     private FailureTrigger failureTrigger = FailureTrigger.NONE;
-    private boolean advertiseWebSocket = true;
-
-    private long maxObjectsInGet = 4096;
-
     private final WebSocketListener webSocketListener =
             new WebSocketListener() {
                 @Override
@@ -147,6 +138,8 @@ public abstract class JmapDispatcher extends Dispatcher {
                     super.onOpen(webSocket, response);
                 }
             };
+    private boolean advertiseWebSocket = true;
+    private long maxObjectsInGet = 4096;
 
     public JmapDispatcher(final int accountIndex) {
         this.account = NameGenerator.getEmailAddress((accountIndex + 1) * 2048 + accountIndex);
@@ -178,8 +171,33 @@ public abstract class JmapDispatcher extends Dispatcher {
                 return dispatchJmap(request);
             case WEB_SOCKET_PATH:
                 return dispatchJmapWebSocket(request);
+            case UPLOAD_PATH:
+                return dispatchUploadRequest(request);
             default:
                 return new MockResponse().setResponseCode(404);
+        }
+    }
+
+    protected MockResponse dispatchUploadRequest(final RecordedRequest request) {
+        if ("POST".equals(request.getMethod())) {
+            final String authorization = request.getHeader("Authorization");
+            if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
+                return new MockResponse().setResponseCode(401);
+            }
+            final String contentType = request.getHeader("Content-Type");
+            final long size = request.getBodySize();
+            final String blobId =
+                    Hashing.sha256().hashBytes(request.getBody().readByteArray()).toString();
+            final Upload upload =
+                    Upload.builder()
+                            .size(size)
+                            .accountId(getAccountId())
+                            .blobId(blobId)
+                            .type(contentType)
+                            .build();
+            return new MockResponse().setResponseCode(200).setBody(GSON.toJson(upload));
+        } else {
+            return new MockResponse().setResponseCode(404);
         }
     }
 
@@ -200,19 +218,6 @@ public abstract class JmapDispatcher extends Dispatcher {
             return session();
         } else if ("POST".equals(request.getMethod())) {
             return request(request);
-        } else {
-            return new MockResponse().setResponseCode(404);
-        }
-    }
-
-    private MockResponse dispatchJmapWebSocket(final RecordedRequest request) {
-        final String authorization = request.getHeader("Authorization");
-        if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
-            return new MockResponse().setResponseCode(401);
-        }
-        if ("GET".equals(request.getMethod())) {
-            // TODO check that proper protocol is set
-            return new MockResponse().withWebSocketUpgrade(webSocketListener);
         } else {
             return new MockResponse().setResponseCode(404);
         }
@@ -316,6 +321,23 @@ public abstract class JmapDispatcher extends Dispatcher {
                 response.values().toArray(new Response.Invocation[0]), getSessionState());
     }
 
+    protected abstract MethodResponse[] dispatch(
+            final MethodCall methodCall,
+            final ListMultimap<String, Response.Invocation> previousResponses);
+
+    private MockResponse dispatchJmapWebSocket(final RecordedRequest request) {
+        final String authorization = request.getHeader("Authorization");
+        if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
+            return new MockResponse().setResponseCode(401);
+        }
+        if ("GET".equals(request.getMethod())) {
+            // TODO check that proper protocol is set
+            return new MockResponse().withWebSocketUpgrade(webSocketListener);
+        } else {
+            return new MockResponse().setResponseCode(404);
+        }
+    }
+
     private AbstractApiWebSocketMessage dispatch(RequestWebSocketMessage webSocketMessage) {
         final String id = webSocketMessage.getRequestId();
         final GenericResponse response = dispatch(webSocketMessage.getRequest());
@@ -333,10 +355,6 @@ public abstract class JmapDispatcher extends Dispatcher {
             throw new IllegalArgumentException("WebSocketMessage was of unknown type");
         }
     }
-
-    protected abstract MethodResponse[] dispatch(
-            final MethodCall methodCall,
-            final ListMultimap<String, Response.Invocation> previousResponses);
 
     protected void incrementSessionState() {
         this.sessionState++;

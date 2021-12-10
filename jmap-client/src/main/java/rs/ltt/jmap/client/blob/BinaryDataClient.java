@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.client.Services;
 import rs.ltt.jmap.client.http.HttpAuthentication;
 import rs.ltt.jmap.client.util.SettableCallFuture;
+import rs.ltt.jmap.common.ErrorResponse;
+import rs.ltt.jmap.common.entity.Upload;
 
 public class BinaryDataClient {
 
@@ -106,13 +108,14 @@ public class BinaryDataClient {
             }
             return Futures.immediateFuture(download);
         }
-        final ProblemDetails details;
+        final ErrorResponse errorResponse;
         try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
-            details = Services.GSON.fromJson(reader, ProblemDetails.class);
+            errorResponse = Services.GSON.fromJson(reader, ErrorResponse.class);
         } catch (final Exception e) {
             return Futures.immediateFailedFuture(e);
         }
-        return Futures.immediateFailedFuture(new BlobTransferException(response.code(), details));
+        return Futures.immediateFailedFuture(
+                new BlobTransferException(response.code(), errorResponse));
     }
 
     public ListenableFuture<Upload> upload(
@@ -152,13 +155,14 @@ public class BinaryDataClient {
                 return Futures.immediateFailedFuture(e);
             }
         }
-        final ProblemDetails details;
+        final ErrorResponse errorResponse;
         try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
-            details = Services.GSON.fromJson(reader, ProblemDetails.class);
+            errorResponse = Services.GSON.fromJson(reader, ErrorResponse.class);
         } catch (final Exception e) {
             return Futures.immediateFailedFuture(e);
         }
-        return Futures.immediateFailedFuture(new BlobTransferException(response.code(), details));
+        return Futures.immediateFailedFuture(
+                new BlobTransferException(response.code(), errorResponse));
     }
 
     public static class ContentRange {

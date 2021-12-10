@@ -32,9 +32,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import rs.ltt.jmap.client.blob.FileUpload;
 import rs.ltt.jmap.client.blob.MaxUploadSizeExceededException;
-import rs.ltt.jmap.client.blob.Upload;
 import rs.ltt.jmap.client.blob.Uploadable;
 import rs.ltt.jmap.common.entity.EmailBodyPart;
+import rs.ltt.jmap.common.entity.Upload;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
@@ -44,12 +44,11 @@ public class FileUploadTest {
 
     @TempDir Path tempDir;
 
-    // @Test
+    @Test
     public void createAndUploadTextFile()
             throws IOException, ExecutionException, InterruptedException {
         final Path textFileLocation = tempDir.resolve("test.txt");
         Files.write(textFileLocation, "hello world".getBytes(StandardCharsets.UTF_8));
-        System.out.println(textFileLocation);
 
         final MockWebServer server = new MockWebServer();
         final MockMailServer mailServer = new MockMailServer(2);
@@ -66,6 +65,10 @@ public class FileUploadTest {
 
         try (final FileUpload fileUpload = FileUpload.of(textFileLocation)) {
             final Upload upload = mua.upload(fileUpload, null).get();
+            Assertions.assertEquals(11, upload.getSize());
+            Assertions.assertEquals(
+                    "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+                    upload.getBlobId());
         }
     }
 

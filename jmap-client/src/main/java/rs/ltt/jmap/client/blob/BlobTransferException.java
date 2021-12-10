@@ -16,22 +16,24 @@
 
 package rs.ltt.jmap.client.blob;
 
+import rs.ltt.jmap.common.ErrorResponse;
+
 public class BlobTransferException extends Exception {
 
     private final int code;
-    private final ProblemDetails problemDetails;
+    private final ErrorResponse errorResponse;
 
-    public BlobTransferException(final int code, final ProblemDetails problemDetails) {
-        super(message(code, problemDetails));
+    public BlobTransferException(final int code, final ErrorResponse errorResponse) {
+        super(message(code, errorResponse));
         this.code = code;
-        this.problemDetails = problemDetails;
+        this.errorResponse = errorResponse;
     }
 
-    private static String message(final int code, final ProblemDetails problemDetails) {
-        if (problemDetails == null) {
+    private static String message(final int code, final ErrorResponse errorResponse) {
+        if (errorResponse == null) {
             return String.format("HTTP Status code %d", code);
         } else {
-            return String.format("HTTP Status code %d. %s", code, problemDetails.getTitle());
+            return String.format("HTTP Status code %d. %s", code, errorResponse.getTitle());
         }
     }
 
@@ -39,7 +41,7 @@ public class BlobTransferException extends Exception {
         return code;
     }
 
-    public ProblemDetails getProblemDetails() {
-        return problemDetails;
+    public ErrorResponse getErrorResponse() {
+        return errorResponse;
     }
 }

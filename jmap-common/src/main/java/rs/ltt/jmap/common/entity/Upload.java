@@ -14,32 +14,20 @@
  *
  */
 
-package rs.ltt.jmap.client.blob;
+package rs.ltt.jmap.common.entity;
 
 import com.google.common.base.MoreObjects;
+import lombok.Builder;
+import lombok.Getter;
 
+@Builder
+@Getter
 public class Upload {
 
     private String accountId;
     private String blobId;
     private String type;
     private Long size;
-
-    public String getAccountId() {
-        return accountId;
-    }
-
-    public String getBlobId() {
-        return blobId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public Long getSize() {
-        return size;
-    }
 
     @Override
     public String toString() {

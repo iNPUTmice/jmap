@@ -39,6 +39,7 @@ import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.client.session.SessionClient;
 import rs.ltt.jmap.client.util.Closeables;
 import rs.ltt.jmap.common.entity.Downloadable;
+import rs.ltt.jmap.common.entity.Upload;
 import rs.ltt.jmap.common.entity.capability.CoreCapability;
 import rs.ltt.jmap.common.method.MethodCall;
 
