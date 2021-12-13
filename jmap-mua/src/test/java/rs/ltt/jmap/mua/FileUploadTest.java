@@ -17,9 +17,13 @@
 package rs.ltt.jmap.mua;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharSource;
 import com.google.common.net.MediaType;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import rs.ltt.jmap.client.blob.FileUpload;
 import rs.ltt.jmap.client.blob.MaxUploadSizeExceededException;
+import rs.ltt.jmap.client.blob.OutputStreamUpload;
 import rs.ltt.jmap.client.blob.Uploadable;
 import rs.ltt.jmap.common.entity.EmailBodyPart;
 import rs.ltt.jmap.common.entity.Upload;
@@ -70,6 +75,38 @@ public class FileUploadTest {
                     "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
                     upload.getBlobId());
         }
+    }
+
+    @Test
+    public void uploadOutputStream() throws IOException, ExecutionException, InterruptedException {
+        final MockWebServer server = new MockWebServer();
+        final MockMailServer mailServer = new MockMailServer(2);
+        server.setDispatcher(mailServer);
+
+        final Mua mua =
+                Mua.builder()
+                        .cache(new InMemoryCache())
+                        .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                        .username(mailServer.getUsername())
+                        .password(JmapDispatcher.PASSWORD)
+                        .accountId(mailServer.getAccountId())
+                        .build();
+
+        final InputStream inputStream =
+                CharSource.wrap("hello world").asByteSource(StandardCharsets.UTF_8).openStream();
+        final OutputStreamUpload outputStreamUpload =
+                OutputStreamUpload.of(MediaType.PLAIN_TEXT_UTF_8);
+        final ListenableFuture<Upload> future = mua.upload(outputStreamUpload, null);
+
+        try (final OutputStream outputStream = outputStreamUpload.getOutputStream()) {
+            ByteStreams.copy(inputStream, outputStream);
+        }
+
+        final Upload upload = future.get();
+        Assertions.assertEquals(11, upload.getSize());
+        Assertions.assertEquals(
+                "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+                upload.getBlobId());
     }
 
     @Test
