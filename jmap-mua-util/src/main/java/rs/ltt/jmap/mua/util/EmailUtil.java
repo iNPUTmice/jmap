@@ -17,6 +17,8 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,6 +26,7 @@ import java.util.List;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithAddresses;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithSubject;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithTime;
 
 public class EmailUtil {
 
@@ -49,6 +52,18 @@ public class EmailUtil {
 
     public static String subjectWithPrefix(final String subject) {
         return String.format("%s: %s", RESPONSE_PREFIX, subject.trim());
+    }
+
+    public static Instant getEffectiveDate(final IdentifiableEmailWithTime email) {
+        final Instant receivedAt = email.getReceivedAt();
+        final OffsetDateTime sentAt = email.getSentAt();
+        if (sentAt == null) {
+            return receivedAt;
+        }
+        if (receivedAt.isBefore(sentAt.toInstant())) {
+            return receivedAt;
+        }
+        return sentAt.toInstant();
     }
 
     public static ReplyAddresses reply(IdentifiableEmailWithAddresses emailWithAddresses) {

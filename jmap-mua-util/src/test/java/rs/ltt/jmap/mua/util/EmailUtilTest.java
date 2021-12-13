@@ -16,6 +16,10 @@
 
 package rs.ltt.jmap.mua.util;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.entity.Email;
@@ -48,5 +52,23 @@ public class EmailUtilTest {
         Assertions.assertEquals(
                 "Re: Hello",
                 EmailUtil.getResponseSubject(Email.builder().subject("Aw: Hello").build()));
+    }
+
+    @Test
+    public void effectiveDateSentBeforeReceived() {
+        final Instant now = Instant.now();
+        final Instant earlier = now.minus(Duration.ofMinutes(10));
+        final OffsetDateTime sentAt = earlier.atOffset(ZoneOffset.UTC);
+        final Email email = Email.builder().sentAt(sentAt).receivedAt(now).build();
+        Assertions.assertEquals(earlier, EmailUtil.getEffectiveDate(email));
+    }
+
+    @Test
+    public void effectiveDateSentAfterReceived() {
+        final Instant now = Instant.now();
+        final Instant later = now.plus(Duration.ofMinutes(10));
+        final OffsetDateTime sentAt = later.atOffset(ZoneOffset.UTC);
+        final Email email = Email.builder().sentAt(sentAt).receivedAt(now).build();
+        Assertions.assertEquals(now, EmailUtil.getEffectiveDate(email));
     }
 }
