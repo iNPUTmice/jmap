@@ -21,18 +21,24 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
+import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import okhttp3.Credentials;
+import okhttp3.HttpUrl;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
 import okio.ByteString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +59,11 @@ public abstract class JmapDispatcher extends Dispatcher {
     protected static final Gson GSON;
     private static final String API_PATH = "/jmap/";
     private static final String UPLOAD_PATH = "/upload/";
+    private static final String DOWNLOAD_PATH = "/download";
     private static final String WEB_SOCKET_PATH = "/jmap/ws";
+
+    private static final Pattern UUID_PATTERN =
+            Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$");
 
     static {
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -164,7 +174,9 @@ public abstract class JmapDispatcher extends Dispatcher {
     @Nonnull
     @Override
     public MockResponse dispatch(final RecordedRequest request) {
-        switch (Strings.nullToEmpty(request.getPath())) {
+        final HttpUrl url = request.getRequestUrl();
+        final String path = url == null ? null : url.encodedPath();
+        switch (Strings.nullToEmpty(path)) {
             case WELL_KNOWN_PATH:
                 return dispatchWellKnown(request);
             case API_PATH:
@@ -173,6 +185,8 @@ public abstract class JmapDispatcher extends Dispatcher {
                 return dispatchJmapWebSocket(request);
             case UPLOAD_PATH:
                 return dispatchUploadRequest(request);
+            case DOWNLOAD_PATH:
+                return dispatchDownloadRequest(request);
             default:
                 return new MockResponse().setResponseCode(404);
         }
@@ -199,6 +213,36 @@ public abstract class JmapDispatcher extends Dispatcher {
         } else {
             return new MockResponse().setResponseCode(404);
         }
+    }
+
+    private MockResponse dispatchDownloadRequest(final RecordedRequest request) {
+        if ("GET".equals(request.getMethod())) {
+            final String authorization = request.getHeader("Authorization");
+            if (!Credentials.basic(getUsername(), PASSWORD).equals(authorization)) {
+                return new MockResponse().setResponseCode(401);
+            }
+            final HttpUrl url = request.getRequestUrl();
+            if (url == null) {
+                return new MockResponse().setResponseCode(404);
+            }
+            final String blobId = url.queryParameter("blobId");
+            if (blobId == null || !UUID_PATTERN.matcher(blobId).matches()) {
+                return new MockResponse().setResponseCode(404);
+            }
+            final URL resource;
+            try {
+                resource = Resources.getResource(String.format("blobs/%s", blobId));
+            } catch (final IllegalArgumentException e) {
+                e.printStackTrace();
+                return new MockResponse().setResponseCode(404);
+            }
+            try {
+                return new MockResponse().setBody(new Buffer().readFrom(resource.openStream()));
+            } catch (final IOException e) {
+                return new MockResponse().setResponseCode(500);
+            }
+        }
+        return new MockResponse().setResponseCode(404);
     }
 
     private MockResponse dispatchWellKnown(final RecordedRequest request) {
@@ -246,6 +290,7 @@ public abstract class JmapDispatcher extends Dispatcher {
                 SessionResource.builder()
                         .apiUrl(API_PATH)
                         .uploadUrl(UPLOAD_PATH)
+                        .downloadUrl(DOWNLOAD_PATH + "?blobId={blobId}")
                         .state(getSessionState())
                         .account(
                                 id,
