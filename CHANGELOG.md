@@ -1,3 +1,8 @@
+### 0.7.5 (2021-12-14)
+
+* Add `OutputStreamUpload` class to retrieve output stream for upload
+* Add utility method to calculate effective date
+
 ### 0.7.4 (2021-08-08)
 
 * Fixed bugs in WebSocket implementation
