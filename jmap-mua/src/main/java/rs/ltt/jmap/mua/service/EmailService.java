@@ -158,7 +158,8 @@ public class EmailService extends MuaService {
         }
     }
 
-    public ListenableFuture<Boolean> submit(final Email email, final Identity identity) {
+    public ListenableFuture<Boolean> submit(
+            final IdentifiableEmailWithMailboxIds email, final Identity identity) {
         return Futures.transformAsync(
                 getService(MailboxService.class).getMailboxes(),
                 mailboxes -> {
@@ -450,6 +451,8 @@ public class EmailService extends MuaService {
                             methodResponsesFuture.updated(GetEmailMethodResponse.class);
                     final Update<Email> update =
                             Update.of(changesResponse, createdResponse, updatedResponse);
+                    getService(PluginService.class)
+                            .executeEmailCacheStagePlugins(update.getCreated());
                     if (update.hasChanges()) {
                         cache.updateEmails(update, Email.Properties.MUTABLE);
                     }

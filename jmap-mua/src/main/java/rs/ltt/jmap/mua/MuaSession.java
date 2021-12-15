@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.Closeable;
+import java.util.Collection;
 import java.util.concurrent.Executors;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.mua.cache.Cache;
@@ -35,7 +36,11 @@ public class MuaSession implements Closeable {
     private final ImmutableClassToInstanceMap<MuaService> services;
     private Long queryPageSize = null;
 
-    public MuaSession(final JmapClient jmapClient, final Cache cache, final String accountId) {
+    public MuaSession(
+            final JmapClient jmapClient,
+            final Cache cache,
+            final String accountId,
+            final Collection<PluginService.Plugin> plugins) {
         this.jmapClient = jmapClient;
         this.cache = cache;
         this.accountId = accountId;
@@ -47,6 +52,7 @@ public class MuaSession implements Closeable {
                         .put(QueryService.class, new QueryService(this))
                         .put(RefreshService.class, new RefreshService(this))
                         .put(ThreadService.class, new ThreadService(this))
+                        .put(PluginService.class, new PluginService(this, plugins))
                         .build();
     }
 

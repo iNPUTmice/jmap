@@ -17,10 +17,12 @@
 package rs.ltt.jmap.mua;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import okhttp3.HttpUrl;
@@ -33,7 +35,6 @@ import rs.ltt.jmap.client.blob.Uploadable;
 import rs.ltt.jmap.client.session.InMemorySessionCache;
 import rs.ltt.jmap.client.session.SessionCache;
 import rs.ltt.jmap.common.entity.*;
-import rs.ltt.jmap.common.entity.Upload;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
@@ -44,8 +45,12 @@ public class Mua extends MuaSession {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Mua.class);
 
-    private Mua(JmapClient jmapClient, Cache cache, String accountId) {
-        super(jmapClient, cache, accountId);
+    private Mua(
+            JmapClient jmapClient,
+            Cache cache,
+            String accountId,
+            final Collection<PluginService.Plugin> plugins) {
+        super(jmapClient, cache, accountId, plugins);
     }
 
     public static Builder builder() {
@@ -94,7 +99,10 @@ public class Mua extends MuaSession {
      * @return String The id of the email that has been created
      */
     public ListenableFuture<String> draft(final Email email) {
-        return getService(EmailService.class).draft(email);
+        return Futures.transformAsync(
+                getService(PluginService.class).executeEmailBuildStagePlugins(email),
+                e -> getService(EmailService.class).draft(e),
+                MoreExecutors.directExecutor());
     }
 
     /**
@@ -109,10 +117,14 @@ public class Mua extends MuaSession {
      */
     public ListenableFuture<String> draft(
             final Email email, final IdentifiableMailboxWithRole drafts) {
-        return getService(EmailService.class).draft(email, drafts);
+        return Futures.transformAsync(
+                getService(PluginService.class).executeEmailBuildStagePlugins(email),
+                e -> getService(EmailService.class).draft(e, drafts),
+                MoreExecutors.directExecutor());
     }
 
-    public ListenableFuture<Boolean> submit(final Email email, final Identity identity) {
+    public ListenableFuture<Boolean> submit(
+            final IdentifiableEmailWithMailboxIds email, final Identity identity) {
         return getService(EmailService.class).submit(email, identity);
     }
 
@@ -155,7 +167,10 @@ public class Mua extends MuaSession {
     }
 
     public ListenableFuture<String> send(final Email email, final IdentifiableIdentity identity) {
-        return getService(EmailService.class).send(email, identity);
+        return Futures.transformAsync(
+                getService(PluginService.class).executeEmailBuildStagePlugins(email),
+                e -> getService(EmailService.class).send(e, identity),
+                MoreExecutors.directExecutor());
     }
 
     public ListenableFuture<Boolean> setKeyword(
@@ -356,6 +371,8 @@ public class Mua extends MuaSession {
     }
 
     public static class Builder {
+        private final ImmutableList.Builder<PluginService.Plugin> pluginBuilder =
+                new ImmutableList.Builder<>();
         private String username;
         private String password;
         private HttpUrl sessionResource;
@@ -415,6 +432,11 @@ public class Mua extends MuaSession {
             return this;
         }
 
+        public Builder plugin(final PluginService.Plugin plugin) {
+            this.pluginBuilder.add(plugin);
+            return this;
+        }
+
         public Mua build() {
             Preconditions.checkNotNull(accountId, "accountId is required");
 
@@ -424,7 +446,8 @@ public class Mua extends MuaSession {
             if (this.useWebSocket != null) {
                 jmapClient.setUseWebSocket(this.useWebSocket);
             }
-            final Mua mua = new Mua(jmapClient, cache, accountId);
+            final List<PluginService.Plugin> plugins = pluginBuilder.build();
+            final Mua mua = new Mua(jmapClient, cache, accountId, plugins);
             mua.setQueryPageSize(this.queryPageSize);
             return mua;
         }

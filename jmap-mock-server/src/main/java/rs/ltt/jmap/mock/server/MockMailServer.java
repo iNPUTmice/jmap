@@ -20,6 +20,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import java.time.Instant;
 import java.util.*;
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,12 +116,16 @@ public class MockMailServer extends StubMailServer {
                         account,
                         MailboxUtil.find(mailboxes.values(), Role.INBOX).getId(),
                         emails.size());
+        createEmail(email);
+        return email;
+    }
+
+    private void createEmail(final Email email) {
         final String oldVersion = getState();
         emails.put(email.getId(), email);
         incrementState();
         final String newVersion = getState();
         this.pushUpdate(oldVersion, Update.created(email, newVersion));
-        return email;
     }
 
     private void pushUpdate(final String oldVersion, final Update update) {
@@ -443,9 +448,8 @@ public class MockMailServer extends StubMailServer {
         final Map<String, Map<String, Object>> update = methodCall.getUpdate();
         final Map<String, Email> create = methodCall.getCreate();
         final String[] destroy = methodCall.getDestroy();
-        if ((create != null && create.size() > 0) || (destroy != null && destroy.length > 0)) {
-            throw new IllegalStateException(
-                    "MockMailServer does not know how to create and destroy");
+        if (destroy != null && destroy.length > 0) {
+            throw new IllegalStateException("MockMailServer does not know how to destroy");
         }
         final SetEmailMethodResponse.SetEmailMethodResponseBuilder responseBuilder =
                 SetEmailMethodResponse.builder();
@@ -476,7 +480,39 @@ public class MockMailServer extends StubMailServer {
             updates.put(
                     oldState, Update.updated(modifiedEmails, this.mailboxes.keySet(), newState));
         }
+        if (create != null && create.size() > 0) {
+            processCreateEmail(create, responseBuilder, previousResponses);
+        }
         return new MethodResponse[] {responseBuilder.build()};
+    }
+
+    private void processCreateEmail(
+            Map<String, Email> create,
+            SetEmailMethodResponse.SetEmailMethodResponseBuilder responseBuilder,
+            ListMultimap<String, Response.Invocation> previousResponses) {
+        for (final Map.Entry<String, Email> entry : create.entrySet()) {
+            final String createId = entry.getKey();
+            final String id = UUID.randomUUID().toString();
+            final String threadId = UUID.randomUUID().toString();
+            final Email userSuppliedEmail = entry.getValue();
+            final Map<String, Boolean> mailboxMap = userSuppliedEmail.getMailboxIds();
+            final Email.EmailBuilder emailBuilder =
+                    userSuppliedEmail.toBuilder()
+                            .id(id)
+                            .threadId(threadId)
+                            .receivedAt(Instant.now());
+            emailBuilder.clearMailboxIds();
+            for (Map.Entry<String, Boolean> mailboxEntry : mailboxMap.entrySet()) {
+                final String mailboxId =
+                        CreationIdResolver.resolveIfNecessary(
+                                mailboxEntry.getKey(), previousResponses);
+                emailBuilder.mailboxId(mailboxId, mailboxEntry.getValue());
+            }
+            final Email email = emailBuilder.build();
+
+            createEmail(email);
+            responseBuilder.created(createId, email);
+        }
     }
 
     @Override

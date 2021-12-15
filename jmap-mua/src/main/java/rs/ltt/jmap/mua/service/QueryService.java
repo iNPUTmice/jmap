@@ -466,6 +466,8 @@ public class QueryService extends MuaService {
                                         .getMain(GetThreadMethodResponse.class);
                         GetEmailMethodResponse getEmailResponse =
                                 getEmailResponsesFuture.get().getMain(GetEmailMethodResponse.class);
+                        getService(PluginService.class)
+                                .executeEmailCacheStagePlugins(getEmailResponse.getList());
                         cache.setThreadsAndEmails(
                                 getThreadsResponse.getTypedState(),
                                 getThreadsResponse.getList(),
@@ -584,6 +586,8 @@ public class QueryService extends MuaService {
                             methodResponses.getMain(GetThreadMethodResponse.class);
                     GetEmailMethodResponse getEmailMethodResponse =
                             getEmailsResponsesFuture.get().getMain(GetEmailMethodResponse.class);
+                    getService(PluginService.class)
+                            .executeEmailCacheStagePlugins(getEmailMethodResponse.getList());
                     cache.addThreadsAndEmail(
                             getThreadMethodResponse.getTypedState(),
                             getThreadMethodResponse.getList(),
