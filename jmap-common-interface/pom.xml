@@ -21,7 +21,7 @@
     <parent>
         <groupId>rs.ltt.jmap</groupId>
         <artifactId>jmap</artifactId>
-        <version>0.7.5</version>
+        <version>0.8.0</version>
     </parent>
 
     <artifactId>jmap-common-interface</artifactId>

@@ -1,3 +1,7 @@
+### 0.8.0 (2021-12-15)
+
+* Add plugin interface to jmap-mua
+
 ### 0.7.5 (2021-12-14)
 
 * Add `OutputStreamUpload` class to retrieve output stream for upload
