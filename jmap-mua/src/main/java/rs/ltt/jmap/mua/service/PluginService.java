@@ -16,11 +16,11 @@
 
 package rs.ltt.jmap.mua.service;
 
+import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
-import java.util.Collection;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.plugin.EmailBuildStagePlugin;
@@ -30,10 +30,12 @@ public class PluginService extends MuaService {
 
     private final ArrayList<EmailBuildStagePlugin> emailBuildStagePlugins = new ArrayList<>();
     private final ArrayList<EmailCacheStagePlugin> emailCacheStagePlugins = new ArrayList<>();
+    private final ClassToInstanceMap<Plugin> plugins;
 
-    public PluginService(MuaSession muaSession, final Collection<Plugin> plugins) {
+    public PluginService(MuaSession muaSession, final ClassToInstanceMap<Plugin> plugins) {
         super(muaSession);
-        this.install(muaSession, plugins);
+        this.plugins = plugins;
+        this.install(muaSession);
     }
 
     public ListenableFuture<Email> executeEmailBuildStagePlugins(final Email email) {
@@ -58,8 +60,8 @@ public class PluginService extends MuaService {
         }
     }
 
-    private void install(final MuaSession muaSession, final Collection<Plugin> plugins) {
-        for (final Plugin plugin : plugins) {
+    private void install(final MuaSession muaSession) {
+        for (final Plugin plugin : plugins.values()) {
             plugin.setMuaSession(muaSession);
             if (plugin instanceof EmailBuildStagePlugin) {
                 this.emailBuildStagePlugins.add((EmailBuildStagePlugin) plugin);
@@ -68,6 +70,10 @@ public class PluginService extends MuaService {
                 this.emailCacheStagePlugins.add((EmailCacheStagePlugin) plugin);
             }
         }
+    }
+
+    public <T extends Plugin> T getPlugin(final Class<T> plugin) {
+        return this.plugins.getInstance(plugin);
     }
 
     public abstract static class Plugin {

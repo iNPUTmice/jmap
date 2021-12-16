@@ -17,12 +17,12 @@
 package rs.ltt.jmap.mua;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import okhttp3.HttpUrl;
@@ -49,12 +49,16 @@ public class Mua extends MuaSession {
             JmapClient jmapClient,
             Cache cache,
             String accountId,
-            final Collection<PluginService.Plugin> plugins) {
+            final ClassToInstanceMap<PluginService.Plugin> plugins) {
         super(jmapClient, cache, accountId, plugins);
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public <T extends PluginService.Plugin> T getPlugin(final Class<T> plugin) {
+        return this.getService(PluginService.class).getPlugin(plugin);
     }
 
     public ListenableFuture<Status> refresh() {
@@ -371,8 +375,8 @@ public class Mua extends MuaSession {
     }
 
     public static class Builder {
-        private final ImmutableList.Builder<PluginService.Plugin> pluginBuilder =
-                new ImmutableList.Builder<>();
+        private final ImmutableClassToInstanceMap.Builder<PluginService.Plugin> pluginBuilder =
+                ImmutableClassToInstanceMap.builder();
         private String username;
         private String password;
         private HttpUrl sessionResource;
@@ -432,8 +436,9 @@ public class Mua extends MuaSession {
             return this;
         }
 
-        public Builder plugin(final PluginService.Plugin plugin) {
-            this.pluginBuilder.add(plugin);
+        public <T extends PluginService.Plugin> Builder plugin(
+                final Class<T> clazz, final T plugin) {
+            this.pluginBuilder.put(clazz, plugin);
             return this;
         }
 
@@ -446,7 +451,7 @@ public class Mua extends MuaSession {
             if (this.useWebSocket != null) {
                 jmapClient.setUseWebSocket(this.useWebSocket);
             }
-            final List<PluginService.Plugin> plugins = pluginBuilder.build();
+            ClassToInstanceMap<PluginService.Plugin> plugins = pluginBuilder.build();
             final Mua mua = new Mua(jmapClient, cache, accountId, plugins);
             mua.setQueryPageSize(this.queryPageSize);
             return mua;

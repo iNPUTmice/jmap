@@ -16,11 +16,11 @@
 
 package rs.ltt.jmap.mua;
 
+import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.Closeable;
-import java.util.Collection;
 import java.util.concurrent.Executors;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.mua.cache.Cache;
@@ -40,7 +40,7 @@ public class MuaSession implements Closeable {
             final JmapClient jmapClient,
             final Cache cache,
             final String accountId,
-            final Collection<PluginService.Plugin> plugins) {
+            final ClassToInstanceMap<PluginService.Plugin> plugins) {
         this.jmapClient = jmapClient;
         this.cache = cache;
         this.accountId = accountId;

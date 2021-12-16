@@ -48,7 +48,7 @@ public class PluginTest {
                         .username(mailServer.getUsername())
                         .password(JmapDispatcher.PASSWORD)
                         .accountId(mailServer.getAccountId())
-                        .plugin(plugin)
+                        .plugin(CountEmailCreationPlugin.class, plugin)
                         .build()) {
             mua.query(EmailQuery.unfiltered(true)).get();
             Assertions.assertEquals(3, plugin.cacheCounter.get());
