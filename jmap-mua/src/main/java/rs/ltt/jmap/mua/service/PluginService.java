@@ -43,7 +43,7 @@ public class PluginService extends MuaService {
     }
 
     private void registerEventCallbacks(final Collection<EventCallback> eventCallbacks) {
-        for (final EventCallback eventCallback :eventCallbacks) {
+        for (final EventCallback eventCallback : eventCallbacks) {
             if (eventCallback instanceof EmailBuildStagePlugin) {
                 this.emailBuildStagePlugins.add((EmailBuildStagePlugin) eventCallback);
             }

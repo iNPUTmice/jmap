@@ -1,3 +1,8 @@
+### 0.8.1 (2021-12-17)
+
+* Refactor plugin API to make callbacks only accessible from PluginService
+* Add method to retrieve installed plugin from Mua
+
 ### 0.8.0 (2021-12-15)
 
 * Add plugin interface to jmap-mua
