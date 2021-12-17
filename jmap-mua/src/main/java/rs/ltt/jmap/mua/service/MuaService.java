@@ -29,7 +29,6 @@ import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.common.method.error.CannotCalculateChangesMethodErrorResponse;
 import rs.ltt.jmap.common.method.response.standard.ChangesMethodResponse;
 import rs.ltt.jmap.common.util.Mapper;
-import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.ObjectsState;

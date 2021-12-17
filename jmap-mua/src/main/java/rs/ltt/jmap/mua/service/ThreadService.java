@@ -25,7 +25,6 @@ import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.common.entity.Thread;
 import rs.ltt.jmap.common.method.response.thread.ChangesThreadMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
-import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Update;
 import rs.ltt.jmap.mua.util.UpdateUtil;

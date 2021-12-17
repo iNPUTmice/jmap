@@ -16,8 +16,9 @@
 
 package rs.ltt.jmap.mua;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import okhttp3.mockwebserver.MockWebServer;
@@ -30,6 +31,8 @@ import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
 import rs.ltt.jmap.mua.plugin.EmailBuildStagePlugin;
 import rs.ltt.jmap.mua.plugin.EmailCacheStagePlugin;
+import rs.ltt.jmap.mua.plugin.EventCallback;
+import rs.ltt.jmap.mua.service.MuaSession;
 import rs.ltt.jmap.mua.service.PluginService;
 
 public class PluginTest {
@@ -55,13 +58,13 @@ public class PluginTest {
             final Email email = Email.builder().subject("Stub Email").build();
             mua.draft(email).get();
             mua.query(EmailQuery.unfiltered(true)).get();
-            Assertions.assertEquals(1, plugin.buildCounter());
+            Assertions.assertEquals(1, plugin.buildCounter.get());
 
             final Email anotherEmail = Email.builder().subject("Another Stub Email").build();
 
             Assertions.assertThrows(
                     ExecutionException.class, () -> mua.send(anotherEmail, identity).get());
-            Assertions.assertEquals(2, plugin.buildCounter());
+            Assertions.assertEquals(2, plugin.buildCounter.get());
 
             mua.query(EmailQuery.unfiltered(true)).get();
 
@@ -69,25 +72,24 @@ public class PluginTest {
         }
     }
 
-    private static class CountEmailCreationPlugin extends PluginService.Plugin
-            implements EmailBuildStagePlugin, EmailCacheStagePlugin {
+    private static class CountEmailCreationPlugin extends PluginService.Plugin {
 
         private final AtomicInteger buildCounter = new AtomicInteger();
         private final AtomicInteger cacheCounter = new AtomicInteger();
 
-        @Override
-        public ListenableFuture<Email> onBuildEmail(Email email) {
-            this.buildCounter.incrementAndGet();
-            return Futures.immediateFuture(email);
-        }
+        private final EmailBuildStagePlugin emailBuildStagePlugin =
+                email -> {
+                    buildCounter.incrementAndGet();
+                    return Futures.immediateFuture(email);
+                };
 
-        public int buildCounter() {
-            return this.buildCounter.get();
-        }
+        private final EmailCacheStagePlugin emailCacheStagePlugin =
+                email -> cacheCounter.incrementAndGet();
 
         @Override
-        public void onCacheEmail(Email email) {
-            this.cacheCounter.incrementAndGet();
+        protected Collection<EventCallback> install(final MuaSession muaSession) {
+            super.install(muaSession);
+            return ImmutableList.of(emailBuildStagePlugin, emailCacheStagePlugin);
         }
     }
 }

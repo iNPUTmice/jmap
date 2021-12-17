@@ -16,8 +16,4 @@
 
 package rs.ltt.jmap.mua.plugin;
 
-import rs.ltt.jmap.common.entity.Email;
-
-public interface EmailCacheStagePlugin extends EventCallback {
-    void onCacheEmail(final Email email);
-}
+public interface EventCallback {}

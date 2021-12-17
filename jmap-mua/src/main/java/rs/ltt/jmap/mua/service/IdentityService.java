@@ -28,7 +28,6 @@ import rs.ltt.jmap.common.entity.Identity;
 import rs.ltt.jmap.common.method.call.identity.GetIdentityMethodCall;
 import rs.ltt.jmap.common.method.response.identity.ChangesIdentityMethodResponse;
 import rs.ltt.jmap.common.method.response.identity.GetIdentityMethodResponse;
-import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Update;
 import rs.ltt.jmap.mua.util.UpdateUtil;

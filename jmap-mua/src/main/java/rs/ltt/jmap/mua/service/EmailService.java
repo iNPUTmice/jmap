@@ -44,7 +44,6 @@ import rs.ltt.jmap.common.method.response.email.SetEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.mailbox.SetMailboxMethodResponse;
 import rs.ltt.jmap.common.method.response.submission.SetEmailSubmissionMethodResponse;
 import rs.ltt.jmap.common.util.Patches;
-import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.ObjectsState;
 import rs.ltt.jmap.mua.cache.Update;

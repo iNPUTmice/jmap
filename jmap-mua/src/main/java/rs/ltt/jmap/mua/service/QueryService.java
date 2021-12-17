@@ -49,7 +49,6 @@ import rs.ltt.jmap.common.method.error.CannotCalculateChangesMethodErrorResponse
 import rs.ltt.jmap.common.method.response.email.GetEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.email.QueryChangesEmailMethodResponse;
 import rs.ltt.jmap.common.method.response.thread.GetThreadMethodResponse;
-import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Missing;
 import rs.ltt.jmap.mua.cache.QueryStateWrapper;

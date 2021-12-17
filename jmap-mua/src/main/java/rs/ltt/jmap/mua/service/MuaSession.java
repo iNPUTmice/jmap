@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Daniel Gultsch
+ * Copyright 2021 Daniel Gultsch
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  *
  */
 
-package rs.ltt.jmap.mua;
+package rs.ltt.jmap.mua.service;
 
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -24,9 +24,8 @@ import java.io.Closeable;
 import java.util.concurrent.Executors;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.mua.cache.Cache;
-import rs.ltt.jmap.mua.service.*;
 
-public class MuaSession implements Closeable {
+public abstract class MuaSession implements Closeable {
 
     protected final JmapClient jmapClient;
     private final Cache cache;
@@ -56,7 +55,7 @@ public class MuaSession implements Closeable {
                         .build();
     }
 
-    public <T extends MuaService> T getService(Class<T> clazz) {
+    protected <T extends MuaService> T getService(Class<T> clazz) {
         return services.getInstance(clazz);
     }
 

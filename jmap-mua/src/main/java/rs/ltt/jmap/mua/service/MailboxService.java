@@ -40,7 +40,6 @@ import rs.ltt.jmap.common.method.response.mailbox.ChangesMailboxMethodResponse;
 import rs.ltt.jmap.common.method.response.mailbox.GetMailboxMethodResponse;
 import rs.ltt.jmap.common.method.response.mailbox.SetMailboxMethodResponse;
 import rs.ltt.jmap.common.util.Patches;
-import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.ObjectsState;
 import rs.ltt.jmap.mua.cache.Update;

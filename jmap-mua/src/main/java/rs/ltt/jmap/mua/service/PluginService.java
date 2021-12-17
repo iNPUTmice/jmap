@@ -21,10 +21,12 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import rs.ltt.jmap.common.entity.Email;
-import rs.ltt.jmap.mua.MuaSession;
 import rs.ltt.jmap.mua.plugin.EmailBuildStagePlugin;
 import rs.ltt.jmap.mua.plugin.EmailCacheStagePlugin;
+import rs.ltt.jmap.mua.plugin.EventCallback;
 
 public class PluginService extends MuaService {
 
@@ -35,7 +37,20 @@ public class PluginService extends MuaService {
     public PluginService(MuaSession muaSession, final ClassToInstanceMap<Plugin> plugins) {
         super(muaSession);
         this.plugins = plugins;
-        this.install(muaSession);
+        for (final Plugin plugin : plugins.values()) {
+            registerEventCallbacks(plugin.install(muaSession));
+        }
+    }
+
+    private void registerEventCallbacks(final Collection<EventCallback> eventCallbacks) {
+        for (final EventCallback eventCallback :eventCallbacks) {
+            if (eventCallback instanceof EmailBuildStagePlugin) {
+                this.emailBuildStagePlugins.add((EmailBuildStagePlugin) eventCallback);
+            }
+            if (eventCallback instanceof EmailCacheStagePlugin) {
+                this.emailCacheStagePlugins.add((EmailCacheStagePlugin) eventCallback);
+            }
+        }
     }
 
     public ListenableFuture<Email> executeEmailBuildStagePlugins(final Email email) {
@@ -60,18 +75,6 @@ public class PluginService extends MuaService {
         }
     }
 
-    private void install(final MuaSession muaSession) {
-        for (final Plugin plugin : plugins.values()) {
-            plugin.setMuaSession(muaSession);
-            if (plugin instanceof EmailBuildStagePlugin) {
-                this.emailBuildStagePlugins.add((EmailBuildStagePlugin) plugin);
-            }
-            if (plugin instanceof EmailCacheStagePlugin) {
-                this.emailCacheStagePlugins.add((EmailCacheStagePlugin) plugin);
-            }
-        }
-    }
-
     public <T extends Plugin> T getPlugin(final Class<T> plugin) {
         return this.plugins.getInstance(plugin);
     }
@@ -80,11 +83,12 @@ public class PluginService extends MuaService {
 
         protected MuaSession muaSession;
 
-        private synchronized void setMuaSession(final MuaSession muaSession) {
+        protected synchronized Collection<EventCallback> install(final MuaSession muaSession) {
             if (this.muaSession != null) {
                 throw new IllegalStateException("This plugin has already been installed");
             }
             this.muaSession = muaSession;
+            return Collections.emptyList();
         }
     }
 }
