@@ -2,8 +2,7 @@
 ![Build Status](https://github.com/inputmice/jmap/actions/workflows/maven.yml/badge.svg)
 [![Codacy Badge](https://img.shields.io/codacy/grade/329b10e923d74c9881f9e8cf53616735?logo=codacy)](https://www.codacy.com/manual/iNPUTmice/jmap)
 [![codecov](https://img.shields.io/codecov/c/gh/inputmice/jmap/master?logo=codecov&label=code%20coverage&token=W35RI2ASHI)](https://codecov.io/gh/iNPUTmice/jmap)
-[![Maven Central](https://img.shields.io/maven-central/v/rs.ltt.jmap/jmap?color=informational)](https://maven-badges.herokuapp.com/maven-central/rs.ltt.jmap/jmap)
-[![Ltt.rs conference room](https://inverse.chat/badge.svg?room=lttrs@conference.conversations.im)](https://conversations.im/j/lttrs@conference.conversations.im)
+[![Maven Central](https://img.shields.io/maven-central/v/rs.ltt.jmap/jmap.svg?label=Maven%20Central&color=informational)](https://search.maven.org/search?q=g:%22rs.ltt.jmap%22%20AND%20a:%22jmap%22)
 [![Liberapay patrons](https://img.shields.io/liberapay/patrons/inputmice?logo=liberapay&style=flat&color=informational)](https://liberapay.com/iNPUTmice)
 
 A library to synchronize data between a client and a server using the JSON Meta Application Protocol. The current focus is on acting as a client library to retrieve emails from a server however it is easily extensible to also synchronize contacts and calendars. It might even be extended to act as a server library.
