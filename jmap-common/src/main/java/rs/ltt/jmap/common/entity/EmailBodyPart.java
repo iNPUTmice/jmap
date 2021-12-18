@@ -16,6 +16,9 @@
 
 package rs.ltt.jmap.common.entity;
 
+import com.google.common.base.Optional;
+import com.google.common.net.MediaType;
+import java.nio.charset.Charset;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,4 +44,15 @@ public class EmailBodyPart implements Attachment {
     private String location;
 
     @Singular private List<EmailBodyPart> subParts;
+
+    public static class EmailBodyPartBuilder {
+        public EmailBodyPartBuilder mediaType(MediaType mediaType) {
+            this.type(mediaType.withoutParameters().toString());
+            final Optional<Charset> optionalCharset = mediaType.charset();
+            if (optionalCharset.isPresent()) {
+                this.charset(optionalCharset.get().name());
+            }
+            return this;
+        }
+    }
 }

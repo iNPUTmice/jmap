@@ -1,5 +1,6 @@
 package rs.ltt.jmap.gson;
 
+import com.google.common.net.MediaType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
@@ -22,7 +23,10 @@ public class EmailSerializerTest extends AbstractGsonTest {
                 EmailBodyValue.builder().value("Beware the white walkers").build();
         String partId = "1";
         EmailBodyPart emailBodyPart =
-                EmailBodyPart.builder().partId(partId).type("text/plain").build();
+                EmailBodyPart.builder()
+                        .partId(partId)
+                        .mediaType(MediaType.PLAIN_TEXT_UTF_8)
+                        .build();
         final Email email =
                 Email.builder()
                         .to(
