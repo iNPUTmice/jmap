@@ -1,3 +1,7 @@
+### 0.8.2 (2021-12-18)
+
+* Add ability to set MediaType on EmailBodyPartBuilder
+
 ### 0.8.1 (2021-12-17)
 
 * Refactor plugin API to make callbacks only accessible from PluginService
