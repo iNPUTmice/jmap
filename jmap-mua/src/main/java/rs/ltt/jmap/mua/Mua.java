@@ -39,7 +39,6 @@ import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.InMemoryCache;
 import rs.ltt.jmap.mua.service.*;
-import rs.ltt.jmap.mua.util.AttachmentUtil;
 
 public class Mua extends MuaSession {
 
@@ -340,7 +339,7 @@ public class Mua extends MuaSession {
      * @return A Download Future that contains the InputStream, size and the cancelable HTTP Call
      */
     public ListenableFuture<Download> download(final Downloadable downloadable) {
-        return jmapClient.download(getAccountId(), downloadable);
+        return getService(BinaryService.class).download(downloadable);
     }
 
     /**
@@ -354,24 +353,16 @@ public class Mua extends MuaSession {
      */
     public ListenableFuture<Download> download(
             final Downloadable downloadable, final long rangeStart) {
-        Preconditions.checkArgument(rangeStart >= 0, "rangeStart must not be smaller than 0");
-        return jmapClient.download(getAccountId(), downloadable, rangeStart);
+        return getService(BinaryService.class).download(downloadable, rangeStart);
     }
 
     public ListenableFuture<Upload> upload(final Uploadable uploadable, final Progress progress) {
-        return jmapClient.upload(getAccountId(), uploadable, progress);
+        return getService(BinaryService.class).upload(uploadable, progress);
     }
 
     public ListenableFuture<Void> verifyAttachmentsDoNotExceedLimit(
             final Collection<? extends Attachment> attachments) {
-        return Futures.transform(
-                getJmapClient().getSession(),
-                session -> {
-                    AttachmentUtil.verifyAttachmentsDoNotExceedLimit(
-                            session, getAccountId(), attachments);
-                    return null;
-                },
-                MoreExecutors.directExecutor());
+        return getService(BinaryService.class).verifyAttachmentsDoNotExceedLimit(attachments);
     }
 
     public static class Builder {

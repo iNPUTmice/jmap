@@ -60,7 +60,7 @@ import rs.ltt.jmap.mua.cache.exception.InconsistentQueryStateException;
 import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
 
-public class QueryService extends MuaService {
+public class QueryService extends AbstractMuaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryService.class);
 

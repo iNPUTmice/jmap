@@ -29,7 +29,7 @@ import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Update;
 import rs.ltt.jmap.mua.util.UpdateUtil;
 
-public class ThreadService extends MuaService {
+public class ThreadService extends AbstractMuaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadService.class);
 

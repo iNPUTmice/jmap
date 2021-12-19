@@ -49,7 +49,7 @@ import rs.ltt.jmap.mua.util.CreateUtil;
 import rs.ltt.jmap.mua.util.MailboxUtil;
 import rs.ltt.jmap.mua.util.UpdateUtil;
 
-public class MailboxService extends MuaService {
+public class MailboxService extends AbstractMuaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailboxService.class);
 

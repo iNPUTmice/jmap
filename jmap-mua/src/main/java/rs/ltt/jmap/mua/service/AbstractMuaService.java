@@ -34,16 +34,16 @@ import rs.ltt.jmap.mua.cache.Cache;
 import rs.ltt.jmap.mua.cache.ObjectsState;
 import rs.ltt.jmap.mua.util.UpdateUtil;
 
-public abstract class MuaService {
+public abstract class AbstractMuaService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MuaService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMuaService.class);
     protected final JmapClient jmapClient;
     protected final Cache cache;
     protected final String accountId;
     protected final ListeningExecutorService ioExecutorService;
     private final MuaSession muaSession;
 
-    public MuaService(final MuaSession muaSession) {
+    public AbstractMuaService(final MuaSession muaSession) {
         this.muaSession = muaSession;
         this.jmapClient = muaSession.getJmapClient();
         this.cache = muaSession.getCache();
@@ -51,7 +51,7 @@ public abstract class MuaService {
         this.ioExecutorService = muaSession.getIoExecutorService();
     }
 
-    protected <T extends MuaService> T getService(Class<T> clazz) {
+    protected <T extends AbstractMuaService> T getService(Class<T> clazz) {
         return muaSession.getService(clazz);
     }
 

@@ -32,7 +32,7 @@ import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.Update;
 import rs.ltt.jmap.mua.util.UpdateUtil;
 
-public class IdentityService extends MuaService {
+public class IdentityService extends AbstractMuaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityService.class);
 

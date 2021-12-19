@@ -28,7 +28,7 @@ import rs.ltt.jmap.mua.plugin.EmailBuildStagePlugin;
 import rs.ltt.jmap.mua.plugin.EmailCacheStagePlugin;
 import rs.ltt.jmap.mua.plugin.EventCallback;
 
-public class PluginService extends MuaService {
+public class PluginService extends AbstractMuaService {
 
     private final ArrayList<EmailBuildStagePlugin> emailBuildStagePlugins = new ArrayList<>();
     private final ArrayList<EmailCacheStagePlugin> emailCacheStagePlugins = new ArrayList<>();

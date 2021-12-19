@@ -25,7 +25,7 @@ import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.cache.ObjectsState;
 
-public class RefreshService extends MuaService {
+public class RefreshService extends AbstractMuaService {
 
     public RefreshService(MuaSession muaSession) {
         super(muaSession);

@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.client.blob;
 
+import com.google.common.base.Strings;
 import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -149,11 +150,14 @@ public class BinaryDataClient {
                     new IllegalStateException("response body was empty"));
         }
         if (response.isSuccessful()) {
+            final Upload upload;
             try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
-                return Futures.immediateFuture(Services.GSON.fromJson(reader, Upload.class));
+                upload = Services.GSON.fromJson(reader, Upload.class);
+                validate(upload);
             } catch (final Exception e) {
                 return Futures.immediateFailedFuture(e);
             }
+            return Futures.immediateFuture(upload);
         }
         final ErrorResponse errorResponse;
         try (final InputStreamReader reader = new InputStreamReader(body.byteStream())) {
@@ -163,6 +167,18 @@ public class BinaryDataClient {
         }
         return Futures.immediateFailedFuture(
                 new BlobTransferException(response.code(), errorResponse));
+    }
+
+    private void validate(final Upload upload) {
+        if (Strings.isNullOrEmpty(upload.getBlobId())) {
+            throw new IllegalStateException("Upload object is missing blobId");
+        }
+        if (upload.getSize() == null) {
+            throw new IllegalStateException("Upload object is missing size");
+        }
+        if (Strings.isNullOrEmpty(upload.getType())) {
+            throw new IllegalStateException("Upload object is missing type");
+        }
     }
 
     public static class ContentRange {

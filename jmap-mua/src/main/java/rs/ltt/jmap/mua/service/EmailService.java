@@ -56,7 +56,7 @@ import rs.ltt.jmap.mua.util.MailboxUtil;
 import rs.ltt.jmap.mua.util.UpdateUtil;
 
 @SuppressWarnings("UnstableApiUsage")
-public class EmailService extends MuaService {
+public class EmailService extends AbstractMuaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
 

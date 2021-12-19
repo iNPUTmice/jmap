@@ -32,7 +32,7 @@ public abstract class MuaSession implements Closeable {
     private final String accountId;
     private final ListeningExecutorService ioExecutorService =
             MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
-    private final ImmutableClassToInstanceMap<MuaService> services;
+    private final ImmutableClassToInstanceMap<AbstractMuaService> services;
     private Long queryPageSize = null;
 
     public MuaSession(
@@ -44,18 +44,19 @@ public abstract class MuaSession implements Closeable {
         this.cache = cache;
         this.accountId = accountId;
         this.services =
-                ImmutableClassToInstanceMap.<MuaService>builder()
+                ImmutableClassToInstanceMap.<AbstractMuaService>builder()
+                        .put(BinaryService.class, new BinaryService(this))
                         .put(EmailService.class, new EmailService(this))
                         .put(IdentityService.class, new IdentityService(this))
                         .put(MailboxService.class, new MailboxService(this))
+                        .put(PluginService.class, new PluginService(this, plugins))
                         .put(QueryService.class, new QueryService(this))
                         .put(RefreshService.class, new RefreshService(this))
                         .put(ThreadService.class, new ThreadService(this))
-                        .put(PluginService.class, new PluginService(this, plugins))
                         .build();
     }
 
-    protected <T extends MuaService> T getService(Class<T> clazz) {
+    protected <T extends AbstractMuaService> T getService(Class<T> clazz) {
         return services.getInstance(clazz);
     }
 
