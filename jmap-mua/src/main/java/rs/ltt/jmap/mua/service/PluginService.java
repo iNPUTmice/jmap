@@ -90,5 +90,13 @@ public class PluginService extends AbstractMuaService {
             this.muaSession = muaSession;
             return Collections.emptyList();
         }
+
+        protected <T extends AbstractMuaService> T getService(Class<T> clazz) {
+            final MuaSession muaSession = this.muaSession;
+            if (muaSession == null) {
+                throw new IllegalStateException("Plugin has not been installed yet");
+            }
+            return muaSession.getService(clazz);
+        }
     }
 }
