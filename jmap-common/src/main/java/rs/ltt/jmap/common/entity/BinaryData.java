@@ -16,6 +16,18 @@
 
 package rs.ltt.jmap.common.entity;
 
-public interface Downloadable extends BinaryData {
-    String getName();
+import com.google.common.net.MediaType;
+
+public interface BinaryData {
+
+    String getBlobId();
+
+    String getType();
+
+    Long getSize();
+
+    default MediaType getMediaType() {
+        final String type = getType();
+        return type == null ? null : MediaType.parse(type);
+    }
 }

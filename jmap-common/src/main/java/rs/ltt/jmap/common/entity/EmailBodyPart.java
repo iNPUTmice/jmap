@@ -20,6 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.net.MediaType;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Locale;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
@@ -50,7 +51,8 @@ public class EmailBodyPart implements Attachment {
             this.type(mediaType.withoutParameters().toString());
             final Optional<Charset> optionalCharset = mediaType.charset();
             if (optionalCharset.isPresent()) {
-                this.charset(optionalCharset.get().name());
+                final Charset charset = optionalCharset.get();
+                this.charset(charset.name().toLowerCase(Locale.ROOT));
             }
             return this;
         }

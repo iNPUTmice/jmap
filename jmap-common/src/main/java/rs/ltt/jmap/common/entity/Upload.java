@@ -22,7 +22,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class Upload {
+public class Upload implements BinaryData {
 
     private String accountId;
     private String blobId;

@@ -14,17 +14,21 @@
  *
  */
 
-package rs.ltt.jmap.common.entity;
+package rs.ltt.jmap.common;
 
 import com.google.common.net.MediaType;
-import rs.ltt.jmap.common.util.MediaTypes;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import rs.ltt.jmap.common.entity.EmailBodyPart;
 
-public interface Attachment extends Downloadable {
+public class BinaryDataTest {
 
-    String getCharset();
-
-    @Override
-    default MediaType getMediaType() {
-        return MediaTypes.of(getType(), getCharset());
+    @Test
+    public void attachmentPlainTextMediaType() {
+        final EmailBodyPart emailBodyPart =
+                EmailBodyPart.builder().mediaType(MediaType.PLAIN_TEXT_UTF_8).build();
+        Assertions.assertEquals("utf-8", emailBodyPart.getCharset());
+        Assertions.assertEquals("text/plain", emailBodyPart.getType());
+        Assertions.assertTrue(MediaType.PLAIN_TEXT_UTF_8.is(emailBodyPart.getMediaType()));
     }
 }
