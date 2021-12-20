@@ -1,3 +1,8 @@
+### 0.8.3 (2021-12-20)
+
+* Give Plugins access to Mua services
+* Common interface `BinaryData` for Upload and Downloadable 
+
 ### 0.8.2 (2021-12-18)
 
 * Add ability to set MediaType on EmailBodyPartBuilder
