@@ -234,6 +234,7 @@ public class Email extends AbstractIdentifiableEntity
         public static final String SENT_AT = "sentAt";
         public static final String HAS_ATTACHMENT = "hasAttachment";
         public static final String PREVIEW = "preview";
+        public static final String BODY_STRUCTURE = "bodyStructure";
         public static final String BODY_VALUES = "bodyValues";
         public static final String TEXT_BODY = "textBody";
         public static final String HTML_BODY = "htmlBody";
@@ -280,6 +281,7 @@ public class Email extends AbstractIdentifiableEntity
         public static final String[] LTTRS_DEFAULT =
                 new ImmutableList.Builder<String>()
                         .addAll(Arrays.asList(RFC_8621_DEFAULT))
+                        .add(Property.BODY_STRUCTURE)
                         .add(Property.USER_AGENT)
                         .add(Property.AUTOCRYPT)
                         .add(Property.AUTOCRYPT_DRAFT_STATE)
