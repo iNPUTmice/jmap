@@ -1,4 +1,5 @@
 # Java JMAP library
+[![Apache 2.0 License](https://img.shields.io/github/license/inputmice/jmap?color=informational)](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
 ![Build Status](https://github.com/inputmice/jmap/actions/workflows/maven.yml/badge.svg)
 [![Codacy Badge](https://img.shields.io/codacy/grade/329b10e923d74c9881f9e8cf53616735?logo=codacy)](https://www.codacy.com/manual/iNPUTmice/jmap)
 [![codecov](https://img.shields.io/codecov/c/gh/inputmice/jmap/master?logo=codecov&label=code%20coverage&token=W35RI2ASHI)](https://codecov.io/gh/iNPUTmice/jmap)
