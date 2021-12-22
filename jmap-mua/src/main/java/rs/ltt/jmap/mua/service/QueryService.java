@@ -439,6 +439,7 @@ public class QueryService extends AbstractMuaService {
                                                             Request.Invocation.ResultReference.Path
                                                                     .LIST_EMAIL_IDS))
                                             .fetchTextBodyValues(true)
+                                            .properties(Email.Properties.LTTRS_DEFAULT)
                                             .build())
                             .getMethodResponses();
         } else {
@@ -565,6 +566,7 @@ public class QueryService extends AbstractMuaService {
                                                         Request.Invocation.ResultReference.Path
                                                                 .LIST_EMAIL_IDS))
                                         .fetchTextBodyValues(true)
+                                        .properties(Email.Properties.LTTRS_DEFAULT)
                                         .build())
                         .getMethodResponses();
         multiCall.execute();

@@ -57,6 +57,7 @@ public class UpdateUtil {
                                                 changesCallInfo.createResultReference(
                                                         Request.Invocation.ResultReference.Path
                                                                 .CREATED))
+                                        .properties(Email.Properties.LTTRS_DEFAULT)
                                         .fetchTextBodyValues(true)
                                         .build())
                         .getMethodResponses();

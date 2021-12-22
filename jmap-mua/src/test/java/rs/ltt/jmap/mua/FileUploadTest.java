@@ -20,7 +20,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharSource;
 import com.google.common.net.MediaType;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,6 +30,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import okhttp3.mockwebserver.MockWebServer;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -112,7 +117,38 @@ public class FileUploadTest {
     }
 
     @Test
-    public void exceedsUploadLimit() throws ExecutionException, InterruptedException {
+    public void uploadOutputStreamWriteFirst() throws IOException {
+        final MockWebServer server = new MockWebServer();
+        final MockMailServer mailServer = new MockMailServer(2);
+        server.setDispatcher(mailServer);
+
+        final Mua mua =
+                Mua.builder()
+                        .cache(new InMemoryCache())
+                        .sessionResource(server.url(JmapDispatcher.WELL_KNOWN_PATH))
+                        .username(mailServer.getUsername())
+                        .password(JmapDispatcher.PASSWORD)
+                        .accountId(mailServer.getAccountId())
+                        .build();
+
+        final InputStream inputStream = new ByteArrayInputStream(new byte[1024 * 1024]);
+        final OutputStreamUpload outputStreamUpload =
+                OutputStreamUpload.of(MediaType.PLAIN_TEXT_UTF_8);
+
+        try (final OutputStream outputStream = outputStreamUpload.getOutputStream()) {
+
+            final ListenableFuture<Long> copiedFuture =
+                    Futures.submit(
+                            () -> ByteStreams.copy(inputStream, outputStream),
+                            Executors.newSingleThreadExecutor());
+
+            Assertions.assertThrows(
+                    TimeoutException.class, () -> copiedFuture.get(2, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    public void exceedsUploadLimit() {
         final MockWebServer server = new MockWebServer();
         final MockMailServer mailServer = new MockMailServer(2);
         server.setDispatcher(mailServer);
@@ -177,22 +213,20 @@ public class FileUploadTest {
         final ExecutionException executionException =
                 Assertions.assertThrows(
                         ExecutionException.class,
-                        () -> {
-                            mua.verifyAttachmentsDoNotExceedLimit(
-                                            ImmutableList.of(imageAttachment, zipAttachment))
-                                    .get();
-                        });
+                        () ->
+                                mua.verifyAttachmentsDoNotExceedLimit(
+                                                ImmutableList.of(imageAttachment, zipAttachment))
+                                        .get());
         MatcherAssert.assertThat(
                 executionException.getCause(),
                 CoreMatchers.instanceOf(
                         AttachmentUtil.CombinedAttachmentSizeExceedsLimitException.class));
         Assertions.assertThrows(
                 ExecutionException.class,
-                () -> {
-                    mua.verifyAttachmentsDoNotExceedLimit(
-                                    ImmutableList.of(
-                                            imageAttachment, zipAttachment, textAttachment))
-                            .get();
-                });
+                () ->
+                        mua.verifyAttachmentsDoNotExceedLimit(
+                                        ImmutableList.of(
+                                                imageAttachment, zipAttachment, textAttachment))
+                                .get());
     }
 }

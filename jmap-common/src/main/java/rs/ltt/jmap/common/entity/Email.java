@@ -17,9 +17,11 @@
 package rs.ltt.jmap.common.entity;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.annotations.SerializedName;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
@@ -212,10 +214,30 @@ public class Email extends AbstractIdentifiableEntity
     }
 
     public static final class Property {
-        public static final String KEYWORDS = "keywords";
-        public static final String MAILBOX_IDS = "mailboxIds";
+        public static final String ID = "id";
+        public static final String BLOB_ID = "id";
         public static final String THREAD_ID = "threadId";
+        public static final String MAILBOX_IDS = "mailboxIds";
+        public static final String KEYWORDS = "keywords";
+        public static final String SIZE = "size";
         public static final String RECEIVED_AT = "receivedAt";
+        public static final String MESSAGE_ID = "messageId";
+        public static final String IN_REPLY_TO = "inReplyTo";
+        public static final String REFERENCES = "references";
+        public static final String SENDER = "sender";
+        public static final String FROM = "from";
+        public static final String TO = "to";
+        public static final String CC = "cc";
+        public static final String BCC = "bcc";
+        public static final String REPLY_TO = "replyTo";
+        public static final String SUBJECT = "subject";
+        public static final String SENT_AT = "sentAt";
+        public static final String HAS_ATTACHMENT = "hasAttachment";
+        public static final String PREVIEW = "preview";
+        public static final String BODY_VALUES = "bodyValues";
+        public static final String TEXT_BODY = "textBody";
+        public static final String HTML_BODY = "htmlBody";
+        public static final String ATTACHMENTS = "attachments";
         public static final String USER_AGENT = "header:User-Agent:asText";
         public static final String AUTOCRYPT = "header:Autocrypt:asText:all";
         public static final String AUTOCRYPT_DRAFT_STATE = "header:Autocrypt-Draft-State:asText";
@@ -229,6 +251,41 @@ public class Email extends AbstractIdentifiableEntity
         public static final String[] THREAD_ID = new String[] {Property.THREAD_ID};
         public static final String[] MUTABLE =
                 new String[] {Property.KEYWORDS, Property.MAILBOX_IDS};
+        public static final String[] RFC_8621_DEFAULT =
+                new String[] {
+                    Property.ID,
+                    Property.BLOB_ID,
+                    Property.THREAD_ID,
+                    Property.MAILBOX_IDS,
+                    Property.KEYWORDS,
+                    Property.SIZE,
+                    Property.RECEIVED_AT,
+                    Property.MESSAGE_ID,
+                    Property.IN_REPLY_TO,
+                    Property.REFERENCES,
+                    Property.SENDER,
+                    Property.FROM,
+                    Property.TO,
+                    Property.CC,
+                    Property.BCC,
+                    Property.REPLY_TO,
+                    Property.SUBJECT,
+                    Property.HAS_ATTACHMENT,
+                    Property.PREVIEW,
+                    Property.BODY_VALUES,
+                    Property.TEXT_BODY,
+                    Property.HTML_BODY,
+                    Property.ATTACHMENTS
+                };
+        public static final String[] LTTRS_DEFAULT =
+                new ImmutableList.Builder<String>()
+                        .addAll(Arrays.asList(RFC_8621_DEFAULT))
+                        .add(Property.USER_AGENT)
+                        .add(Property.AUTOCRYPT)
+                        .add(Property.AUTOCRYPT_DRAFT_STATE)
+                        .add(Property.AUTOCRYPT_SETUP_MESSAGE)
+                        .build()
+                        .toArray(new String[0]);
 
         private Properties() {}
     }
