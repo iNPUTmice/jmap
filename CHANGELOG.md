@@ -1,3 +1,7 @@
+### 0.8.4 (2021-12-25)
+
+* Make jmap-mua request some additonal, custom e-mail properties
+
 ### 0.8.3 (2021-12-20)
 
 * Give Plugins access to Mua services
