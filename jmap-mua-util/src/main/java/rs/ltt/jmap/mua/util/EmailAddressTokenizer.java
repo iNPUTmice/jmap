@@ -20,17 +20,16 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import rs.ltt.jmap.common.entity.EmailAddress;
 
 public class EmailAddressTokenizer {
 
-    public static Collection<EmailAddressToken> tokenize(final CharSequence cs) {
+    public static List<EmailAddressToken> tokenize(final CharSequence cs) {
         return tokenize(cs, false);
     }
 
-    public static Collection<EmailAddressToken> tokenize(
+    public static List<EmailAddressToken> tokenize(
             final CharSequence cs, final boolean requireExplicitDelimiter) {
         final ImmutableList.Builder<EmailAddressToken> tokenBuilder = new ImmutableList.Builder<>();
         final TokenReader tokenReader = new TokenReader(cs);

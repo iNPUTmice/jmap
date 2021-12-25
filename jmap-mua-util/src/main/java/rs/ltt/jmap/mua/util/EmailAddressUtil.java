@@ -16,7 +16,7 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import java.util.*;
 import java.util.regex.Pattern;
 import rs.ltt.jmap.common.entity.EmailAddress;
@@ -377,8 +377,8 @@ public class EmailAddressUtil {
         return EMAIL_PATTERN.matcher(email).matches();
     }
 
-    public static Collection<EmailAddress> parse(final String userInput) {
-        return Collections2.transform(
+    public static List<EmailAddress> parse(final String userInput) {
+        return Lists.transform(
                 EmailAddressTokenizer.tokenize(userInput),
                 token -> token != null ? token.getEmailAddress() : null);
     }
