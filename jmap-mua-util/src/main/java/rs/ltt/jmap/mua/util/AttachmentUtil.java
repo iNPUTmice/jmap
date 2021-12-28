@@ -27,6 +27,9 @@ public final class AttachmentUtil {
     private AttachmentUtil() {}
 
     public static EmailBodyPart toEmailBodyPart(final Attachment attachment) {
+        if (attachment instanceof EmailBodyPart) {
+            return (EmailBodyPart) attachment;
+        }
         return EmailBodyPart.builder()
                 .blobId(attachment.getBlobId())
                 .charset(attachment.getCharset())
