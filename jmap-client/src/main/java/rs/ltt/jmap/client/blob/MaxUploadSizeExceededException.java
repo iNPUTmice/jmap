@@ -16,7 +16,7 @@
 
 package rs.ltt.jmap.client.blob;
 
-public class MaxUploadSizeExceededException extends Exception {
+public class MaxUploadSizeExceededException extends RuntimeException {
 
     private final long fileSize;
     private final long maxFileSize;
