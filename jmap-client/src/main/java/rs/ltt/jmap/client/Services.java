@@ -29,6 +29,7 @@ import rs.ltt.jmap.gson.JmapAdapters;
 
 public final class Services {
 
+    public static final Logger OK_HTTP_LOGGER = LoggerFactory.getLogger(OkHttpClient.class);
     public static final OkHttpClient OK_HTTP_CLIENT;
     public static final OkHttpClient OK_HTTP_CLIENT_LOGGING;
     public static final Gson GSON;
@@ -37,7 +38,6 @@ public final class Services {
 
     static {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        final Logger OK_HTTP_LOGGER = LoggerFactory.getLogger(OkHttpClient.class);
         builder.addInterceptor(new UserAgentInterceptor());
         OK_HTTP_CLIENT = builder.build();
         if (OK_HTTP_LOGGER.isInfoEnabled()) {

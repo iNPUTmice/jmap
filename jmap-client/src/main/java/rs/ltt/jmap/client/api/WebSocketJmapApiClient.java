@@ -95,7 +95,9 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
     }
 
     protected boolean send(final WebSocketMessage message) {
-        LOGGER.debug("--> {}", Services.GSON.toJson(message));
+        if (Services.OK_HTTP_LOGGER.isDebugEnabled()) {
+            Services.OK_HTTP_LOGGER.debug("--> {}", Services.GSON.toJson(message));
+        }
         return requireWebSocket().send(Services.GSON.toJson(message));
     }
 
@@ -171,7 +173,9 @@ public class WebSocketJmapApiClient extends AbstractJmapApiClient implements Clo
 
     private synchronized void onMessage(final WebSocket webSocket, final String text) {
         this.lastFrameReceived = System.nanoTime();
-        LOGGER.debug("<-- {}", text);
+        if (Services.OK_HTTP_LOGGER.isDebugEnabled()) {
+            Services.OK_HTTP_LOGGER.debug("<-- {}", text);
+        }
         final WebSocketMessage message;
         try {
             message = Services.GSON.fromJson(text, WebSocketMessage.class);
