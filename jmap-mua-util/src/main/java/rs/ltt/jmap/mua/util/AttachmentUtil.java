@@ -39,6 +39,15 @@ public final class AttachmentUtil {
                 .build();
     }
 
+    public static EmailBodyPart toAnonymousEmailBodyPart(final Attachment attachment) {
+        return EmailBodyPart.builder()
+                .charset(attachment.getCharset())
+                .type(attachment.getType())
+                .name(attachment.getName())
+                .size(attachment.getSize())
+                .build();
+    }
+
     public static void verifyAttachmentsDoNotExceedLimit(
             final Session session,
             final String account,
