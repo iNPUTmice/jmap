@@ -1,3 +1,7 @@
+### 0.8.5 (2021-12-29)
+
+* Log Websocket traffic to OkHttp logger
+
 ### 0.8.4 (2021-12-25)
 
 * Make jmap-mua request some additonal, custom e-mail properties
