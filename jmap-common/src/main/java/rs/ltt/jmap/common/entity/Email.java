@@ -281,6 +281,7 @@ public class Email extends AbstractIdentifiableEntity
         public static final String[] LTTRS_DEFAULT =
                 new ImmutableList.Builder<String>()
                         .addAll(Arrays.asList(RFC_8621_DEFAULT))
+                        .add(Property.SENT_AT)
                         .add(Property.BODY_STRUCTURE)
                         .add(Property.USER_AGENT)
                         .add(Property.AUTOCRYPT)
