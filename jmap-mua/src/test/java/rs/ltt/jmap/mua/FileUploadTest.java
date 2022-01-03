@@ -22,10 +22,7 @@ import com.google.common.io.CharSource;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,10 +36,7 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import rs.ltt.jmap.client.blob.FileUpload;
-import rs.ltt.jmap.client.blob.MaxUploadSizeExceededException;
-import rs.ltt.jmap.client.blob.OutputStreamUpload;
-import rs.ltt.jmap.client.blob.Uploadable;
+import rs.ltt.jmap.client.blob.*;
 import rs.ltt.jmap.common.entity.EmailBodyPart;
 import rs.ltt.jmap.common.entity.Upload;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
@@ -83,6 +77,15 @@ public class FileUploadTest {
     }
 
     @Test
+    public void testLegacyDetectDirectory() {
+        Assertions.assertThrows(
+                IOException.class,
+                () -> {
+                    LegacyFileUpload.of(tempDir.toFile(), MediaType.OCTET_STREAM);
+                });
+    }
+
+    @Test
     public void uploadOutputStream() throws IOException, ExecutionException, InterruptedException {
         final MockWebServer server = new MockWebServer();
         final MockMailServer mailServer = new MockMailServer(2);
@@ -114,6 +117,8 @@ public class FileUploadTest {
                 upload.getBlobId());
         Assertions.assertEquals("text/plain", upload.getType());
         Assertions.assertTrue(MediaType.create("text", "plain").is(upload.getMediaType()));
+
+        Assertions.assertThrows(IllegalStateException.class, outputStreamUpload::getInputStream);
     }
 
     @Test

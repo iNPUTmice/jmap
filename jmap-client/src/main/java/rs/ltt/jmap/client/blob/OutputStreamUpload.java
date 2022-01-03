@@ -17,7 +17,9 @@
 package rs.ltt.jmap.client.blob;
 
 import com.google.common.net.MediaType;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedOutputStream;
 
 public class OutputStreamUpload implements Uploadable {
 
@@ -41,6 +43,11 @@ public class OutputStreamUpload implements Uploadable {
 
     @Override
     public InputStream getInputStream() {
+        if (this.inputStream.closed) {
+            throw new IllegalStateException(
+                    "PipedInputStream has already been closed. Are you using a network"
+                            + " interceptor/logger?");
+        }
         return inputStream;
     }
 
@@ -56,5 +63,16 @@ public class OutputStreamUpload implements Uploadable {
 
     public PipedOutputStream getOutputStream() throws IOException {
         return new PipedOutputStream(inputStream);
+    }
+
+    private static class PipedInputStream extends java.io.PipedInputStream {
+
+        private boolean closed = false;
+
+        @Override
+        public void close() throws IOException {
+            this.closed = true;
+            super.close();
+        }
     }
 }
