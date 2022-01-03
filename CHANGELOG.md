@@ -1,3 +1,8 @@
+### 0.8.6 (2022-01-03)
+
+* Introduce LegacyFileUpload for use in Android
+* Request `sentAt` property by default in jmap-mua
+
 ### 0.8.5 (2021-12-29)
 
 * Log Websocket traffic to OkHttp logger
