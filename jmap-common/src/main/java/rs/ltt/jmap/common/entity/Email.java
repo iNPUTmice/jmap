@@ -138,7 +138,7 @@ public class Email extends AbstractIdentifiableEntity
             @Singular Map<String, EmailBodyValue> bodyValues,
             @Singular("textBody") List<EmailBodyPart> textBody,
             @Singular("htmlBody") List<EmailBodyPart> htmlBody,
-            List<EmailBodyPart> attachments,
+            @Singular List<EmailBodyPart> attachments,
             Boolean hasAttachment,
             String preview) {
         this.id = id;
