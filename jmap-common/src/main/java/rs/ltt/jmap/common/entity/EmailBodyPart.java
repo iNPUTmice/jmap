@@ -16,6 +16,7 @@
 
 package rs.ltt.jmap.common.entity;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.net.MediaType;
 import java.nio.charset.Charset;
@@ -45,6 +46,24 @@ public class EmailBodyPart implements Attachment {
     private String location;
 
     @Singular private List<EmailBodyPart> subParts;
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("partId", partId)
+                .add("blobId", blobId)
+                .add("size", size)
+                .add("headers", headers)
+                .add("name", name)
+                .add("type", type)
+                .add("charset", charset)
+                .add("disposition", disposition)
+                .add("cid", cid)
+                .add("language", language)
+                .add("location", location)
+                .add("subParts", subParts)
+                .toString();
+    }
 
     public static class EmailBodyPartBuilder {
         public EmailBodyPartBuilder mediaType(MediaType mediaType) {
