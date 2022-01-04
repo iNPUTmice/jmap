@@ -1,3 +1,7 @@
+### 0.8.7 (2022-01-04)
+
+* Introduce EmailBuilder.attachment (singular) method
+
 ### 0.8.6 (2022-01-03)
 
 * Introduce LegacyFileUpload for use in Android
