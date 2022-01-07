@@ -1,3 +1,7 @@
+### 0.8.8 (2022-01-07)
+
+* Include interruptible variant of ByteStreams.copy()
+
 ### 0.8.7 (2022-01-04)
 
 * Introduce EmailBuilder.attachment (singular) method
