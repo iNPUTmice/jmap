@@ -17,6 +17,7 @@
 package rs.ltt.jmap.mua.util;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -75,7 +76,7 @@ public class EmailUtil {
     }
 
     private static Collection<EmailAddress> replyTo(
-            IdentifiableEmailWithAddresses emailWithAddresses) {
+            final IdentifiableEmailWithAddresses emailWithAddresses) {
         final Collection<EmailAddress> from = emailWithAddresses.getFrom();
         if (from != null && !from.isEmpty()) {
             return from;
@@ -87,7 +88,13 @@ public class EmailUtil {
         return Collections.emptyList();
     }
 
-    public static ReplyAddresses replyAll(IdentifiableEmailWithAddresses emailWithAddresses) {
+    public static ReplyAddresses replyAll(final IdentifiableEmailWithAddresses emailWithAddresses) {
+        return replyAll(emailWithAddresses, Collections.emptyList());
+    }
+
+    public static ReplyAddresses replyAll(
+            final IdentifiableEmailWithAddresses emailWithAddresses,
+            final Collection<String> identityEmailAddresses) {
         final Collection<EmailAddress> replyTo = emailWithAddresses.getReplyTo();
         final Collection<EmailAddress> cc = emailWithAddresses.getCc();
         if (replyTo != null && replyTo.size() > 0 && (cc == null || cc.isEmpty())) {
@@ -96,7 +103,13 @@ public class EmailUtil {
         final Collection<EmailAddress> to = emailWithAddresses.getTo();
         ImmutableList.Builder<EmailAddress> ccBuilder = new ImmutableList.Builder<>();
         if (to != null) {
-            ccBuilder.addAll(to);
+            for (final EmailAddress address : to) {
+                if (Iterables.any(
+                        identityEmailAddresses, i -> i.equalsIgnoreCase(address.getEmail()))) {
+                    continue;
+                }
+                ccBuilder.add(address);
+            }
         }
         if (cc != null) {
             ccBuilder.addAll(cc);

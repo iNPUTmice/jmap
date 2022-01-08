@@ -16,13 +16,16 @@
 
 package rs.ltt.jmap.mua.util;
 
+import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import rs.ltt.jmap.common.entity.Email;
+import rs.ltt.jmap.common.entity.EmailAddress;
 
 public class EmailUtilTest {
 
@@ -70,5 +73,37 @@ public class EmailUtilTest {
         final OffsetDateTime sentAt = later.atOffset(ZoneOffset.UTC);
         final Email email = Email.builder().sentAt(sentAt).receivedAt(now).build();
         Assertions.assertEquals(now, EmailUtil.getEffectiveDate(email));
+    }
+
+    @Test
+    public void replyAll() {
+        final EmailAddress alice = EmailAddress.builder().email("alice@example.com").build();
+        final EmailAddress bob = EmailAddress.builder().email("bob@example.com").build();
+        final EmailAddress chris = EmailAddress.builder().email("chris@example.com").build();
+        final Email email = Email.builder().from(alice).to(bob).cc(chris).build();
+        final EmailUtil.ReplyAddresses replyAddresses = EmailUtil.replyAll(email);
+        Assertions.assertEquals(ImmutableList.of(alice), replyAddresses.getTo());
+        Assertions.assertEquals(ImmutableList.of(bob, chris), replyAddresses.getCc());
+    }
+
+    @Test
+    public void replyAllMinusIdentities() {
+        final EmailAddress alice = EmailAddress.builder().email("alice@example.com").build();
+        final EmailAddress bob = EmailAddress.builder().email("bob@example.com").build();
+        final Email email = Email.builder().from(alice).to(bob).build();
+        final EmailUtil.ReplyAddresses replyAddresses =
+                EmailUtil.replyAll(email, Collections.singleton("bob@example.com"));
+        Assertions.assertEquals(ImmutableList.of(alice), replyAddresses.getTo());
+        Assertions.assertTrue(replyAddresses.getCc().isEmpty());
+    }
+
+    @Test
+    public void reply() {
+        final EmailAddress alice = EmailAddress.builder().email("alice@example.com").build();
+        final EmailAddress bob = EmailAddress.builder().email("bob@example.com").build();
+        final Email email = Email.builder().from(alice).to(bob).build();
+        final EmailUtil.ReplyAddresses replyAddresses = EmailUtil.reply(email);
+        Assertions.assertEquals(ImmutableList.of(alice), replyAddresses.getTo());
+        Assertions.assertTrue(replyAddresses.getCc().isEmpty());
     }
 }
