@@ -88,25 +88,40 @@ public class EmailService extends AbstractMuaService {
             final Email email,
             final IdentifiableMailboxWithRole drafts,
             final JmapClient.MultiCall multiCall) {
+        return store(email, drafts, Role.DRAFTS, multiCall);
+    }
+
+    private ListenableFuture<String> store(
+            final Email email,
+            final IdentifiableMailboxWithRole mailbox,
+            final Role role,
+            final JmapClient.MultiCall multiCall) {
         Preconditions.checkNotNull(
                 email, "Email can not be null when attempting to create a draft");
         Preconditions.checkState(email.getId() == null, "id is a server-set property");
         Preconditions.checkState(email.getBlobId() == null, "blobId is a server-set property");
         Preconditions.checkState(email.getThreadId() == null, "threadId is a server-set property");
+        if (mailbox != null) {
+            Preconditions.checkArgument(
+                    mailbox.getRole() != null && mailbox.getRole() == role,
+                    "Mailbox role must match the supplied role");
+        }
         final Email.EmailBuilder emailBuilder = email.toBuilder();
         final ListenableFuture<MethodResponses> mailboxCreateFuture;
-        if (drafts == null) {
+        if (mailbox == null) {
             mailboxCreateFuture =
-                    getService(MailboxService.class).createMailbox(Role.DRAFTS, null, multiCall);
+                    getService(MailboxService.class).createMailbox(role, null, multiCall);
         } else {
             mailboxCreateFuture = null;
         }
-        if (drafts == null) {
-            emailBuilder.mailboxId(CreateUtil.createIdReference(Role.DRAFTS), true);
+        if (mailbox == null) {
+            emailBuilder.mailboxId(CreateUtil.createIdReference(role), true);
         } else {
-            emailBuilder.mailboxId(drafts.getId(), true);
+            emailBuilder.mailboxId(mailbox.getId(), true);
         }
-        emailBuilder.keyword(Keyword.DRAFT, true);
+        if (role == Role.DRAFTS) {
+            emailBuilder.keyword(Keyword.DRAFT, true);
+        }
         emailBuilder.keyword(Keyword.SEEN, true);
         final ListenableFuture<MethodResponses> future =
                 multiCall
@@ -155,6 +170,25 @@ public class EmailService extends AbstractMuaService {
             Preconditions.checkArgument(mailbox.getRole() == role);
             return callable.call();
         }
+    }
+
+    public ListenableFuture<String> store(final Email email, final Role role) {
+        return Futures.transformAsync(
+                getService(MailboxService.class).getMailboxes(),
+                mailboxes -> {
+                    final IdentifiableMailboxWithRole mailbox = MailboxUtil.find(mailboxes, role);
+                    return ensureNoPreexistingMailbox(
+                            mailbox, role, () -> store(email, mailbox, role));
+                },
+                MoreExecutors.directExecutor());
+    }
+
+    private ListenableFuture<String> store(
+            final Email email, final IdentifiableMailboxWithRole mailbox, Role role) {
+        final JmapClient.MultiCall multiCall = jmapClient.newMultiCall();
+        final ListenableFuture<String> future = store(email, mailbox, role, multiCall);
+        multiCall.execute();
+        return future;
     }
 
     public ListenableFuture<Boolean> submit(
