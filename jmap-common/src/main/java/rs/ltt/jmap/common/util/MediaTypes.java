@@ -22,6 +22,10 @@ import java.nio.charset.UnsupportedCharsetException;
 
 public final class MediaTypes {
 
+    public static final MediaType TEXT_PLAIN = MediaType.create("text", "plain");
+    public static final MediaType TEXT_HTML = MediaType.create("text", "html");
+    public static final MediaType MULTIPART_ANY = MediaType.create("multipart", "*");
+
     private MediaTypes() {}
 
     public static MediaType of(final String type, final String charsetName) {
