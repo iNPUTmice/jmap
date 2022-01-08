@@ -16,9 +16,12 @@
 
 package rs.ltt.jmap.mua.service.exception;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
-import java.util.Map;
+import com.google.common.collect.Collections2;
+import java.util.*;
 import rs.ltt.jmap.common.entity.SetError;
+import rs.ltt.jmap.common.entity.SetErrorType;
 
 public abstract class SetException extends Exception {
 
@@ -30,9 +33,31 @@ public abstract class SetException extends Exception {
             Map<String, SetError> notCreated,
             Map<String, SetError> notUpdated,
             Map<String, SetError> notDestroyed) {
+        super(message(notCreated, notUpdated, notDestroyed));
         this.notCreated = notCreated;
         this.notUpdated = notUpdated;
         this.notDestroyed = notDestroyed;
+    }
+
+    private static String message(
+            final Map<String, SetError> notCreated,
+            final Map<String, SetError> notUpdated,
+            final Map<String, SetError> notDestroyed) {
+        final List<String> messages =
+                Arrays.asList(
+                        message("created", notCreated),
+                        message("updated", notUpdated),
+                        message("destroyed", notDestroyed));
+        return Joiner.on(' ').join(Collections2.filter(messages, Objects::nonNull));
+    }
+
+    private static String message(final String action, final Map<String, SetError> errors) {
+        if (errors == null || errors.isEmpty()) {
+            return null;
+        }
+        final Collection<SetErrorType> types =
+                Collections2.transform(errors.values(), SetError::getType);
+        return String.format("not %s: (%s)", action, Joiner.on(", ").join(types));
     }
 
     public Map<String, SetError> getNotCreated() {
