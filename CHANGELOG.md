@@ -1,3 +1,9 @@
+### 0.8.9 (2022-01-09)
+
+* Include some custom MediaTypes in MediaTypes
+* Include Mua/EmailService.store method for use in plugins
+* Add ability to remove own identities from EmailUtil.replyAll
+
 ### 0.8.8 (2022-01-07)
 
 * Include interruptible variant of ByteStreams.copy()
