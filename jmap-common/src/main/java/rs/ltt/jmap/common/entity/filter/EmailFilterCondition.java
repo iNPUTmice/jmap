@@ -17,6 +17,7 @@
 package rs.ltt.jmap.common.entity.filter;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
 import java.time.Instant;
@@ -68,6 +69,8 @@ public class EmailFilterCondition implements FilterCondition<Email> {
 
     private String body;
 
+    private String[] header;
+
     @Override
     public String toQueryString() {
         return QueryStringUtils.toQueryString(
@@ -91,7 +94,8 @@ public class EmailFilterCondition implements FilterCondition<Email> {
                 cc,
                 bcc,
                 subject,
-                body);
+                body,
+                header);
     }
 
     @Override
@@ -130,6 +134,7 @@ public class EmailFilterCondition implements FilterCondition<Email> {
                     .compare(Strings.nullToEmpty(bcc), Strings.nullToEmpty(other.bcc))
                     .compare(Strings.nullToEmpty(subject), Strings.nullToEmpty(other.subject))
                     .compare(Strings.nullToEmpty(body), Strings.nullToEmpty(other.body))
+                    .compare(header, other.header, QueryStringUtils.STRING_ARRAY_COMPARATOR)
                     .result();
         } else {
             return 1;
@@ -160,7 +165,19 @@ public class EmailFilterCondition implements FilterCondition<Email> {
                 .add("bcc", bcc)
                 .add("subject", subject)
                 .add("body", body)
+                .add("header", header)
                 .omitNullValues()
                 .toString();
+    }
+
+    public static class EmailFilterConditionBuilder {
+
+        public EmailFilterConditionBuilder header(final String[] header) {
+            Preconditions.checkArgument(
+                    header != null && (header.length == 1 || header.length == 2),
+                    "The header array MUST contain either one or two elements.");
+            this.header = header;
+            return this;
+        }
     }
 }

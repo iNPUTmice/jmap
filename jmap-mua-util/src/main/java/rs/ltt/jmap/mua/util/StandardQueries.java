@@ -25,7 +25,7 @@ import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public final class StandardQueries {
 
-    private static final Comparator[] SORT_DEFAULT =
+    public static final Comparator[] SORT_DEFAULT =
             new Comparator[] {new Comparator(Email.Property.RECEIVED_AT, false)};
 
     private StandardQueries() {}
