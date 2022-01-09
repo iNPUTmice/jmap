@@ -28,7 +28,7 @@ public class StandardQueriesTest {
     public void mailbox() {
         final Query<Email> query = StandardQueries.mailbox("inbox");
         Assertions.assertEquals(
-                "57839588c47c04e2a010e1cde932f3bebf31c07609235c19a8f95c17445f0818", query.asHash());
+                "d0833ce845bbc8d7f1df4a7b03ee90a46bb08875eaf2613894d67c42b20e9a59", query.asHash());
     }
 
     @Test
@@ -36,6 +36,6 @@ public class StandardQueriesTest {
         final Query<Email> query =
                 StandardQueries.keyword(Keyword.FLAGGED, new String[] {"junk", "trash"});
         Assertions.assertEquals(
-                "c0f83960f59ea96e99bd2cc2ad54db66ece24522e8ce95bb11f37b769468778e", query.asHash());
+                "a13cb6f4e6022b9fedbd6a03bfa1c6ab5c7c9dfc644fce7b4e76ec6462cf2a91", query.asHash());
     }
 }
