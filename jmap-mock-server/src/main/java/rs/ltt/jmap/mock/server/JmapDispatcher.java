@@ -229,20 +229,20 @@ public abstract class JmapDispatcher extends Dispatcher {
             if (blobId == null || !UUID_PATTERN.matcher(blobId).matches()) {
                 return new MockResponse().setResponseCode(404);
             }
-            final URL resource;
             try {
-                resource = Resources.getResource(String.format("blobs/%s", blobId));
-            } catch (final IllegalArgumentException e) {
-                e.printStackTrace();
+                return new MockResponse().setBody(getDownloadBuffer(blobId));
+            } catch (IllegalArgumentException e) {
                 return new MockResponse().setResponseCode(404);
-            }
-            try {
-                return new MockResponse().setBody(new Buffer().readFrom(resource.openStream()));
             } catch (final IOException e) {
                 return new MockResponse().setResponseCode(500);
             }
         }
         return new MockResponse().setResponseCode(404);
+    }
+
+    protected Buffer getDownloadBuffer(final String blobId) throws IOException {
+        final URL resource = Resources.getResource(String.format("blobs/%s", blobId));
+        return new Buffer().readFrom(resource.openStream());
     }
 
     private MockResponse dispatchWellKnown(final RecordedRequest request) {

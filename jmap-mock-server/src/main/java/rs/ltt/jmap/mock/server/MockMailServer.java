@@ -20,6 +20,9 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.Comparator;
@@ -29,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import okhttp3.HttpUrl;
+import okio.Buffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.common.Request;
@@ -67,6 +71,7 @@ public class MockMailServer extends StubMailServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockMailServer.class);
 
     protected final Map<String, Email> emails = new HashMap<>();
+    protected final Map<String, byte[]> inMemoryAttachments = new HashMap<>();
     protected final Map<String, MailboxInfo> mailboxes = new HashMap<>();
     protected final Map<String, PushSubscription> pushSubscriptions = new HashMap<>();
 
@@ -79,6 +84,15 @@ public class MockMailServer extends StubMailServer {
     public MockMailServer(final int numThreads, final int accountIndex) {
         super(accountIndex);
         setup(numThreads, (accountIndex * 2048) + accountIndex);
+    }
+
+    @Override
+    protected Buffer getDownloadBuffer(final String blobId) throws IOException {
+        final byte[] attachment = this.inMemoryAttachments.get(blobId);
+        if (attachment != null) {
+            return new Buffer().readFrom(new ByteArrayInputStream(attachment));
+        }
+        return super.getDownloadBuffer(blobId);
     }
 
     protected void setup(final int numThreads, final int offset) {
@@ -436,6 +450,14 @@ public class MockMailServer extends StubMailServer {
                 emailStream =
                         emailStream.filter(email -> email.getMailboxIds().containsKey(inMailbox));
             }
+            final String[] header = emailFilterCondition.getHeader();
+            if (header != null
+                    && header.length == 2
+                    && header[0].equals("Autocrypt-Setup-Message")) {
+                emailStream =
+                        emailStream.filter(
+                                email -> header[1].equals(email.getAutocryptSetupMessage()));
+            }
         }
         return emailStream;
     }
@@ -508,11 +530,39 @@ public class MockMailServer extends StubMailServer {
                                 mailboxEntry.getKey(), previousResponses);
                 emailBuilder.mailboxId(mailboxId, mailboxEntry.getValue());
             }
+            final List<EmailBodyPart> attachments = userSuppliedEmail.getAttachments();
+            emailBuilder.clearAttachments();
+            if (attachments != null) {
+                for (final EmailBodyPart attachment : attachments) {
+                    final String partId = attachment.getPartId();
+                    final EmailBodyValue value =
+                            partId == null ? null : userSuppliedEmail.getBodyValues().get(partId);
+                    if (value != null) {
+                        final EmailBodyPart emailBodyPart = injectId(attachment);
+                        this.inMemoryAttachments.put(
+                                emailBodyPart.getBlobId(),
+                                value.getValue().getBytes(StandardCharsets.UTF_8));
+                        emailBuilder.attachment(emailBodyPart);
+                    } else {
+                        emailBuilder.attachment(attachment);
+                    }
+                }
+            }
             final Email email = emailBuilder.build();
 
             createEmail(email);
             responseBuilder.created(createId, email);
         }
+    }
+
+    private static EmailBodyPart injectId(final Attachment attachment) {
+        return EmailBodyPart.builder()
+                .blobId(UUID.randomUUID().toString())
+                .charset(attachment.getCharset())
+                .type(attachment.getType())
+                .name(attachment.getName())
+                .size(attachment.getSize())
+                .build();
     }
 
     @Override
