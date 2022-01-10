@@ -1,3 +1,7 @@
+### 0.8.10 (2022-01-10)
+
+* Add bodyStructure to mock messages in MockMailServer
+
 ### 0.8.9 (2022-01-09)
 
 * Include some custom MediaTypes in MediaTypes
