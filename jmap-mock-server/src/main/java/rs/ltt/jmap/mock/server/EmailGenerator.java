@@ -151,6 +151,7 @@ public class EmailGenerator {
                 .preview(body.substring(0, Math.max(subject.length(), 256)))
                 .bodyValue(partId, emailBodyValue)
                 .textBody(emailBodyPart)
+                .bodyStructure(emailBodyPart)
                 .build();
     }
 }
