@@ -252,7 +252,7 @@ public class Email extends AbstractIdentifiableEntity
         public static final String[] THREAD_ID = new String[] {Property.THREAD_ID};
         public static final String[] MUTABLE =
                 new String[] {Property.KEYWORDS, Property.MAILBOX_IDS};
-        public static final String[] RFC_8621_DEFAULT =
+        private static final String[] BASE =
                 new String[] {
                     Property.ID,
                     Property.BLOB_ID,
@@ -271,16 +271,21 @@ public class Email extends AbstractIdentifiableEntity
                     Property.BCC,
                     Property.REPLY_TO,
                     Property.SUBJECT,
-                    Property.HAS_ATTACHMENT,
-                    Property.PREVIEW,
                     Property.BODY_VALUES,
                     Property.TEXT_BODY,
                     Property.HTML_BODY,
                     Property.ATTACHMENTS
                 };
+        public static final String[] RFC_8621_DEFAULT =
+                new ImmutableList.Builder<String>()
+                        .addAll(Arrays.asList(BASE))
+                        .add(Property.HAS_ATTACHMENT)
+                        .add(Property.PREVIEW)
+                        .build()
+                        .toArray(new String[0]);
         public static final String[] LTTRS_DEFAULT =
                 new ImmutableList.Builder<String>()
-                        .addAll(Arrays.asList(RFC_8621_DEFAULT))
+                        .addAll(Arrays.asList(BASE))
                         .add(Property.SENT_AT)
                         .add(Property.BODY_STRUCTURE)
                         .add(Property.USER_AGENT)
