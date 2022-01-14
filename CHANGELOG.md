@@ -1,3 +1,8 @@
+### 0.8.11 (2022-01-14)
+
+* Add MediaTypes.MULTIPART\_REPORT
+* Do not request preview and hasAttachments in jmap-mua
+
 ### 0.8.10 (2022-01-10)
 
 * Add bodyStructure to mock messages in MockMailServer
