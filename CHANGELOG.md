@@ -1,3 +1,7 @@
+### 0.8.12 (2022-01-17)
+
+* Add combined interface for EmailWithAddresses and EmailWithTime
+
 ### 0.8.11 (2022-01-14)
 
 * Add MediaTypes.MULTIPART\_REPORT
