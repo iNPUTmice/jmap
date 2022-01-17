@@ -35,9 +35,8 @@ import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 public class Email extends AbstractIdentifiableEntity
         implements IdentifiableEmailWithKeywords,
                 IdentifiableEmailWithMailboxIds,
-                IdentifiableEmailWithAddresses,
-                IdentifiableEmailWithSubject,
-                IdentifiableEmailWithTime {
+                IdentifiableEmailWithAddressesAndTime,
+                IdentifiableEmailWithSubject {
 
     // Metadata
 
