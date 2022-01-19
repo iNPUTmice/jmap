@@ -71,7 +71,6 @@ public class MockMailServer extends StubMailServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockMailServer.class);
 
     protected final Map<String, Email> emails = new HashMap<>();
-    protected final Map<String, byte[]> inMemoryAttachments = new HashMap<>();
     protected final Map<String, MailboxInfo> mailboxes = new HashMap<>();
     protected final Map<String, PushSubscription> pushSubscriptions = new HashMap<>();
 
@@ -84,15 +83,6 @@ public class MockMailServer extends StubMailServer {
     public MockMailServer(final int numThreads, final int accountIndex) {
         super(accountIndex);
         setup(numThreads, (accountIndex * 2048) + accountIndex);
-    }
-
-    @Override
-    protected Buffer getDownloadBuffer(final String blobId) throws IOException {
-        final byte[] attachment = this.inMemoryAttachments.get(blobId);
-        if (attachment != null) {
-            return new Buffer().readFrom(new ByteArrayInputStream(attachment));
-        }
-        return super.getDownloadBuffer(blobId);
     }
 
     protected void setup(final int numThreads, final int offset) {
@@ -122,6 +112,15 @@ public class MockMailServer extends StubMailServer {
     public MockMailServer(final int numThreads) {
         super(0);
         setup(numThreads, 0);
+    }
+
+    @Override
+    protected Buffer getDownloadBuffer(final String blobId) throws IOException {
+        final byte[] attachment = this.inMemoryAttachments.get(blobId);
+        if (attachment != null) {
+            return new Buffer().readFrom(new ByteArrayInputStream(attachment));
+        }
+        return super.getDownloadBuffer(blobId);
     }
 
     public Email generateEmailOnTop() {

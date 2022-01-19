@@ -28,7 +28,9 @@ import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import okhttp3.Credentials;
@@ -64,6 +66,7 @@ public abstract class JmapDispatcher extends Dispatcher {
 
     private static final Pattern UUID_PATTERN =
             Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$");
+    private static final Pattern SHA_SUM_PATTERN = Pattern.compile("^[0-9a-fA-F]{64}$");
 
     static {
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -73,6 +76,7 @@ public abstract class JmapDispatcher extends Dispatcher {
 
     public final EmailAddress account;
     protected final List<WebSocket> pushEnabledWebSockets = new ArrayList<>();
+    protected final Map<String, byte[]> inMemoryAttachments = new HashMap<>();
     private int sessionState = 0;
     private FailureTrigger failureTrigger = FailureTrigger.NONE;
     private final WebSocketListener webSocketListener =
@@ -200,8 +204,9 @@ public abstract class JmapDispatcher extends Dispatcher {
             }
             final String contentType = request.getHeader("Content-Type");
             final long size = request.getBodySize();
-            final String blobId =
-                    Hashing.sha256().hashBytes(request.getBody().readByteArray()).toString();
+            final byte[] blob = request.getBody().readByteArray();
+            final String blobId = Hashing.sha256().hashBytes(blob).toString();
+            this.inMemoryAttachments.put(blobId, blob);
             final Upload upload =
                     Upload.builder()
                             .size(size)
@@ -222,19 +227,22 @@ public abstract class JmapDispatcher extends Dispatcher {
                 return new MockResponse().setResponseCode(401);
             }
             final HttpUrl url = request.getRequestUrl();
-            if (url == null) {
+            final String blobId = url == null ? null : url.queryParameter("blobId");
+            if (blobId == null) {
                 return new MockResponse().setResponseCode(404);
             }
-            final String blobId = url.queryParameter("blobId");
-            if (blobId == null || !UUID_PATTERN.matcher(blobId).matches()) {
+
+            if (UUID_PATTERN.matcher(blobId).matches()
+                    || SHA_SUM_PATTERN.matcher(blobId).matches()) {
+                try {
+                    return new MockResponse().setBody(getDownloadBuffer(blobId));
+                } catch (IllegalArgumentException e) {
+                    return new MockResponse().setResponseCode(404);
+                } catch (final IOException e) {
+                    return new MockResponse().setResponseCode(500);
+                }
+            } else {
                 return new MockResponse().setResponseCode(404);
-            }
-            try {
-                return new MockResponse().setBody(getDownloadBuffer(blobId));
-            } catch (IllegalArgumentException e) {
-                return new MockResponse().setResponseCode(404);
-            } catch (final IOException e) {
-                return new MockResponse().setResponseCode(500);
             }
         }
         return new MockResponse().setResponseCode(404);
