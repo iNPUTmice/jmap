@@ -1,3 +1,7 @@
+### 0.8.13 (2022-01-19)
+
+* MockMailServer: store all uploaded attachments in memory
+
 ### 0.8.12 (2022-01-17)
 
 * Add combined interface for EmailWithAddresses and EmailWithTime
