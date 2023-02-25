@@ -1,0 +1,23 @@
+{
+    "sessionState": "0",
+    "methodResponses": [
+        [
+            "Mailbox/set",
+            {
+                "accountId": "8a64f89eb617c9b8d0d192888ed0d7de97908e95a9f48ebac60fef71493a43a1",
+                "oldState": "4011",
+                "newState": "4011",
+                "notCreated": {
+                    "c0298190-81b6-11ed-b189-95eb25c143c2": {
+                        "type": "new-mailbox-0",
+                        "description": "Mailbox with name=#private:test01-ldap@*****.vn:Spam already exists.",
+                        "properties": [
+                            "name"
+                        ]
+                    }
+                }
+            },
+            "0"
+        ]
+    ]
+}

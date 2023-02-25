@@ -56,7 +56,9 @@ public abstract class SetException extends Exception {
             return null;
         }
         final Collection<SetErrorType> types =
-                Collections2.transform(errors.values(), SetError::getType);
+                Collections2.filter(
+                        Collections2.transform(errors.values(), SetError::getType),
+                        Objects::nonNull);
         return String.format("not %s: (%s)", action, Joiner.on(", ").join(types));
     }
 
