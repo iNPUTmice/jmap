@@ -20,6 +20,7 @@ import rs.ltt.jmap.common.method.MethodCall;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.MethodResponse;
 import rs.ltt.jmap.common.method.error.InvalidArgumentsMethodErrorResponse;
+import rs.ltt.jmap.common.method.error.ServerFailMethodErrorResponse;
 import rs.ltt.jmap.common.util.Mapper;
 
 public class MethodErrorResponseException extends JmapApiException {
@@ -50,14 +51,19 @@ public class MethodErrorResponseException extends JmapApiException {
         }
         messageBuilder.append(" in response to ");
         messageBuilder.append(Mapper.METHOD_CALLS.inverse().get(methodCall.getClass()));
+
+        String description = null;
+
         if (methodErrorResponse instanceof InvalidArgumentsMethodErrorResponse) {
-            final String description =
+            description =
                     ((InvalidArgumentsMethodErrorResponse) methodErrorResponse).getDescription();
-            if (description != null) {
-                messageBuilder.append(" (");
-                messageBuilder.append(description);
-                messageBuilder.append(')');
-            }
+        } else if (methodErrorResponse instanceof ServerFailMethodErrorResponse) {
+            description = ((ServerFailMethodErrorResponse) methodErrorResponse).getDescription();
+        }
+        if (description != null) {
+            messageBuilder.append(" (");
+            messageBuilder.append(description);
+            messageBuilder.append(')');
         }
         return messageBuilder.toString();
     }
