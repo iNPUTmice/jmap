@@ -35,10 +35,13 @@ public final class JmapAdapters {
         ResultReferenceTypeAdapter.register(builder);
         PatchObjectNullTypeAdapter.register(builder);
         TypeStateMapAdapter.register(builder);
+        DurationTypeAdapter.register(builder);
+        LocalDateTimeAdapter.register(builder);
 
         CapabilitiesDeserializer.register(builder);
         FilterDeserializer.register(builder);
         AccountCapabilitiesDeserializer.register(builder);
+        CalendarAlertTriggerDeserializer.register(builder);
         GenericResponseDeserializer.register(builder);
         PrimaryAccountsDeserializer.register(builder);
         PushMessageDeserializer.register(builder);
@@ -53,5 +56,6 @@ public final class JmapAdapters {
         ListSerializer.register(builder);
         ResponseInvocationSerializer.register(builder);
         StringMapSerializer.register(builder);
+        CalendarAlertTriggerSerializer.register(builder);
     }
 }
