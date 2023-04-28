@@ -50,7 +50,7 @@ public class ResponseDeserializationTest extends AbstractGsonTest {
                                         "response/invalid-response-array.json",
                                         GenericResponse.class));
         Assertions.assertEquals(
-                "unexpected json type when parsing response", exception.getMessage());
+                "unexpected json type when parsing response for element []", exception.getMessage());
     }
 
     @Test

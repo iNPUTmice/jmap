@@ -43,7 +43,7 @@ public class GenericResponseDeserializer implements JsonDeserializer<GenericResp
             throw new JsonParseException(
                     "Unable to identify response as neither error nor response");
         } else {
-            throw new JsonParseException("unexpected json type when parsing response");
+            throw new JsonParseException("unexpected json type when parsing response for element " + jsonElement);
         }
     }
 }

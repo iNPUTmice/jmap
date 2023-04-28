@@ -39,6 +39,17 @@ import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.client.util.SettableCallFuture;
 import rs.ltt.jmap.common.GenericResponse;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
+
+import static rs.ltt.jmap.client.Services.GSON;
+import static rs.ltt.jmap.client.Services.OK_HTTP_CLIENT_LOGGING;
+
 public class HttpJmapApiClient extends AbstractJmapApiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpJmapApiClient.class);
@@ -81,10 +92,20 @@ public class HttpJmapApiClient extends AbstractJmapApiClient {
                 new FutureCallback<InputStream>() {
                     @Override
                     public void onSuccess(final InputStream inputStream) {
+                        String json_str = "Unreadable InputStream";
+
                         try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
+                            json_str = new BufferedReader(reader).lines().collect(Collectors.joining("\n"));
+
                             final GenericResponse genericResponse =
-                                    GSON.fromJson(reader, GenericResponse.class);
+                                    GSON.fromJson(json_str, GenericResponse.class);
                             processResponse(jmapRequest, genericResponse);
+                        } catch (final RuntimeException e) {
+                            if (json_str.length() > 1000)
+                                json_str = json_str.substring(0,1000) + "...";
+
+                            LOGGER.warn("Invalid JSON: " + json_str);
+                            jmapRequest.setException(e);
                         } catch (final Exception e) {
                             jmapRequest.setException(e);
                         }
