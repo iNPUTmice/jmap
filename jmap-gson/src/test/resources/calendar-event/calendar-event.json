@@ -1,0 +1,58 @@
+{
+  "@type" : "jsevent",
+  "alerts" : {
+    "c9895a08-282b-436b-adc6-c73bda480fff" : {
+      "@type" : "Alert",
+      "action" : "display",
+      "trigger" : {
+        "@type" : "OffsetTrigger",
+        "offset" : "-PT1H",
+        "relativeTo" : "start"
+      }
+    }
+  },
+  "calendarId" : "123",
+  "created" : "2021-06-21T13:09:50Z",
+  "descriptionContentType" : "text/plain",
+  "duration" : "PT1H",
+  "freeBusyStatus" : "busy",
+  "id" : "c2ec0813-1227-42fa-b6bd-7b68ad4ca281",
+  "keywords" : null,
+  "links" : null,
+  "locale" : null,
+  "locations" : {
+    "1" : {
+      "@type" : "Location",
+      "name" : "Down Town"
+    }
+  },
+  "participants" : null,
+  "priority" : 0,
+  "privacy" : "public",
+  "prodId" : "-//CyrusIMAP.org/Cyrus 3.5.0-alpha0-530-gd0c265785f-fm-20210616.002-gd0c26578//EN",
+  "recurrenceOverrides" : {
+    "2021-07-16T15:00:00" : {
+      "excluded" : true
+    }
+  },
+  "recurrenceRule" : {
+    "@type" : "RecurrenceRule",
+    "count" : 6,
+    "firstDayOfWeek" : "mo",
+    "frequency" : "weekly",
+    "interval" : 1,
+    "rscale" : "gregorian",
+    "skip" : "omit"
+  },
+  "relatedTo" : null,
+  "sequence" : 3,
+  "showWithoutTime" : false,
+  "start" : "2021-06-25T15:00:00",
+  "status" : "confirmed",
+  "timeZone" : "America/Los_Angeles",
+  "title" : "Repeating with Modification",
+  "uid" : "c2ec0813-1227-42fa-b6bd-7b68ad4ca281",
+  "updated" : "2021-06-21T13:10:22Z",
+  "useDefaultAlerts" : false,
+  "virtualLocations" : null
+}
